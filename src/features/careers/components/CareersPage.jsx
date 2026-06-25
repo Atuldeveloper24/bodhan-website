@@ -4,7 +4,7 @@ import { MapPin, Briefcase, ChevronDown, ExternalLink } from 'lucide-react';
 import Navbar from '../../home/components/Navbar';
 import Footer from '../../home/components/Footer';
 
-const APPLY_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSfTqBrU9bQVcrkCdpeRdkl1Z5s55ZEzpkl261TszvbFqo9q6g/viewform';
+const APPLY_URL = 'https://forms.gle/PZAZ9rVnYcZvUxx97';
 
 const jobPostings = [
     {
@@ -56,33 +56,6 @@ const jobPostings = [
             'Familiarity with model optimization for real-world, large-scale deployments',
             'A background in educational technology, psychometrics, or cognitive science',
             'A track record of contributions to open-source AI projects',
-        ],
-    },
-    {
-        title: 'RAG Engineer',
-        experience: '1–3 years',
-        about: "Build production-ready RAG systems that leverage Bodhan AI's models for Indian language applications. Work on LangChain, LlamaIndex, and custom orchestration frameworks.",
-        responsibilities: [
-            "Design and implement RAG pipelines using Bodhan AI's speech and LLM models",
-            'Optimize retrieval systems for multilingual document search (22 Indian languages)',
-            'Build vector databases and embedding systems for Indian languages',
-            'Develop prompt engineering strategies for Indian language LLMs',
-            'Create production-ready APIs and integration examples',
-        ],
-        required: [
-            '1–3 years experience with LLMs and RAG systems',
-            'Hands-on experience with LangChain, LlamaIndex, or similar frameworks',
-            'Proficiency in Python and modern ML frameworks',
-            'Experience with vector databases (Pinecone, Weaviate, ChromaDB, FAISS, Milvus)',
-            'Understanding of embedding models and semantic search',
-        ],
-        preferred: [
-            'Experience with multilingual RAG systems',
-            'Knowledge of Indian languages',
-            'Built production RAG systems serving real users',
-            'Familiarity with Bodhan AI models',
-            'Experience with prompt optimization and chain-of-thought reasoning',
-            'Contributions to RAG-related open-source projects',
         ],
     },
     {
