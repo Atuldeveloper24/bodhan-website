@@ -1,5 +1,21 @@
 export const tenders = [
     {
+        id: 'tender-006',
+        status: 'active',
+        title: 'Agency on Retainer for Public Relations',
+        description:
+            'On behalf of the IITM Bodhan-AI Foundation, offers are invited for Appointment of Event Management & Experiential Agency for Bodhan AI" Document (Annexure III). As per Government of India order, only Class-I and Class-II Local Suppliers are eligible to participate. Bids must be submitted by 17th July 2026, 5:00 PM via the Bodhan AI website or as a hard copy received at the Bodhan office, IIT Madras Research Park, Chennai.',
+        closingDate: '2026-07-17',
+        closingTime: '17:00 IST',
+        documents: [
+            {
+                name: 'Agency on Retainer for Public Relations Tender Document',
+                url: 'https://drive.google.com/uc?export=download&id=1B_gfoMHtAUSgsT6pBowUfITr7DQ1v65w',
+                previewUrl: 'https://drive.google.com/file/d/1B_gfoMHtAUSgsT6pBowUfITr7DQ1v65w/preview',
+            },
+        ],
+    },
+    {
         id: 'tender-001',
         status: 'closed',
         title: 'GPU & Storage Services',
