@@ -1,5 +1,20 @@
 export const tenders = [
     {
+        id: 'tender-007',
+        status: 'active',
+        title: 'Appointment of Event Management & Experiential Agency',
+        description: 'Event Strategy and Experience Design',
+        closingDate: '2026-07-21',
+        closingTime: '15:00 IST',
+        documents: [
+            {
+                name: 'Appointment of Event Management & Experiential Agency Tender Document',
+                url: 'https://drive.google.com/uc?export=download&id=1B_gfoMHtAUSgsT6pBowUfITr7DQ1v65w',
+                previewUrl: 'https://drive.google.com/file/d/1B_gfoMHtAUSgsT6pBowUfITr7DQ1v65w/preview',
+            },
+        ],
+    },
+    {
         id: 'tender-006',
         status: 'active',
         title: 'Agency on Retainer for Public Relations',
@@ -10,8 +25,8 @@ export const tenders = [
         documents: [
             {
                 name: 'Agency on Retainer for Public Relations Tender Document',
-                url: 'https://drive.google.com/uc?export=download&id=1B_gfoMHtAUSgsT6pBowUfITr7DQ1v65w',
-                previewUrl: 'https://drive.google.com/file/d/1B_gfoMHtAUSgsT6pBowUfITr7DQ1v65w/preview',
+                url: 'https://drive.google.com/uc?export=download&id=1Lg5Y2ytjBp0jrrM4-0WPxNWyoYxM4uzS',
+                previewUrl: 'https://drive.google.com/file/d/1Lg5Y2ytjBp0jrrM4-0WPxNWyoYxM4uzS/preview',
             },
         ],
     },
