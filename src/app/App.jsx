@@ -1,4 +1,3 @@
-import { useEffect } from 'react'
 import { Routes, Route } from "react-router-dom"
 import HomePage from '../features/home/components/HomePage'
 import AI4BPage from '../features/ai4b/components/AI4BPage'
@@ -8,12 +7,30 @@ import ContactPage from '../features/contact/components/ContactPage'
 import TendersPage from '../features/tenders/components/TendersPage'
 import TenderApplyPage from '../features/tenders/components/TenderApplyPage'
 import PartnersPage from '../features/partners/components/PartnersPage'
+import ResearchPage from '../features/research/components/ResearchPage'
+import BlogPostPage from '../features/research/components/BlogPostPage'
+import ResearchProblemsLayout from '../features/research-problems/ResearchProblemsLayout'
+import {
+  ResearchProblemsHomePage,
+  ResearchProblemsVerticalPage,
+  ResearchProblemsGrandChallengePage,
+} from '../features/research-problems/ResearchProblemsRoutes'
 
 function App() {
 
   return (
     <Routes>
       <Route path="/" element={<HomePage />} />
+      <Route path="/research" element={<ResearchPage />} />
+      <Route path="/research/blog" element={<ResearchPage />} />
+      <Route path="/research/publications" element={<ResearchPage />} />
+      <Route path="/research/models" element={<ResearchPage />} />
+      <Route path="/research/problems" element={<ResearchProblemsLayout />}>
+        <Route index element={<ResearchProblemsHomePage />} />
+        <Route path="vertical/:verticalId" element={<ResearchProblemsVerticalPage />} />
+        <Route path="grand-challenge/:challengeId" element={<ResearchProblemsGrandChallengePage />} />
+      </Route>
+      <Route path="/research/:slug" element={<BlogPostPage />} />
       <Route path="/advisory-council" element={<AdvisoryCouncilPage />} />
       <Route path="/careers" element={<CareersPage />} />
       <Route path="/contact" element={<ContactPage />} />

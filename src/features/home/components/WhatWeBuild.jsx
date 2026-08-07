@@ -110,10 +110,10 @@ const WhatWeBuild = () => {
                 ))}
             </div>
 
-            {/* Open Research Problems Section */}
-            <div id="research" className="mt-16 md:mt-40 max-w-4xl mx-auto scroll-mt-40">
+            {/* Entirely New Problems Section */}
+            <div id="new-problems" className="mt-16 md:mt-40 max-w-4xl mx-auto scroll-mt-40">
                 <h2 className="text-3xl md:text-4xl font-bold text-[#1A1A1A] mb-4 leading-tight">
-                    Open Research Problems in<br />
+                    Entirely New Problems in<br />
                     <span className="text-[var(--text-orange-500)]">AI for Education</span>
                 </h2>
 
@@ -143,7 +143,7 @@ const WhatWeBuild = () => {
                     rel="noopener noreferrer"
                     className="inline-block bg-[#1A1A1A] hover:bg-black text-white text-sm md:text-base font-medium py-2.5 px-6 md:py-3 md:px-8 rounded-lg transition-all duration-300 shadow-md hover:shadow-lg hover:-translate-y-0.5"
                 >
-                    Explore Bodhan Research
+                    Explore Research Agenda
                 </a>
             </div>
         </Container>
