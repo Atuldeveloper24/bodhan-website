@@ -4,8 +4,34 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import BlogChart from './charts/BlogChart';
 import ResearchExperiment from './ResearchExperiments';
-import { CanaryArchitectureFlow, OutputModesAnimation } from './AnimatedResearchVisuals';
+import OutputModesDemo from './OutputModesDemo';
+import ArchitectureDiagram from './ArchitectureDiagram';
+import BenchmarkTable from './BenchmarkTable';
 import { resolveChart } from '../data/charts';
+import { formatBlogText } from '../utils/formatBlogText';
+import { cn } from '../../../utils/tailwindUtils';
+
+const isCompactBulletList = (items) =>
+    items.length <= 8 && items.every((item) => item.length < 55);
+
+const BulletList = ({ items, compact: compactProp, className = '' }) => {
+    const compact = compactProp ?? isCompactBulletList(items);
+
+    return (
+        <div className={cn('research-bullet-block', compact && 'research-bullet-block--compact', className)}>
+            <ul className={cn('research-bullet-list', compact && 'research-bullet-list--compact')}>
+                {items.map((item, index) => (
+                    <li key={index} className="research-bullet-item">
+                        <span className="research-bullet-marker" aria-hidden="true">
+                            {compact ? null : String(index + 1).padStart(2, '0')}
+                        </span>
+                        <span className="research-bullet-text">{formatBlogText(item)}</span>
+                    </li>
+                ))}
+            </ul>
+        </div>
+    );
+};
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -66,7 +92,7 @@ const BlogContent = ({ sections }) => {
     const renderLink = ({ label, href }) => {
         const isInternal = href.startsWith('/');
         const className =
-            'inline-flex items-center text-[13px] font-medium text-[var(--text-primary)] border border-[var(--primary-100)] rounded-full px-3.5 py-1.5 hover:bg-[var(--primary-100)] hover:border-[var(--text-orange-500)] hover:-translate-y-0.5 transition-all duration-200';
+            'research-inline-link inline-flex items-center text-[13px] font-medium text-[var(--text-primary)] border border-[var(--primary-100)] rounded-full px-3.5 py-1.5 hover:bg-[var(--primary-100)] hover:border-[var(--text-orange-500)] hover:-translate-y-0.5 transition-all duration-200';
 
         if (isInternal) {
             return (
@@ -88,33 +114,25 @@ const BlogContent = ({ sections }) => {
             {sections.map((section) => (
                 <Reveal key={section.id}>
                     <section id={section.id} className="scroll-mt-28 mb-14 md:mb-16">
-                        <div className="research-section-rule" aria-hidden="true" />
-                        <h2 className="research-type-h2 text-[var(--text-primary)] mb-5">
-                            {section.title}
-                        </h2>
+                        <header className="research-section-header">
+                            <div className="research-section-rule" aria-hidden="true" />
+                            <h2 className="research-type-h2">{section.title}</h2>
+                        </header>
 
                         {section.content?.map((paragraph, i) => (
-                            <p key={i} className="research-type-body mb-4 last:mb-0">
-                                {paragraph}
+                            <p
+                                key={i}
+                                className={
+                                    i === 0
+                                        ? 'research-type-lead mb-5 last:mb-0'
+                                        : 'research-type-body mb-4 last:mb-0'
+                                }
+                            >
+                                {formatBlogText(paragraph)}
                             </p>
                         ))}
 
-                        {section.bullets && (
-                            <ul className="space-y-2.5 mb-5 mt-2">
-                                {section.bullets.map((item, i) => (
-                                    <li
-                                        key={i}
-                                        className="flex items-start gap-3 research-type-body"
-                                    >
-                                        <span
-                                            className="shrink-0 mt-[0.65rem] w-1.5 h-1.5 rounded-full bg-gradient-to-br from-[var(--text-orange-500)] to-[var(--text-orange-400)]"
-                                            aria-hidden="true"
-                                        />
-                                        <span>{item}</span>
-                                    </li>
-                                ))}
-                            </ul>
-                        )}
+                        {section.bullets && <BulletList items={section.bullets} />}
 
                         {section.stats && (
                             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 my-6">
@@ -124,9 +142,7 @@ const BlogContent = ({ sections }) => {
                                             <p className="research-type-eyebrow text-[var(--color-11)] mb-1.5">
                                                 {label}
                                             </p>
-                                            <p className="text-xl font-medium text-[var(--text-primary)] tracking-tight">
-                                                {value}
-                                            </p>
+                                            <p className="research-type-stat-value">{value}</p>
                                         </div>
                                     </Reveal>
                                 ))}
@@ -144,12 +160,10 @@ const BlogContent = ({ sections }) => {
                         {section.demo && (
                             <div className="my-8 research-surface research-demo-frame rounded-xl overflow-hidden">
                                 <div className="px-4 py-3 border-b border-[var(--primary-100)] bg-gradient-to-r from-[var(--bg-cream-100)] to-white">
-                                    <p className="text-[13px] font-medium text-[var(--text-primary)]">
-                                        {section.demo.title}
-                                    </p>
+                                    <p className="research-type-h4 mb-1">{section.demo.title}</p>
                                     {section.demo.description && (
-                                        <p className="research-type-body text-[13px] mt-1 !leading-relaxed">
-                                            {section.demo.description}
+                                        <p className="research-type-body-small mt-1">
+                                            {formatBlogText(section.demo.description)}
                                         </p>
                                     )}
                                 </div>
@@ -166,7 +180,7 @@ const BlogContent = ({ sections }) => {
                                         href={section.demo.url}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="text-[13px] font-medium text-[var(--text-orange-500)] hover:text-[var(--text-hover)] transition-colors"
+                                        className="research-type-body-small text-[var(--text-orange-500)] hover:text-[var(--text-hover)] transition-colors"
                                     >
                                         Open demo in a new tab →
                                     </a>
@@ -176,41 +190,13 @@ const BlogContent = ({ sections }) => {
 
                         {section.table && (
                             section.id === 'model-card' ? (
-                                <CanaryArchitectureFlow />
+                                <ArchitectureDiagram />
                             ) : (
-                            <div className="overflow-x-auto my-6 research-surface rounded-xl">
-                                <table className="w-full text-[13px]">
-                                    <thead>
-                                        <tr className="border-b border-[var(--primary-100)] bg-gradient-to-r from-[var(--bg-cream-100)] to-white">
-                                            {section.table.headers.map((header) => (
-                                                <th
-                                                    key={header}
-                                                    className="text-left px-4 py-3 research-type-eyebrow text-[var(--color-11)]"
-                                                >
-                                                    {header}
-                                                </th>
-                                            ))}
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {section.table.rows.map((row, i) => (
-                                            <tr
-                                                key={i}
-                                                className="border-b border-[var(--primary-100)] last:border-0 even:bg-[var(--bg-cream-50)]/70 hover:bg-[var(--bg-cream-100)]/80 transition-colors"
-                                            >
-                                                {row.map((cell, j) => (
-                                                    <td
-                                                        key={j}
-                                                        className="px-4 py-3 research-type-body text-[13px]"
-                                                    >
-                                                        {cell}
-                                                    </td>
-                                                ))}
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
+                                <BenchmarkTable
+                                    headers={section.table.headers}
+                                    rows={section.table.rows}
+                                    caption="Public speech-recognition benchmarks used in this evaluation."
+                                />
                             )
                         )}
 
@@ -225,23 +211,10 @@ const BlogContent = ({ sections }) => {
                                                 </p>
                                                 <h3 className="research-feature-title">{sub.title}</h3>
                                                 {sub.content && (
-                                                    <p className="research-feature-body">{sub.content}</p>
+                                                    <p className="research-feature-body">{formatBlogText(sub.content)}</p>
                                                 )}
                                                 {sub.bullets && (
-                                                    <ul className="space-y-1.5 mt-3">
-                                                        {sub.bullets.map((item, j) => (
-                                                            <li
-                                                                key={j}
-                                                                className="flex items-start gap-2 research-feature-body"
-                                                            >
-                                                                <span
-                                                                    className="shrink-0 mt-[0.55rem] w-1 h-1 rounded-full bg-[var(--text-orange-500)]"
-                                                                    aria-hidden="true"
-                                                                />
-                                                                <span>{item}</span>
-                                                            </li>
-                                                        ))}
-                                                    </ul>
+                                                    <BulletList items={sub.bullets} compact className="research-bullet-block--card mt-3" />
                                                 )}
                                             </article>
                                         </Reveal>
@@ -249,51 +222,36 @@ const BlogContent = ({ sections }) => {
                                 </div>
                             ) : (
                                 section.subsections.map((sub, i) => (
-                                    <div key={i} className="mt-8">
-                                        <h3 className="research-type-h3 text-[var(--text-primary)] mb-3">
-                                            {sub.title}
-                                        </h3>
+                                    <div key={i} className="research-subsection">
+                                        {sub.title === 'Three Output Modes' ? (
+                                            <OutputModesDemo />
+                                        ) : (
+                                            <>
+                                        <h3 className="research-type-h3 mb-2">{sub.title}</h3>
                                         {sub.content && (
-                                            <p className="research-type-body mb-4">{sub.content}</p>
+                                            <p className="research-type-body mb-4">{formatBlogText(sub.content)}</p>
                                         )}
                                         {sub.examples && (
-                                            sub.title === 'Three Output Modes' ? (
-                                                <OutputModesAnimation />
-                                            ) : (
                                             <div className="grid gap-2.5 my-4">
                                                 {sub.examples.map(({ label, text }) => (
                                                     <div
                                                         key={label}
                                                         className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 research-surface research-example-row rounded-xl p-4"
                                                     >
-                                                        <span className="research-type-eyebrow text-[var(--text-orange-500)] w-24 shrink-0">
+                                                        <span className="research-type-h4 w-24 shrink-0">
                                                             {label}
                                                         </span>
-                                                        <span className="research-type-body text-[var(--text-primary)] !leading-snug">
+                                                        <span className="research-type-example-text !leading-snug">
                                                             {text}
                                                         </span>
                                                     </div>
                                                 ))}
                                             </div>
-                                            )
                                         )}
-                                        {sub.bullets && (
-                                            <ul className="space-y-2">
-                                                {sub.bullets.map((item, j) => (
-                                                    <li
-                                                        key={j}
-                                                        className="flex items-start gap-3 research-type-body"
-                                                    >
-                                                        <span
-                                                            className="shrink-0 mt-[0.65rem] w-1.5 h-1.5 rounded-full bg-gradient-to-br from-[var(--text-orange-500)] to-[var(--text-orange-400)]"
-                                                            aria-hidden="true"
-                                                        />
-                                                        <span>{item}</span>
-                                                    </li>
-                                                ))}
-                                            </ul>
-                                        )}
+                                        {sub.bullets && <BulletList items={sub.bullets} compact={isCompactBulletList(sub.bullets)} />}
                                         {renderCharts(sub.charts)}
+                                            </>
+                                        )}
                                     </div>
                                 ))
                             ))}

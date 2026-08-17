@@ -1,453 +1,547 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import {
-    BarChart,
     Bar,
-    XAxis,
-    YAxis,
-    CartesianGrid,
-    Tooltip,
-    Legend,
-    ResponsiveContainer,
+    BarChart,
     Cell,
     LabelList,
-    PieChart,
-    Pie,
+    ResponsiveContainer,
+    Tooltip,
+    XAxis,
+    YAxis,
 } from 'recharts';
+import ChartCard, {
+    ChartLegend,
+    ChartTooltipCard,
+    useContainerSize,
+} from './ChartCard';
+import { CHART, axisTick, prefersReducedMotion, resolveSeries } from './chartTheme';
 
-const CHART_COLORS = {
-    brandBlue: '#314685',
-    brandOrange: '#FF6B35',
-    lightBlue: '#A0C4FF',
-    paleYellow: '#E8D88A',
-    cream: '#FFF9F0',
-    grid: '#FFEAD2',
-    text: '#525252',
-    textMuted: '#737373',
+const formatValue = (value, digits = 1, suffix = '') => {
+    if (typeof value !== 'number') return value;
+    return `${value.toFixed(digits)}${suffix}`;
 };
 
-const RoundedBar = (props) => {
-    const { fill, x, y, width, height } = props;
-    if (!height || height <= 0) return null;
-    const radius = 4;
+const Marker = ({ type, cx, cy, color, size = 7, focused = false }) => {
+    const stroke = focused ? CHART.focus : color;
+    const strokeWidth = focused ? 2 : 1.25;
+
+    if (type === 'square') {
+        const half = size;
+        return (
+            <rect
+                x={cx - half}
+                y={cy - half}
+                width={half * 2}
+                height={half * 2}
+                fill={color}
+                stroke={stroke}
+                strokeWidth={strokeWidth}
+            />
+        );
+    }
+
+    if (type === 'diamond') {
+        const d = size + 1;
+        return (
+            <polygon
+                points={`${cx},${cy - d} ${cx + d},${cy} ${cx},${cy + d} ${cx - d},${cy}`}
+                fill={color}
+                stroke={stroke}
+                strokeWidth={strokeWidth}
+            />
+        );
+    }
+
     return (
-        <rect
-            x={x}
-            y={y}
-            width={width}
-            height={height}
-            fill={fill}
-            rx={radius}
-            ry={radius}
+        <circle
+            cx={cx}
+            cy={cy}
+            r={size}
+            fill={color}
+            stroke={CHART.panel}
+            strokeWidth={focused ? 2 : 1.5}
         />
     );
 };
 
-const ChartTooltip = ({ active, payload, label, valueSuffix = '', lowerIsBetter = false }) => {
+const CompactRechartsTooltip = ({ active, payload, label, valueSuffix = '', digits = 1 }) => {
     if (!active || !payload?.length) return null;
 
     return (
-        <div className="bg-[var(--text-primary)] text-white text-[13px] rounded-xl px-3.5 py-2.5 shadow-xl border border-white/10">
-            <p className="font-medium mb-1.5 tracking-tight">{label}</p>
+        <div className="chart-tooltip chart-tooltip-static">
+            <p className="chart-tooltip-title">{label}</p>
             {payload.map((entry) => (
-                <div key={entry.name} className="flex items-center gap-2 text-white/90">
-                    <span
-                        className="w-2 h-2 rounded-full shrink-0"
-                        style={{ backgroundColor: entry.color }}
-                    />
-                    <span>
-                        {entry.name}: {entry.value}
-                        {valueSuffix}
-                        {lowerIsBetter && ' (lower is better)'}
+                <div key={entry.name} className="chart-tooltip-row">
+                    <span className="chart-tooltip-label">
+                        <span className="chart-marker chart-marker-circle" style={{ color: entry.color }} />
+                        {entry.name}
                     </span>
+                    <span className="chart-tooltip-value">{formatValue(entry.value, digits, valueSuffix)}</span>
                 </div>
             ))}
         </div>
     );
 };
 
-const ChartLegend = ({ payload }) => (
-    <div className="flex flex-wrap justify-center gap-x-5 gap-y-2 mt-1 mb-3">
-        {payload?.map((entry) => (
-            <div
-                key={entry.value}
-                className="flex items-center gap-2 text-[12.5px] text-[var(--color-10)]"
-            >
-                <span
-                    className="w-2.5 h-2.5 rounded-full"
-                    style={{ backgroundColor: entry.color }}
-                />
-                {entry.value}
-            </div>
-        ))}
-    </div>
-);
+const DotPlot = ({ chart, series }) => {
+    const [ref, size] = useContainerSize();
+    const [active, setActive] = useState(null);
+    const isMobile = size.width > 0 && size.width < 560;
+    const rowHeight = isMobile ? 36 : 32;
+    const plotHeight = Math.max(220, chart.data.length * rowHeight + 48);
 
-const ChartShell = ({ title, subtitle, children }) => (
-    <div className="relative overflow-hidden research-surface rounded-xl my-8">
-        <div
-            className="absolute inset-0 pointer-events-none"
-            aria-hidden="true"
-            style={{
-                background:
-                    'radial-gradient(ellipse 70% 45% at 10% 0%, rgba(49, 70, 133, 0.06) 0%, transparent 55%), radial-gradient(ellipse 50% 40% at 100% 100%, rgba(255, 107, 53, 0.06) 0%, transparent 50%)',
-            }}
-        />
-        <div className="relative p-5 md:p-6">
-            <div className="text-center mb-5">
-                <h4 className="research-type-h3 text-[var(--text-primary)] mb-1">{title}</h4>
-                {subtitle && (
-                    <p className="text-[13px] text-[var(--color-11)]">{subtitle}</p>
-                )}
-            </div>
-            <div className="w-full h-[320px] md:h-[360px]">{children}</div>
-        </div>
-    </div>
-);
+    const margin = {
+        top: 8,
+        right: isMobile ? 12 : 20,
+        bottom: 28,
+        left: isMobile ? 72 : 86,
+    };
 
-export const GroupedBarChart = ({ chart }) => {
-    const { title, subtitle, yLabel, xLabel, series, data, lowerIsBetter, valueSuffix = '' } = chart;
+    const values = chart.data.flatMap((row) => series.map((item) => row[item.key]));
+    const max = Math.max(...values) * 1.12;
+    const innerWidth = Math.max(0, size.width - margin.left - margin.right);
+    const innerHeight = Math.max(0, plotHeight - margin.top - margin.bottom);
+    const x = (value) => margin.left + (value / max) * innerWidth;
+    const y = (index) => margin.top + (index + 0.5) * (innerHeight / chart.data.length);
+    const ticks = [0, Math.round(max / 2), Math.round(max)];
+
+    const activeRow = active != null ? chart.data[active] : null;
 
     return (
-        <ChartShell title={title} subtitle={subtitle}>
-            <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={data} margin={{ top: 20, right: 12, left: 4, bottom: 20 }}>
-                    <defs>
-                        {series.map((s) => (
-                            <linearGradient
-                                key={s.key}
-                                id={`bar-grad-${s.key}`}
-                                x1="0"
-                                y1="0"
-                                x2="0"
-                                y2="1"
-                            >
-                                <stop offset="0%" stopColor={s.color} stopOpacity={1} />
-                                <stop offset="100%" stopColor={s.color} stopOpacity={0.65} />
-                            </linearGradient>
-                        ))}
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke={CHART_COLORS.grid} vertical={false} />
-                    <XAxis
-                        dataKey="category"
-                        tick={{ fill: CHART_COLORS.text, fontSize: 11 }}
-                        axisLine={false}
-                        tickLine={false}
-                        label={
-                            xLabel
-                                ? {
-                                      value: xLabel,
-                                      position: 'insideBottom',
-                                      offset: -8,
-                                      fill: CHART_COLORS.textMuted,
-                                      fontSize: 11,
-                                  }
-                                : undefined
-                        }
-                    />
-                    <YAxis
-                        tick={{ fill: CHART_COLORS.text, fontSize: 11 }}
-                        axisLine={false}
-                        tickLine={false}
-                        label={
-                            yLabel
-                                ? {
-                                      value: yLabel,
-                                      angle: -90,
-                                      position: 'insideLeft',
-                                      fill: CHART_COLORS.textMuted,
-                                      style: { textAnchor: 'middle', fontSize: 11 },
-                                  }
-                                : undefined
-                        }
-                    />
-                    <Tooltip
-                        content={
-                            <ChartTooltip valueSuffix={valueSuffix} lowerIsBetter={lowerIsBetter} />
-                        }
-                        cursor={{ fill: 'rgba(255, 234, 210, 0.45)' }}
-                    />
-                    <Legend content={<ChartLegend />} />
-                    {series.map((s) => (
-                        <Bar
-                            key={s.key}
-                            dataKey={s.key}
-                            name={s.label}
-                            fill={`url(#bar-grad-${s.key})`}
-                            shape={<RoundedBar />}
-                            animationDuration={1100}
-                            animationEasing="ease-out"
-                            label={{
-                                position: 'top',
-                                fill: CHART_COLORS.textMuted,
-                                fontSize: 10,
-                                formatter: (v) => (typeof v === 'number' ? v.toFixed(1) : v),
-                            }}
+        <div ref={ref} className="chart-svg-wrap" style={{ height: plotHeight }}>
+            {size.width > 0 && (
+                <svg
+                    width={size.width}
+                    height={plotHeight}
+                    role="img"
+                    aria-label={chart.title}
+                >
+                    {chart.data.map((_, index) => (
+                        <line
+                            key={`grid-${index}`}
+                            x1={margin.left}
+                            x2={size.width - margin.right}
+                            y1={y(index)}
+                            y2={y(index)}
+                            stroke={CHART.grid}
+                            strokeWidth={1}
                         />
                     ))}
-                </BarChart>
-            </ResponsiveContainer>
-        </ChartShell>
+
+                    {ticks.map((tick) => (
+                        <g key={tick}>
+                            <line
+                                x1={x(tick)}
+                                x2={x(tick)}
+                                y1={margin.top}
+                                y2={plotHeight - margin.bottom + 4}
+                                stroke={tick === 0 ? CHART.axis : 'transparent'}
+                                strokeWidth={1}
+                            />
+                            <text
+                                x={x(tick)}
+                                y={plotHeight - 8}
+                                textAnchor="middle"
+                                fill={CHART.text.secondary}
+                                fontSize="12"
+                                fontFamily="Manrope, sans-serif"
+                            >
+                                {tick}
+                            </text>
+                        </g>
+                    ))}
+
+                    {chart.data.map((row, index) => (
+                        <g key={row.category}>
+                            <text
+                                x={margin.left - 10}
+                                y={y(index) + 4}
+                                textAnchor="end"
+                                fill={CHART.text.primary}
+                                fontSize="12"
+                                fontFamily="Manrope, sans-serif"
+                            >
+                                {row.category}
+                            </text>
+                            <rect
+                                x={margin.left}
+                                y={y(index) - rowHeight / 2}
+                                width={innerWidth}
+                                height={rowHeight}
+                                fill="transparent"
+                                tabIndex={0}
+                                focusable="true"
+                                role="button"
+                                aria-label={`${row.category}: ${series
+                                    .map((item) => `${item.label} ${formatValue(row[item.key], 1, chart.valueSuffix)}`)
+                                    .join(', ')}`}
+                                onMouseEnter={() => setActive(index)}
+                                onMouseLeave={() => setActive(null)}
+                                onFocus={() => setActive(index)}
+                                onBlur={() => setActive(null)}
+                            />
+                            {series.map((item) => (
+                                <Marker
+                                    key={item.key}
+                                    type={item.marker}
+                                    cx={x(row[item.key])}
+                                    cy={y(index)}
+                                    color={item.color}
+                                    size={isMobile ? 6 : 7}
+                                    focused={active === index}
+                                />
+                            ))}
+                        </g>
+                    ))}
+                </svg>
+            )}
+
+            {activeRow && (
+                <ChartTooltipCard
+                    title={activeRow.category}
+                    rows={series.map((item) => ({
+                        label: item.label,
+                        value: formatValue(activeRow[item.key], 1, chart.valueSuffix),
+                        color: item.color,
+                        marker: item.marker,
+                    }))}
+                    hint="↓ Lower is better"
+                    x={x(Math.max(...series.map((item) => activeRow[item.key])))}
+                    y={y(active)}
+                    bounds={{ width: size.width, height: plotHeight }}
+                />
+            )}
+        </div>
     );
 };
 
-export const RankedBarChart = ({ chart }) => {
-    const { title, subtitle, yLabel, data, highlightKey = 'bodhan' } = chart;
+const DumbbellPlot = ({ chart, series }) => {
+    const [ref, size] = useContainerSize();
+    const [active, setActive] = useState(null);
+    const left = series[0];
+    const right = series[1];
+    const isMobile = size.width > 0 && size.width < 560;
+    const rowHeight = isMobile ? 38 : 34;
+    const plotHeight = Math.max(220, chart.data.length * rowHeight + 48);
+    const margin = { top: 8, right: 16, bottom: 28, left: isMobile ? 76 : 88 };
+
+    const values = chart.data.flatMap((row) => [row[left.key], row[right.key]]);
+    const min = Math.min(...values);
+    const max = Math.max(...values);
+    const pad = (max - min) * 0.35 || 0.02;
+    const domainMin = min - pad;
+    const domainMax = max + pad;
+    const innerWidth = Math.max(0, size.width - margin.left - margin.right);
+    const innerHeight = Math.max(0, plotHeight - margin.top - margin.bottom);
+    const x = (value) => margin.left + ((value - domainMin) / (domainMax - domainMin)) * innerWidth;
+    const y = (index) => margin.top + (index + 0.5) * (innerHeight / chart.data.length);
+    const ticks = [min, (min + max) / 2, max].map((tick) => Number(tick.toFixed(2)));
+    const activeRow = active != null ? chart.data[active] : null;
 
     return (
-        <ChartShell title={title} subtitle={subtitle}>
+        <div ref={ref} className="chart-svg-wrap" style={{ height: plotHeight }}>
+            {size.width > 0 && (
+                <svg width={size.width} height={plotHeight} role="img" aria-label={chart.title}>
+                    {chart.data.map((_, index) => (
+                        <line
+                            key={`grid-${index}`}
+                            x1={margin.left}
+                            x2={size.width - margin.right}
+                            y1={y(index)}
+                            y2={y(index)}
+                            stroke={CHART.grid}
+                            strokeWidth={1}
+                        />
+                    ))}
+
+                    {ticks.map((tick) => (
+                        <text
+                            key={tick}
+                            x={x(tick)}
+                            y={plotHeight - 8}
+                            textAnchor="middle"
+                            fill={CHART.text.secondary}
+                            fontSize="12"
+                            fontFamily="Manrope, sans-serif"
+                        >
+                            {tick.toFixed(2)}
+                        </text>
+                    ))}
+
+                    {chart.data.map((row, index) => {
+                        const x1 = x(row[left.key]);
+                        const x2 = x(row[right.key]);
+                        return (
+                            <g key={row.category}>
+                                <text
+                                    x={margin.left - 10}
+                                    y={y(index) + 4}
+                                    textAnchor="end"
+                                    fill={CHART.text.primary}
+                                    fontSize="12"
+                                    fontFamily="Manrope, sans-serif"
+                                >
+                                    {row.category}
+                                </text>
+                                <rect
+                                    x={margin.left}
+                                    y={y(index) - rowHeight / 2}
+                                    width={innerWidth}
+                                    height={rowHeight}
+                                    fill="transparent"
+                                    tabIndex={0}
+                                    focusable="true"
+                                    role="button"
+                                    aria-label={`${row.category}: ${left.label} ${row[left.key].toFixed(3)}, ${right.label} ${row[right.key].toFixed(3)}`}
+                                    onMouseEnter={() => setActive(index)}
+                                    onMouseLeave={() => setActive(null)}
+                                    onFocus={() => setActive(index)}
+                                    onBlur={() => setActive(null)}
+                                />
+                                <line
+                                    x1={x1}
+                                    x2={x2}
+                                    y1={y(index)}
+                                    y2={y(index)}
+                                    stroke={CHART.axis}
+                                    strokeWidth={2}
+                                    strokeLinecap="round"
+                                />
+                                <Marker type={left.marker} cx={x1} cy={y(index)} color={left.color} focused={active === index} />
+                                <Marker type={right.marker} cx={x2} cy={y(index)} color={right.color} focused={active === index} />
+                            </g>
+                        );
+                    })}
+                </svg>
+            )}
+
+            {activeRow && (
+                <ChartTooltipCard
+                    title={activeRow.category}
+                    rows={series.map((item) => ({
+                        label: item.label,
+                        value: activeRow[item.key].toFixed(3),
+                        color: item.color,
+                        marker: item.marker,
+                    }))}
+                    hint="↑ Higher is better"
+                    x={x(activeRow[right.key])}
+                    y={y(active)}
+                    bounds={{ width: size.width, height: plotHeight }}
+                />
+            )}
+        </div>
+    );
+};
+
+const GroupedDotChart = ({ chart }) => {
+    const series = resolveSeries(chart.series);
+
+    return (
+        <ChartCard
+            title={chart.title}
+            subtitle={chart.subtitle}
+            note={chart.note}
+            description={chart.description}
+            legend={<ChartLegend series={series} />}
+            table={{
+                headers: ['Language', ...series.map((item) => item.label)],
+                rows: chart.data.map((row) => [
+                    row.category,
+                    ...series.map((item) => formatValue(row[item.key], 1, chart.valueSuffix)),
+                ]),
+            }}
+        >
+            <DotPlot chart={chart} series={series} />
+        </ChartCard>
+    );
+};
+
+const DumbbellChart = ({ chart }) => {
+    const series = resolveSeries(chart.series);
+
+    return (
+        <ChartCard
+            title={chart.title}
+            subtitle={chart.subtitle}
+            note={chart.note}
+            description={chart.description}
+            legend={<ChartLegend series={series} />}
+            table={{
+                headers: ['Speaker', ...series.map((item) => item.label)],
+                rows: chart.data.map((row) => [
+                    row.category,
+                    ...series.map((item) => row[item.key].toFixed(3)),
+                ]),
+            }}
+        >
+            <DumbbellPlot chart={chart} series={series} />
+        </ChartCard>
+    );
+};
+
+const RankedBarPlot = ({ chart }) => {
+    const reduceMotion = prefersReducedMotion();
+    const highlightKey = chart.highlightKey ?? 'bodhan';
+    const plotHeight = Math.max(200, chart.data.length * 42 + 36);
+
+    return (
+        <ChartCard
+            title={chart.title}
+            subtitle={chart.subtitle}
+            note={chart.note}
+            description={chart.description}
+            plotHeight={plotHeight}
+            table={{
+                headers: ['System', 'WER (%)'],
+                rows: chart.data.map((row) => [row.name, `${row.score}`]),
+            }}
+        >
             <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={data} margin={{ top: 24, right: 12, left: 4, bottom: 48 }}>
-                    <defs>
-                        <linearGradient id="bar-grad-highlight" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%" stopColor="#4a6bb5" />
-                            <stop offset="100%" stopColor="#314685" />
-                        </linearGradient>
-                        <linearGradient id="bar-grad-muted" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%" stopColor="#c5d8f5" />
-                            <stop offset="100%" stopColor="#A0C4FF" />
-                        </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke={CHART_COLORS.grid} vertical={false} />
+                <BarChart
+                    data={chart.data}
+                    layout="vertical"
+                    margin={{ top: 4, right: 36, left: 4, bottom: 4 }}
+                    barCategoryGap="32%"
+                    maxBarSize={22}
+                >
                     <XAxis
-                        dataKey="name"
-                        tick={{ fill: CHART_COLORS.text, fontSize: 11 }}
-                        axisLine={false}
+                        type="number"
+                        domain={[0, 'auto']}
+                        tick={axisTick}
+                        axisLine={{ stroke: CHART.axis }}
                         tickLine={false}
-                        interval={0}
-                        angle={-20}
-                        textAnchor="end"
-                        height={60}
                     />
                     <YAxis
-                        tick={{ fill: CHART_COLORS.text, fontSize: 11 }}
+                        type="category"
+                        dataKey="name"
+                        width={118}
+                        tick={axisTick}
                         axisLine={false}
                         tickLine={false}
-                        domain={['auto', 'auto']}
-                        label={
-                            yLabel
-                                ? {
-                                      value: yLabel,
-                                      angle: -90,
-                                      position: 'insideLeft',
-                                      fill: CHART_COLORS.textMuted,
-                                      style: { textAnchor: 'middle', fontSize: 11 },
-                                  }
-                                : undefined
-                        }
                     />
                     <Tooltip
-                        content={<ChartTooltip valueSuffix="%" />}
-                        cursor={{ fill: 'rgba(255, 234, 210, 0.45)' }}
+                        content={<CompactRechartsTooltip valueSuffix="%" digits={1} />}
+                        cursor={{ fill: 'rgba(92, 83, 74, 0.06)' }}
                     />
                     <Bar
                         dataKey="score"
-                        name="Score"
-                        shape={<RoundedBar />}
-                        animationDuration={1200}
-                        animationEasing="ease-out"
+                        name="WER"
+                        radius={[0, 5, 5, 0]}
+                        maxBarSize={22}
+                        isAnimationActive={!reduceMotion}
                     >
-                        {data.map((entry) => (
+                        {chart.data.map((entry) => (
                             <Cell
                                 key={entry.name}
                                 fill={
                                     entry.highlight || entry.key === highlightKey
-                                        ? 'url(#bar-grad-highlight)'
-                                        : entry.color ?? 'url(#bar-grad-muted)'
+                                        ? CHART.series.primary
+                                        : CHART.series.muted
                                 }
                             />
                         ))}
                         <LabelList
                             dataKey="score"
-                            position="top"
-                            fill={CHART_COLORS.textMuted}
-                            fontSize={10}
+                            position="right"
+                            fill={CHART.text.secondary}
+                            fontSize={12}
+                            content={({ x, y, width, height, value, index }) => {
+                                const entry = chart.data[index];
+                                if (!entry?.highlight) return null;
+                                return (
+                                    <text
+                                        x={x + width + 8}
+                                        y={y + height / 2 + 4}
+                                        fill={CHART.series.primary}
+                                        fontSize="12"
+                                        fontFamily="Manrope, sans-serif"
+                                        fontWeight="650"
+                                    >
+                                        {value}%
+                                    </text>
+                                );
+                            }}
                         />
                     </Bar>
                 </BarChart>
             </ResponsiveContainer>
-        </ChartShell>
+        </ChartCard>
     );
 };
 
-export const DonutChartPlaceholder = ({ chart }) => {
-    const { title, subtitle, segments, totalLabel, totalValue } = chart;
-    const [activeIndex, setActiveIndex] = useState(null);
-    const [mounted, setMounted] = useState(false);
-
-    useEffect(() => {
-        const timer = requestAnimationFrame(() => setMounted(true));
-        return () => cancelAnimationFrame(timer);
-    }, []);
-
-    const pieData = segments.map((seg, index) => ({
-        name: seg.label,
-        value: seg.hours ?? seg.value,
-        index,
+const CompositionChart = ({ chart }) => {
+    const [active, setActive] = useState(null);
+    const series = chart.segments.map((segment, index) => ({
+        key: segment.label,
+        label: segment.label,
+        color: [CHART.series.tertiary, CHART.series.primary, CHART.series.secondary][index],
+        marker: ['diamond', 'circle', 'square'][index],
+        display: segment.display,
+        value: segment.value,
     }));
 
     return (
-        <div className="relative overflow-hidden research-surface rounded-xl my-8 shadow-sm border border-[var(--primary-100)]">
-            <div
-                className="absolute inset-0 pointer-events-none"
-                aria-hidden="true"
-                style={{
-                    background:
-                        'radial-gradient(ellipse 70% 50% at 20% 0%, rgba(255, 107, 53, 0.08) 0%, transparent 60%), radial-gradient(ellipse 60% 40% at 90% 100%, rgba(49, 70, 133, 0.1) 0%, transparent 55%)',
-                }}
-            />
-
-            <div className="relative p-5 md:p-7">
-                <div className="text-center mb-6">
-                    <h4 className="research-type-h3 text-[var(--text-primary)] mb-1">{title}</h4>
-                    {subtitle && (
-                        <p className="text-[13px] text-[var(--color-11)]">{subtitle}</p>
-                    )}
-                </div>
-
-                <div className="flex flex-col lg:flex-row items-center gap-8 lg:gap-12">
-                    {/* Donut */}
-                    <div className="relative w-52 h-52 md:w-60 md:h-60 shrink-0">
-                        <div
-                            className="absolute inset-0 rounded-full blur-2xl opacity-40 transition-opacity duration-700"
+        <ChartCard
+            title={chart.title}
+            subtitle={chart.subtitle}
+            note={chart.note}
+            description={chart.description}
+            legend={<ChartLegend series={series} />}
+            plotHeight={88}
+            table={{
+                headers: ['Source', 'Hours', 'Share'],
+                rows: chart.segments.map((segment) => [
+                    segment.label,
+                    segment.display,
+                    `${segment.value}%`,
+                ]),
+            }}
+        >
+            <div className="chart-composition">
+                <div
+                    className="chart-composition-bar"
+                    role="img"
+                    aria-label={chart.segments.map((segment) => `${segment.label} ${segment.display}`).join(', ')}
+                >
+                    {series.map((item, index) => (
+                        <button
+                            key={item.key}
+                            type="button"
+                            className="chart-composition-slice"
                             style={{
-                                background:
-                                    activeIndex !== null
-                                        ? `linear-gradient(135deg, ${segments[activeIndex].gradientFrom}, ${segments[activeIndex].gradientTo})`
-                                        : 'linear-gradient(135deg, #314685, #FF6B35)',
+                                width: `${item.value}%`,
+                                background: item.color,
+                                opacity: active === null || active === index ? 1 : 0.45,
                             }}
+                            aria-label={`${item.label}: ${item.display}, ${item.value}%`}
+                            onMouseEnter={() => setActive(index)}
+                            onMouseLeave={() => setActive(null)}
+                            onFocus={() => setActive(index)}
+                            onBlur={() => setActive(null)}
                         />
-
-                        <ResponsiveContainer width="100%" height="100%">
-                            <PieChart>
-                                <defs>
-                                    {segments.map((seg, i) => (
-                                        <linearGradient
-                                            key={seg.label}
-                                            id={`donut-grad-${i}`}
-                                            x1="0"
-                                            y1="0"
-                                            x2="1"
-                                            y2="1"
-                                        >
-                                            <stop offset="0%" stopColor={seg.gradientFrom} />
-                                            <stop offset="100%" stopColor={seg.gradientTo} />
-                                        </linearGradient>
-                                    ))}
-                                </defs>
-                                <Pie
-                                    data={pieData}
-                                    dataKey="value"
-                                    cx="50%"
-                                    cy="50%"
-                                    innerRadius="58%"
-                                    outerRadius="82%"
-                                    paddingAngle={3}
-                                    stroke="var(--bg-cream-50)"
-                                    strokeWidth={3}
-                                    animationBegin={0}
-                                    animationDuration={1400}
-                                    animationEasing="ease-out"
-                                    onMouseEnter={(_, index) => setActiveIndex(index)}
-                                    onMouseLeave={() => setActiveIndex(null)}
-                                >
-                                    {pieData.map((entry) => (
-                                        <Cell
-                                            key={entry.name}
-                                            fill={`url(#donut-grad-${entry.index})`}
-                                            opacity={
-                                                activeIndex === null || activeIndex === entry.index
-                                                    ? 1
-                                                    : 0.3
-                                            }
-                                            style={{
-                                                filter:
-                                                    activeIndex === entry.index
-                                                        ? 'drop-shadow(0 4px 12px rgba(0,0,0,0.15))'
-                                                        : 'none',
-                                                transition: 'opacity 0.3s ease, filter 0.3s ease',
-                                                cursor: 'pointer',
-                                            }}
-                                        />
-                                    ))}
-                                </Pie>
-                            </PieChart>
-                        </ResponsiveContainer>
-
-                        <div
-                            className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none transition-transform duration-700"
-                            style={{ transform: mounted ? 'scale(1)' : 'scale(0.85)', opacity: mounted ? 1 : 0 }}
-                        >
-                            <span className="text-2xl md:text-3xl font-medium text-[var(--text-primary)] tracking-tight">
-                                {totalValue}
-                            </span>
-                            <span className="research-type-eyebrow text-[var(--color-11)] mt-0.5">
-                                {totalLabel}
-                            </span>
-                        </div>
-                    </div>
-
-                    {/* Legend */}
-                    <div className="flex-1 w-full space-y-3">
-                        {segments.map((seg, i) => {
-                            const isActive = activeIndex === i;
-                            return (
-                                <button
-                                    key={seg.label}
-                                    type="button"
-                                    onMouseEnter={() => setActiveIndex(i)}
-                                    onMouseLeave={() => setActiveIndex(null)}
-                                    className={`w-full text-left rounded-lg px-4 py-3 transition-all duration-300 border ${
-                                        isActive
-                                            ? 'border-[var(--text-orange-500)]/30 bg-[var(--bg-cream-100)] shadow-sm'
-                                            : 'border-transparent bg-[var(--bg-cream-50)]/80 hover:bg-[var(--bg-cream-100)]'
-                                    }`}
-                                >
-                                    <div className="flex items-center justify-between gap-3 mb-2">
-                                        <div className="flex items-center gap-2.5 min-w-0">
-                                            <span
-                                                className="w-2.5 h-2.5 rounded-full shrink-0 transition-transform duration-300"
-                                                style={{
-                                                    background: `linear-gradient(135deg, ${seg.gradientFrom}, ${seg.gradientTo})`,
-                                                    transform: isActive ? 'scale(1.3)' : 'scale(1)',
-                                                }}
-                                            />
-                                            <span className="text-[13px] font-medium text-[var(--text-primary)] truncate">
-                                                {seg.label}
-                                            </span>
-                                        </div>
-                                        <span className="text-[13px] font-semibold text-[var(--text-primary)] shrink-0">
-                                            {seg.display}
-                                        </span>
-                                    </div>
-
-                                    <div className="h-1.5 rounded-full bg-[var(--primary-100)] overflow-hidden">
-                                        <div
-                                            className="h-full rounded-full transition-all duration-1000 ease-out"
-                                            style={{
-                                                width: mounted ? `${seg.value}%` : '0%',
-                                                background: `linear-gradient(90deg, ${seg.gradientFrom}, ${seg.gradientTo})`,
-                                                transitionDelay: `${200 + i * 180}ms`,
-                                            }}
-                                        />
-                                    </div>
-
-                                    <p className="text-[11px] text-[var(--color-11)] mt-1.5">
-                                        {seg.value}% of training corpus
-                                    </p>
-                                </button>
-                            );
-                        })}
-                    </div>
+                    ))}
                 </div>
+                <ul className="chart-composition-stats">
+                    {series.map((item) => (
+                        <li key={item.key}>
+                            <strong>{item.display}</strong>
+                            <span>{item.label}</span>
+                        </li>
+                    ))}
+                </ul>
             </div>
-        </div>
+        </ChartCard>
     );
 };
 
 const CHART_REGISTRY = {
-    groupedBar: GroupedBarChart,
-    rankedBar: RankedBarChart,
-    donut: DonutChartPlaceholder,
+    groupedBar: GroupedDotChart,
+    dotPlot: GroupedDotChart,
+    dumbbell: DumbbellChart,
+    rankedBar: RankedBarPlot,
+    donut: CompositionChart,
+    composition: CompositionChart,
 };
 
 const BlogChart = ({ chart }) => {

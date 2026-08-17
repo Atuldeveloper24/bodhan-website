@@ -1,32 +1,34 @@
-import { useMemo, useState } from 'react';
-import {
-    Bar,
-    BarChart,
-    CartesianGrid,
-    LabelList,
-    Legend,
-    ResponsiveContainer,
-    Tooltip,
-    XAxis,
-    YAxis,
-} from 'recharts';
+import { useEffect, useId, useMemo, useRef, useState } from 'react';
+import { Pause, Play } from 'lucide-react';
+import EditorialCard, { InnerPanel } from './EditorialCard';
 
-const COLORS = {
-    blue: '#314685',
-    orange: '#FF6B35',
-    gold: '#E8B34F',
-    paleBlue: '#A0C4FF',
-    cream: '#FFEAD2',
-    text: '#525252',
-    muted: '#737373',
-};
+const WINDOW_MS = 10000;
+const MAX_VISIBLE_CHUNKS = 6;
 
-const Slider = ({ id, label, value, min, max, step = 1, suffix = '', onChange }) => (
-    <label htmlFor={id} className="research-lab-control">
-        <span>
-            {label}
-            <strong>{value}{suffix}</strong>
-        </span>
+const ControlSlider = ({
+    id,
+    label,
+    value,
+    min,
+    max,
+    step = 1,
+    suffix = '',
+    onChange,
+    description,
+}) => (
+    <div className="editorial-control">
+        <label htmlFor={id} className="editorial-control-label">
+            <span>{label}</span>
+            <strong>
+                {value}
+                {suffix}
+            </strong>
+        </label>
+        {description && (
+            <p id={`${id}-hint`} className="editorial-control-hint">
+                {description}
+            </p>
+        )}
         <input
             id={id}
             type="range"
@@ -34,27 +36,301 @@ const Slider = ({ id, label, value, min, max, step = 1, suffix = '', onChange })
             max={max}
             step={step}
             value={value}
+            aria-valuetext={`${value}${suffix}`}
+            aria-describedby={description ? `${id}-hint` : undefined}
             onChange={(event) => onChange(Number(event.target.value))}
         />
-    </label>
+    </div>
 );
 
-const LabTooltip = ({ active, payload, label, suffix = '' }) => {
-    if (!active || !payload?.length) return null;
+const percent = (ms) => `${(ms / WINDOW_MS) * 100}%`;
+
+export const StreamingTimelineLab = () => {
+    const [chunkMs, setChunkMs] = useState(640);
+    const [overlap, setOverlap] = useState(20);
+    const [activeIndex, setActiveIndex] = useState(0);
+    const [playing, setPlaying] = useState(false);
+    const [tooltip, setTooltip] = useState(null);
+    const trackRef = useRef(null);
+    const statusId = useId();
+
+    const model = useMemo(() => {
+        const stepMs = chunkMs * (1 - overlap / 100);
+        const totalChunks = Math.max(1, Math.ceil((WINDOW_MS - chunkMs) / stepMs) + 1);
+        const visibleCount = Math.min(MAX_VISIBLE_CHUNKS, totalChunks);
+
+        const chunks = Array.from({ length: visibleCount }, (_, index) => {
+            const startMs = index * stepMs;
+            const endMs = startMs + chunkMs;
+            const prevEndMs = index === 0 ? startMs : (index - 1) * stepMs + chunkMs;
+            const overlapStartMs = startMs;
+            const overlapEndMs = Math.max(startMs, Math.min(prevEndMs, endMs));
+            const overlapMs = index === 0 ? 0 : Math.max(0, overlapEndMs - overlapStartMs);
+            const clippedEnd = Math.min(endMs, WINDOW_MS);
+            const clippedStart = Math.min(startMs, WINDOW_MS);
+            const availableAtMs = Math.min(endMs, WINDOW_MS);
+
+            return {
+                index,
+                label: `Chunk ${index + 1}`,
+                startMs,
+                endMs,
+                clippedStart,
+                clippedEnd,
+                overlapMs,
+                newMs: Math.max(0, chunkMs - overlapMs),
+                availableAtMs,
+                isLastVisible: index === visibleCount - 1 && totalChunks > visibleCount,
+            };
+        });
+
+        return {
+            stepMs,
+            totalChunks,
+            chunks,
+        };
+    }, [chunkMs, overlap]);
+
+    useEffect(() => {
+        setActiveIndex(0);
+        setPlaying(false);
+    }, [chunkMs, overlap]);
+
+    useEffect(() => {
+        if (!playing) return undefined;
+
+        const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (reduceMotion) {
+            setActiveIndex(model.chunks.length - 1);
+            setPlaying(false);
+            return undefined;
+        }
+
+        let index = 0;
+        setActiveIndex(0);
+        const timer = window.setInterval(() => {
+            index += 1;
+            if (index >= model.chunks.length) {
+                setPlaying(false);
+                window.clearInterval(timer);
+                return;
+            }
+            setActiveIndex(index);
+        }, 800);
+
+        return () => window.clearInterval(timer);
+    }, [playing, model.chunks.length]);
+
+    const activeChunk = model.chunks[activeIndex] ?? model.chunks[0];
+
+    const showTooltip = (chunk, event) => {
+        const bounds = trackRef.current?.getBoundingClientRect();
+        if (!bounds) return;
+        const x = event.currentTarget.getBoundingClientRect().left - bounds.left;
+        setTooltip({ chunk, x: Math.min(Math.max(8, x), bounds.width - 180) });
+    };
 
     return (
-        <div className="research-lab-tooltip">
-            <p>{label}</p>
-            {payload
-                .filter((entry) => entry.value > 0 && entry.name !== 'Start')
-                .map((entry) => (
-                    <span key={entry.name}>
-                        <i style={{ backgroundColor: entry.color }} />
-                        {entry.name}: {entry.value}{suffix}
-                    </span>
-                ))}
-        </div>
+        <EditorialCard
+            eyebrow="Interactive experiment"
+            title="How streaming audio is processed"
+            description="Adjust chunk size and overlap to see how incoming speech is split, reused, processed, and turned into successive transcript updates. The diagram is a conceptual timeline, not a latency measurement."
+            metrics={
+                <dl className="editorial-summary">
+                    <div>
+                        <dt>Chunk size</dt>
+                        <dd>{chunkMs} ms</dd>
+                    </div>
+                    <div>
+                        <dt>Update interval</dt>
+                        <dd>{Math.round(model.stepMs)} ms</dd>
+                    </div>
+                    <div>
+                        <dt>Chunks in 10 s</dt>
+                        <dd>{model.totalChunks}</dd>
+                    </div>
+                </dl>
+            }
+            footer="Conceptual timeline only; it does not claim measured Bodhan model latency."
+        >
+            <InnerPanel>
+                <div className="editorial-controls editorial-controls-two">
+                    <ControlSlider
+                        id="chunk-size"
+                        label="Chunk size"
+                        value={chunkMs}
+                        min={160}
+                        max={1280}
+                        step={160}
+                        suffix=" ms"
+                        description="Length of each audio window sent to the model."
+                        onChange={setChunkMs}
+                    />
+                    <ControlSlider
+                        id="chunk-overlap"
+                        label="Overlap"
+                        value={overlap}
+                        min={0}
+                        max={50}
+                        step={5}
+                        suffix="%"
+                        description="How much of the previous chunk is reused in the next one."
+                        onChange={setOverlap}
+                    />
+                </div>
+
+                <div className="stream-toolbar">
+                    <button
+                        type="button"
+                        className="stream-play"
+                        onClick={() => setPlaying((current) => !current)}
+                        aria-pressed={playing}
+                    >
+                        {playing ? <Pause size={14} aria-hidden="true" /> : <Play size={14} aria-hidden="true" />}
+                        {playing ? 'Pause sequence' : 'Play sequence'}
+                    </button>
+                    <p id={statusId} className="stream-status" aria-live="polite">
+                        {activeChunk.label} available at {(activeChunk.availableAtMs / 1000).toFixed(2)}s
+                        {activeChunk.index === model.chunks.length - 1 ? ' · final transcript' : ' · partial output'}
+                        {model.totalChunks > model.chunks.length
+                            ? ` · showing first ${model.chunks.length} of ${model.totalChunks} chunks`
+                            : ''}
+                    </p>
+                </div>
+
+                <div
+                    className="stream-board"
+                    role="img"
+                    aria-label={`Streaming execution over 10 seconds. ${model.chunks.length} representative chunks of ${chunkMs} milliseconds with ${overlap} percent overlap. New audio arrives every ${Math.round(model.stepMs)} milliseconds.`}
+                >
+                    <div className="stream-lane">
+                        <p className="stream-lane-label">Audio</p>
+                        <div className="stream-lane-track stream-audio-track" aria-hidden="true">
+                            <span className="stream-audio-fill" />
+                            {Array.from({ length: 40 }, (_, index) => (
+                                <i
+                                    key={index}
+                                    className="stream-wave-bar"
+                                    style={{ height: `${28 + ((index * 17) % 48)}%` }}
+                                />
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className="stream-lane">
+                        <p className="stream-lane-label">Chunks</p>
+                        <div className="stream-lane-track" ref={trackRef}>
+                            {model.chunks.map((chunk) => {
+                                const widthMs = Math.max(0, chunk.clippedEnd - chunk.clippedStart);
+                                const overlapRatio = chunk.overlapMs / chunkMs;
+                                return (
+                                    <button
+                                        key={chunk.label}
+                                        type="button"
+                                        className={`stream-chunk${activeIndex === chunk.index ? ' is-active' : ''}`}
+                                        style={{
+                                            left: percent(chunk.clippedStart),
+                                            width: percent(widthMs),
+                                            zIndex: chunk.index + 1,
+                                        }}
+                                        aria-pressed={activeIndex === chunk.index}
+                                        aria-label={`${chunk.label}: ${ (chunk.startMs / 1000).toFixed(2)}s to ${(chunk.endMs / 1000).toFixed(2)}s. Overlap ${(chunk.overlapMs / 1000).toFixed(2)}s. Update at ${(chunk.availableAtMs / 1000).toFixed(2)}s.`}
+                                        onClick={() => {
+                                            setPlaying(false);
+                                            setActiveIndex(chunk.index);
+                                        }}
+                                        onFocus={(event) => {
+                                            setActiveIndex(chunk.index);
+                                            showTooltip(chunk, event);
+                                        }}
+                                        onBlur={() => setTooltip(null)}
+                                        onMouseEnter={(event) => showTooltip(chunk, event)}
+                                        onMouseLeave={() => setTooltip(null)}
+                                    >
+                                        <span
+                                            className="stream-chunk-overlap"
+                                            style={{ width: `${overlapRatio * 100}%` }}
+                                        />
+                                        <span className="stream-chunk-new" />
+                                        <span className="stream-chunk-label">{chunk.index + 1}</span>
+                                    </button>
+                                );
+                            })}
+                            {tooltip && (
+                                <div className="stream-tooltip" style={{ left: tooltip.x }} role="status">
+                                    <p>{tooltip.chunk.label}</p>
+                                    <span>Start {(tooltip.chunk.startMs / 1000).toFixed(2)}s</span>
+                                    <span>End {(tooltip.chunk.endMs / 1000).toFixed(2)}s</span>
+                                    <span>Overlap {(tooltip.chunk.overlapMs / 1000).toFixed(2)}s</span>
+                                    <span>Update at {(tooltip.chunk.availableAtMs / 1000).toFixed(2)}s</span>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    <div className="stream-lane">
+                        <p className="stream-lane-label">Processing</p>
+                        <div className="stream-lane-track" aria-hidden="true">
+                            {model.chunks.map((chunk) => (
+                                <span
+                                    key={`proc-${chunk.label}`}
+                                    className={`stream-process${activeIndex === chunk.index ? ' is-active' : ''}`}
+                                    style={{
+                                        left: percent(Math.min(chunk.availableAtMs, WINDOW_MS - model.stepMs * 0.25)),
+                                        width: percent(Math.min(model.stepMs * 0.55, 480)),
+                                    }}
+                                />
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className="stream-lane">
+                        <p className="stream-lane-label">Output</p>
+                        <div className="stream-lane-track stream-output-track">
+                            {model.chunks.map((chunk) => {
+                                const isFinal = chunk.index === model.chunks.length - 1;
+                                const isActive = activeIndex === chunk.index;
+                                return (
+                                    <span
+                                        key={`out-${chunk.label}`}
+                                        className={`stream-output${isActive ? ' is-active' : ''}${isFinal ? ' is-final' : ''}`}
+                                        style={{ left: percent(Math.min(chunk.availableAtMs, WINDOW_MS - 40)) }}
+                                    >
+                                        {isActive ? (isFinal ? 'Final' : `Partial ${chunk.index + 1}`) : ''}
+                                    </span>
+                                );
+                            })}
+                        </div>
+                    </div>
+
+                    <div className="stream-lane stream-axis-lane">
+                        <p className="stream-lane-label">Time</p>
+                        <div className="stream-lane-track stream-axis" aria-hidden="true">
+                            {[0, 2, 4, 6, 8, 10].map((second) => (
+                                <span key={second} style={{ left: `${(second / 10) * 100}%` }}>
+                                    {second}s
+                                </span>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+
+                <ul className="stream-legend" aria-label="Timeline legend">
+                    <li><i className="stream-swatch stream-swatch-new" /> New audio</li>
+                    <li><i className="stream-swatch stream-swatch-overlap" /> Reused overlap</li>
+                    <li><i className="stream-swatch stream-swatch-process" /> Processing</li>
+                    <li><i className="stream-swatch stream-swatch-output" /> Transcript update</li>
+                </ul>
+            </InnerPanel>
+        </EditorialCard>
     );
+};
+
+const TOKEN_META = {
+    C: { label: 'Correct', abbr: 'C' },
+    S: { label: 'Substitution', abbr: 'S' },
+    D: { label: 'Deletion', abbr: 'D' },
+    I: { label: 'Insertion', abbr: 'I' },
 };
 
 export const WerPlayground = () => {
@@ -63,127 +339,150 @@ export const WerPlayground = () => {
     const [deletions, setDeletions] = useState(1);
     const [insertions, setInsertions] = useState(1);
 
-    const safeSubstitutions = Math.min(substitutions, referenceWords);
-    const safeDeletions = Math.min(deletions, referenceWords - safeSubstitutions);
+    const maxSubstitutions = referenceWords;
+    const maxDeletions = Math.max(0, referenceWords - Math.min(substitutions, maxSubstitutions));
+    const safeSubstitutions = Math.min(substitutions, maxSubstitutions);
+    const safeDeletions = Math.min(deletions, maxDeletions);
     const correct = Math.max(0, referenceWords - safeSubstitutions - safeDeletions);
-    const wer = ((safeSubstitutions + safeDeletions + insertions) / referenceWords) * 100;
-    const chartData = [{
-        name: 'Reference',
-        Correct: correct,
-        Substitutions: safeSubstitutions,
-        Deletions: safeDeletions,
-        Insertions: insertions,
-    }];
+    const errors = safeSubstitutions + safeDeletions + insertions;
+    const wer = (errors / referenceWords) * 100;
+    const werLabel = Number.isInteger(wer) ? `${wer}` : wer.toFixed(1);
 
-    const handleReferenceChange = (value) => {
-        setReferenceWords(value);
-        setSubstitutions((current) => Math.min(current, value));
-        setDeletions((current) => Math.min(current, Math.max(0, value - Math.min(substitutions, value))));
-    };
+    const tokens = [
+        ...Array.from({ length: correct }, () => 'C'),
+        ...Array.from({ length: safeSubstitutions }, () => 'S'),
+        ...Array.from({ length: safeDeletions }, () => 'D'),
+        ...Array.from({ length: insertions }, () => 'I'),
+    ];
+
+    const segments = [
+        { key: 'C', count: correct, pattern: 'solid' },
+        { key: 'S', count: safeSubstitutions, pattern: 'striped' },
+        { key: 'D', count: safeDeletions, pattern: 'dashed' },
+        { key: 'I', count: insertions, pattern: 'dotted' },
+    ].filter((segment) => segment.count > 0);
+
+    const totalTokens = Math.max(1, tokens.length);
 
     return (
-        <div className="research-lab" aria-labelledby="wer-lab-title">
-            <div className="research-lab-heading">
-                <div>
-                    <p className="research-type-eyebrow">Interactive experiment</p>
-                    <h3 id="wer-lab-title">Build a Word Error Rate</h3>
-                </div>
-                <output aria-live="polite">
-                    <strong>{wer.toFixed(1)}%</strong>
-                    <span>WER</span>
+        <EditorialCard
+            eyebrow="Interactive experiment"
+            title="Build a Word Error Rate"
+            description="Change the reference length and error types. The strip, counts, and formula update together so you can see how substitutions, deletions, and insertions become WER."
+            metric={
+                <output className="editorial-metric" aria-live="polite" aria-label={`Word error rate: ${werLabel} percent`}>
+                    <span className="editorial-metric-value">{wer.toFixed(1)}%</span>
+                    <span className="editorial-metric-label">WER</span>
                 </output>
-            </div>
+            }
+        >
+            <InnerPanel>
+                <div className="wer-layout">
+                    <fieldset className="wer-inputs">
+                        <legend>Inputs</legend>
+                        <div className="editorial-controls editorial-controls-wer">
+                            <ControlSlider
+                                id="reference-words"
+                                label="Reference words"
+                                value={referenceWords}
+                                min={5}
+                                max={50}
+                                description="Number of words in the reference transcript."
+                                onChange={setReferenceWords}
+                            />
+                            <ControlSlider
+                                id="substitutions"
+                                label="Substitutions"
+                                value={safeSubstitutions}
+                                min={0}
+                                max={maxSubstitutions}
+                                description="Reference words replaced by a different word."
+                                onChange={setSubstitutions}
+                            />
+                            <ControlSlider
+                                id="deletions"
+                                label="Deletions"
+                                value={safeDeletions}
+                                min={0}
+                                max={maxDeletions}
+                                description="Reference words missing from the hypothesis."
+                                onChange={setDeletions}
+                            />
+                            <ControlSlider
+                                id="insertions"
+                                label="Insertions"
+                                value={insertions}
+                                min={0}
+                                max={10}
+                                description="Extra words that do not appear in the reference."
+                                onChange={setInsertions}
+                            />
+                        </div>
+                    </fieldset>
 
-            <div className="research-lab-controls research-lab-controls-four">
-                <Slider id="reference-words" label="Reference words" value={referenceWords} min={5} max={50} onChange={handleReferenceChange} />
-                <Slider id="substitutions" label="Substitutions" value={safeSubstitutions} min={0} max={referenceWords - safeDeletions} onChange={setSubstitutions} />
-                <Slider id="deletions" label="Deletions" value={safeDeletions} min={0} max={referenceWords - safeSubstitutions} onChange={setDeletions} />
-                <Slider id="insertions" label="Insertions" value={insertions} min={0} max={10} onChange={setInsertions} />
-            </div>
+                    <div className="wer-visual">
+                        <p className="wer-visual-label">Word-level alignment</p>
+                        <div
+                            className="wer-bar"
+                            role="img"
+                            aria-label={`Alignment of ${referenceWords} reference words plus ${insertions} insertions: ${correct} correct, ${safeSubstitutions} substitutions, ${safeDeletions} deletions, ${insertions} insertions.`}
+                        >
+                            {segments.map((segment) => (
+                                <span
+                                    key={segment.key}
+                                    className={`wer-bar-slice wer-token-${segment.key.toLowerCase()} wer-pattern-${segment.pattern}`}
+                                    style={{ flexGrow: segment.count, flexBasis: 0 }}
+                                >
+                                    <span>
+                                        {TOKEN_META[segment.key].abbr} {segment.count}
+                                    </span>
+                                </span>
+                            ))}
+                        </div>
 
-            <div className="research-lab-chart" role="img" aria-label={`Word error composition: ${correct} correct, ${safeSubstitutions} substitutions, ${safeDeletions} deletions, and ${insertions} insertions. WER is ${wer.toFixed(1)} percent.`}>
-                <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={chartData} layout="vertical" margin={{ top: 12, right: 12, bottom: 8, left: 0 }}>
-                        <CartesianGrid stroke={COLORS.cream} horizontal={false} />
-                        <XAxis type="number" tick={{ fill: COLORS.muted, fontSize: 11 }} axisLine={false} tickLine={false} />
-                        <YAxis type="category" dataKey="name" hide />
-                        <Tooltip content={<LabTooltip />} cursor={false} />
-                        <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 11, color: COLORS.text }} />
-                        <Bar dataKey="Correct" stackId="words" fill={COLORS.paleBlue} animationDuration={500} radius={[6, 0, 0, 6]} />
-                        <Bar dataKey="Substitutions" stackId="words" fill={COLORS.orange} animationDuration={500} />
-                        <Bar dataKey="Deletions" stackId="words" fill={COLORS.blue} animationDuration={500} />
-                        <Bar dataKey="Insertions" stackId="words" fill={COLORS.gold} animationDuration={500} radius={[0, 6, 6, 0]} />
-                    </BarChart>
-                </ResponsiveContainer>
-            </div>
+                        <ul className="wer-tokens" aria-hidden="true">
+                            {tokens.slice(0, 36).map((type, index) => (
+                                <li key={`${type}-${index}`} className={`wer-token wer-token-${type.toLowerCase()}`}>
+                                    {TOKEN_META[type].abbr}
+                                </li>
+                            ))}
+                            {tokens.length > 36 && (
+                                <li className="wer-token wer-token-more">+{tokens.length - 36}</li>
+                            )}
+                        </ul>
 
-            <p className="research-lab-equation">
-                ({safeSubstitutions} substitutions + {safeDeletions} deletions + {insertions} insertions) ÷ {referenceWords} reference words
-            </p>
-        </div>
-    );
-};
+                        <ul className="stream-legend wer-legend" aria-label="Error categories">
+                            {Object.entries(TOKEN_META).map(([key, meta]) => (
+                                <li key={key}>
+                                    <i className={`stream-swatch wer-token-${key.toLowerCase()}`} />
+                                    {meta.label} ({meta.abbr})
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
 
-export const StreamingTimelineLab = () => {
-    const [chunkMs, setChunkMs] = useState(640);
-    const [overlap, setOverlap] = useState(20);
-
-    const { timeline, stepMs, updatesPerSecond, chunksInTenSeconds, repeatedMs } = useMemo(() => {
-        const step = chunkMs * (1 - overlap / 100);
-        const chunks = Math.max(1, Math.ceil((10000 - chunkMs) / step) + 1);
-        const visibleChunks = Array.from({ length: Math.min(7, chunks) }, (_, index) => ({
-            name: `Chunk ${index + 1}`,
-            Start: Number(((index * step) / 1000).toFixed(2)),
-            Audio: Number((chunkMs / 1000).toFixed(2)),
-        }));
-
-        return {
-            timeline: visibleChunks,
-            stepMs: step,
-            updatesPerSecond: 1000 / step,
-            chunksInTenSeconds: chunks,
-            repeatedMs: Math.max(0, chunks * chunkMs - 10000),
-        };
-    }, [chunkMs, overlap]);
-
-    return (
-        <div className="research-lab" aria-labelledby="stream-lab-title">
-            <div className="research-lab-heading">
-                <div>
-                    <p className="research-type-eyebrow">Interactive experiment</p>
-                    <h3 id="stream-lab-title">Streaming chunk timeline</h3>
+                    <div className="wer-formula">
+                        <p className="wer-visual-label">Calculation</p>
+                        <div className="wer-formula-steps">
+                            <p>
+                                Errors = S + D + I
+                                <br />
+                                Errors = {safeSubstitutions} + {safeDeletions} + {insertions} = <strong>{errors}</strong>
+                            </p>
+                            <p>
+                                WER = Errors ÷ Reference words
+                                <br />
+                                WER = {errors} ÷ {referenceWords} = <strong>{wer.toFixed(1)}%</strong>
+                            </p>
+                        </div>
+                        <p className="wer-result" aria-hidden="true">
+                            {errors} errors in {referenceWords} reference words
+                            {totalTokens !== referenceWords ? ` · ${insertions} extra inserted` : ''}
+                        </p>
+                    </div>
                 </div>
-                <div className="research-lab-live-metrics" aria-live="polite">
-                    <span><strong>{updatesPerSecond.toFixed(1)}</strong> updates/sec</span>
-                    <span><strong>{chunksInTenSeconds}</strong> chunks / 10 sec</span>
-                </div>
-            </div>
-
-            <div className="research-lab-controls">
-                <Slider id="chunk-size" label="Chunk size" value={chunkMs} min={160} max={1280} step={160} suffix=" ms" onChange={setChunkMs} />
-                <Slider id="chunk-overlap" label="Overlap" value={overlap} min={0} max={50} step={5} suffix="%" onChange={setOverlap} />
-            </div>
-
-            <div className="research-lab-timeline" role="img" aria-label={`The first ${timeline.length} audio chunks, each ${chunkMs} milliseconds long with ${overlap} percent overlap.`}>
-                <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={timeline} layout="vertical" margin={{ top: 6, right: 24, bottom: 24, left: 4 }} barCategoryGap={5}>
-                        <CartesianGrid stroke={COLORS.cream} vertical horizontal={false} />
-                        <XAxis type="number" unit="s" tick={{ fill: COLORS.muted, fontSize: 11 }} axisLine={false} tickLine={false} domain={[0, 'dataMax']} />
-                        <YAxis type="category" dataKey="name" width={58} tick={{ fill: COLORS.text, fontSize: 10 }} axisLine={false} tickLine={false} />
-                        <Tooltip content={<LabTooltip suffix=" sec" />} cursor={{ fill: 'rgba(255, 234, 210, 0.35)' }} />
-                        <Bar dataKey="Start" stackId="timeline" fill="transparent" isAnimationActive={false} legendType="none" />
-                        <Bar dataKey="Audio" stackId="timeline" fill={COLORS.blue} animationDuration={450} radius={4}>
-                            <LabelList dataKey="Audio" position="right" formatter={(value) => `${value}s`} fill={COLORS.muted} fontSize={10} />
-                        </Bar>
-                    </BarChart>
-                </ResponsiveContainer>
-            </div>
-
-            <p className="research-lab-equation">
-                New audio every {Math.round(stepMs)} ms · approximately {(repeatedMs / 1000).toFixed(1)} sec of overlapping audio processed across a 10-second clip
-            </p>
-            <p className="research-lab-note">Conceptual timeline only; it does not claim measured Bodhan model latency.</p>
-        </div>
+            </InnerPanel>
+        </EditorialCard>
     );
 };
 

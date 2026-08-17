@@ -159,7 +159,7 @@ const Navbar = () => {
     };
 
     const linkClass =
-        'text-sm text-[var(--color-10)] hover:text-[var(--text-orange-500)] transition-colors whitespace-nowrap';
+                'text-sm text-[var(--color-10)] hover:text-[var(--text-orange-500)] focus-visible:text-[var(--text-orange-500)] transition-colors whitespace-nowrap min-h-11 inline-flex items-center';
 
     const renderLink = (link, className) => {
         if (link.children) {

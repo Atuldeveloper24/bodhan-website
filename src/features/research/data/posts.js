@@ -56,8 +56,8 @@ export const posts = [
                 id: 'why-asr',
                 title: 'Why Another ASR Model?',
                 content: [
-                    'India has many languages. Existing ASR systems perform well only on high-resource languages. Dialects remain underserved. Code-mixed speech is common. Production systems need low latency.',
-                    'Bodhan ASR was built to address these challenges in a single multilingual model.',
+                    'India has many languages. Existing ASR systems perform well only on **high-resource languages**. Dialects remain underserved. *Code-mixed speech* is common. Production systems need **low latency**.',
+                    'Bodhan ASR was built to address these challenges in a **single multilingual model**.',
                 ],
                 bullets: [
                     'India has many languages with significant dialectal variation.',
@@ -71,8 +71,8 @@ export const posts = [
                 id: 'meet-bodhan-asr',
                 title: 'Meet Bodhan ASR',
                 content: [
-                    'Bodhan Scribe is a single multilingual model that supports 22 constitutional languages, Indian English, Bhojpuri, and Bhili.',
-                    'Instead of training separate models per language, Bodhan Scribe learns a unified multilingual representation — enabling consistent quality across India\'s linguistic diversity.',
+                    'Bodhan Scribe is a single multilingual model that supports **22 constitutional languages**, Indian English, Bhojpuri, and Bhili.',
+                    'Instead of training separate models per language, Bodhan Scribe learns a *unified multilingual representation* — enabling consistent quality across India\'s linguistic diversity.',
                 ],
                 bullets: [
                     '22 constitutional languages',
@@ -88,7 +88,7 @@ export const posts = [
                     {
                         title: 'Supports 25 Indian Languages',
                         content:
-                            'Broad coverage across constitutional languages and underserved dialects, designed for real-world Indian speech patterns.',
+                            'Broad coverage across constitutional languages and underserved dialects, designed for *real-world Indian speech patterns*.',
                     },
                     {
                         title: 'Three Output Modes',
@@ -115,7 +115,7 @@ export const posts = [
                     {
                         title: 'Low Resource Language Support',
                         content:
-                            'Bhili receives dedicated support despite limited public datasets — a critical gap in existing ASR systems for India.',
+                            'Bhili receives **dedicated support** despite limited public datasets — a critical gap in existing ASR systems for India.',
                     },
                     {
                         title: 'Production Ready',

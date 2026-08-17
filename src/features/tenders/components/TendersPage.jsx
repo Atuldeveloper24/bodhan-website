@@ -69,8 +69,8 @@ const StatusBadge = ({ status }) =>
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> Active
         </span>
     ) : (
-        <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-gray-500 bg-gray-100 border border-gray-200 rounded-full px-2.5 py-0.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-gray-400" /> Closed
+        <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-stone-700 bg-gray-100 border border-gray-300 rounded-full px-2.5 py-0.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-stone-600" /> Closed
         </span>
     );
 
@@ -102,7 +102,7 @@ const TenderCard = ({ tender, index, onPreview }) => {
                                         <Award size={11} /> Awarded
                                     </span>
                                 )}
-                                <span className="text-xs text-gray-400 font-mono">{tender.id}</span>
+                                <span className="text-xs text-stone-600 font-mono">{tender.id}</span>
                             </div>
                             <h3 className="text-lg md:text-xl font-semibold text-[#1A1A1A] mb-2 leading-snug">
                                 {tender.title}
@@ -115,11 +115,11 @@ const TenderCard = ({ tender, index, onPreview }) => {
                         {/* Right: deadline box */}
                         <div className="md:flex-shrink-0 md:w-44">
                             <div className={`rounded-xl p-4 text-center ${isActive ? 'bg-orange-50 border border-orange-100' : 'bg-gray-50 border border-gray-100'}`}>
-                                <p className="text-[10px] uppercase tracking-widest font-bold text-gray-400 mb-1.5">Closing</p>
-                                <p className={`text-sm font-bold leading-tight ${isActive ? 'text-[#1A1A1A]' : 'text-gray-400'}`}>
+                                <p className="text-xs uppercase tracking-widest font-bold text-stone-600 mb-1.5">Closing</p>
+                                <p className={`text-sm font-bold leading-tight ${isActive ? 'text-[#1A1A1A]' : 'text-stone-600'}`}>
                                     {formatDateShort(tender.closingDate)}
                                 </p>
-                                <p className="text-xs text-gray-400 mt-1">{tender.closingTime}</p>
+                                <p className="text-xs text-stone-600 mt-1">{tender.closingTime}</p>
                                 {isActive && (
                                     <Link
                                         to={`/tenders/apply/${tender.id}`}
@@ -149,7 +149,7 @@ const TenderCard = ({ tender, index, onPreview }) => {
                                         <div className="flex items-center gap-3 flex-1 min-w-0">
                                             <span className="flex flex-col items-center justify-center w-9 h-9 rounded-lg bg-white border border-emerald-100 flex-shrink-0 gap-0.5 shadow-sm">
                                                 <FileText size={11} className="text-emerald-600" />
-                                                <span className="text-[8px] font-bold text-emerald-600 uppercase leading-none">PDF</span>
+                                                <span className="text-[11px] font-bold text-emerald-700 uppercase leading-none">PDF</span>
                                             </span>
                                             <span className="text-sm font-medium text-gray-700 break-words min-w-0">{tender.bidAward.name}</span>
                                         </div>
@@ -173,14 +173,14 @@ const TenderCard = ({ tender, index, onPreview }) => {
                                     </div>
                                 </div>
                             )}
-                            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Documents</p>
+                            <p className="text-xs font-semibold text-stone-600 uppercase tracking-wider mb-3">Documents</p>
                             <ul className="space-y-2">
                                 {tender.documents.map((doc, i) => (
                                     <li key={i} className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 bg-gray-50 rounded-xl px-3 py-2.5">
                                         <div className="flex items-center gap-3 flex-1 min-w-0">
                                             <span className="flex flex-col items-center justify-center w-9 h-9 rounded-lg bg-white border border-orange-100 flex-shrink-0 gap-0.5 shadow-sm">
                                                 <FileText size={11} className="text-[var(--text-orange-500)]" />
-                                                <span className="text-[8px] font-bold text-[var(--text-orange-500)] uppercase leading-none">PDF</span>
+                                                <span className="text-[11px] font-bold text-[var(--text-orange-500)] uppercase leading-none">PDF</span>
                                             </span>
                                             <span className="text-sm font-medium text-gray-700 break-words min-w-0">{doc.name}</span>
                                         </div>
@@ -213,7 +213,7 @@ const TenderCard = ({ tender, index, onPreview }) => {
                 onClick={() => setExpanded(!expanded)}
                 className="w-full border-t border-gray-100 px-6 py-2.5 flex items-center justify-between bg-gray-50/60 hover:bg-gray-50 transition-colors group"
             >
-                <span className="flex items-center gap-1.5 text-xs text-gray-400">
+                <span className="flex items-center gap-1.5 text-xs text-stone-600">
                     <FileText size={11} />
                     {tender.documents.length} document{tender.documents.length !== 1 ? 's' : ''}
                     {tender.bidAward && (
@@ -222,7 +222,7 @@ const TenderCard = ({ tender, index, onPreview }) => {
                         </span>
                     )}
                 </span>
-                <span className="flex items-center gap-1 text-xs font-medium text-gray-400 group-hover:text-[var(--text-orange-500)] transition-colors">
+                <span className="flex items-center gap-1 text-xs font-medium text-stone-600 group-hover:text-[var(--text-orange-500)] transition-colors">
                     {expanded ? 'Hide details' : 'View details'}
                     <ChevronDown size={12} className={`transition-transform duration-200 ${expanded ? 'rotate-180' : ''}`} />
                 </span>
@@ -374,7 +374,7 @@ const TendersPage = () => {
                                     <FileText size={24} className="text-gray-400" />
                                 </div>
                                 <p className="text-gray-500 font-medium">No {activeTab} tenders at the moment.</p>
-                                <p className="text-gray-400 text-sm mt-1">Check back soon for new opportunities.</p>
+                                <p className="text-stone-600 text-sm mt-1">Check back soon for new opportunities.</p>
                             </motion.div>
                         )}
                     </AnimatePresence>

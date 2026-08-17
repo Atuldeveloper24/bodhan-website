@@ -18,7 +18,7 @@ export const Breadcrumbs: React.FC = () => {
   if (relativeParts.length === 0) return null;
 
   return (
-    <nav className="flex items-center text-sm text-gray-400 mb-8 overflow-x-auto whitespace-nowrap">
+    <nav className="flex items-center text-sm text-stone-600 mb-8 overflow-x-auto whitespace-nowrap">
       <Link
         to={PROBLEMS_HOME}
         className="hover:text-bodhan-orange transition-colors flex items-center"

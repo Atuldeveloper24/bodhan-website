@@ -41,7 +41,7 @@ const Footer = () => {
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 aria-label={label}
-                                className={`text-gray-400 ${hoverColor} transition-colors duration-200 p-2 bg-white rounded-full shadow-sm hover:shadow-md group`}
+                                className={`text-stone-600 ${hoverColor} transition-colors duration-200 p-2.5 min-w-11 min-h-11 inline-flex items-center justify-center bg-white rounded-full shadow-sm hover:shadow-md group`}
                             >
                                 {isCustom ? (
                                     <Icon size={20} />
@@ -57,7 +57,7 @@ const Footer = () => {
                 <div className="w-full h-px bg-gray-300 mb-4"></div>
 
                 {/* Bottom: Copyright */}
-                <div className="text-center text-sm text-gray-500">
+                <div className="text-center text-sm text-stone-600">
                     Copyright © 2026 bodhan.ai
                 </div>
             </div>

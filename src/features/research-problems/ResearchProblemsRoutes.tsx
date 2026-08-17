@@ -15,6 +15,12 @@ import { Breadcrumbs } from './components/Breadcrumbs';
 import { VerticalTheme, ResearchProblem } from './types';
 
 export const RESEARCH_PROBLEMS_BASE = '/research/problems';
+const RESEARCH_AGENDA_ID = 'research-agenda';
+
+const scrollToResearchAgenda = (event?: React.MouseEvent) => {
+  event?.preventDefault();
+  document.getElementById(RESEARCH_AGENDA_ID)?.scrollIntoView({ behavior: 'smooth' });
+};
 
 // --- Theme Helper ---
 const THEME_COLORS: Record<VerticalTheme, string> = {
@@ -272,7 +278,7 @@ const HeroSection = () => {
                             </div>
                         </div>
 
-                         <Button href="#research" className="group w-full sm:w-auto">
+                         <Button onClick={scrollToResearchAgenda} className="group w-full sm:w-auto">
                             Explore Problems <ArrowRight size={16} className="ml-2 group-hover:translate-x-1 transition-transform" />
                         </Button>
                     </div>
@@ -457,12 +463,13 @@ const CallToActionSection = () => {
           >
             Get in Touch <ArrowRight size={16} />
           </a>
-          <a
-            href="#research"
+          <button
+            type="button"
+            onClick={scrollToResearchAgenda}
             className="inline-flex items-center text-lg justify-center px-8 py-3 rounded-full border border-white/20 text-white/90 hover:text-white hover:border-white/40 transition-all w-full sm:w-auto"
           >
             Browse Problems
-          </a>
+          </button>
         </div>
       </div>
     </section>
@@ -492,7 +499,7 @@ export const ResearchProblemsHomePage: React.FC = () => {
       </div>
       
       {/* Research Agenda Grid */}
-      <div id="research" className="py-24 bg-cream-100">
+      <div id={RESEARCH_AGENDA_ID} className="py-24 bg-cream-100 scroll-mt-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-5xl font-serif font-medium text-gray-900 mb-6">Explore Our Research Agenda</h2>

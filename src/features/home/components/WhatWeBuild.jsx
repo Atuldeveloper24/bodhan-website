@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import Container from './Container';
 import SectionHeading from './SectionHeading';
 import Card from './Card';
@@ -137,14 +138,12 @@ const WhatWeBuild = () => {
                     </div>
                 </div>
 
-                <a
-                    href="https://research.bodhan.ai"
-                    target="_blank"
-                    rel="noopener noreferrer"
+                <Link
+                    to="/research/problems"
                     className="inline-block bg-[#1A1A1A] hover:bg-black text-white text-sm md:text-base font-medium py-2.5 px-6 md:py-3 md:px-8 rounded-lg transition-all duration-300 shadow-md hover:shadow-lg hover:-translate-y-0.5"
                 >
                     Explore Research Agenda
-                </a>
+                </Link>
             </div>
         </Container>
     );

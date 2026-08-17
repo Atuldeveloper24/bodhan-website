@@ -30,13 +30,9 @@ const ShareButton = ({ title }) => {
             type="button"
             onClick={handleShare}
             aria-label={copied ? 'Link copied' : 'Share publication'}
-            className={`shrink-0 inline-flex items-center justify-center w-9 h-9 rounded-full border transition-all duration-300 ${
-                copied
-                    ? 'border-[var(--text-orange-500)] bg-[var(--primary-100)] text-[var(--text-orange-500)] scale-105'
-                    : 'border-[var(--primary-100)] text-[var(--color-11)] hover:text-[var(--text-orange-500)] hover:border-[var(--text-orange-500)] hover:bg-white hover:shadow-sm'
-            }`}
+            className={`research-share-button ${copied ? 'is-copied' : ''}`}
         >
-            {copied ? <Check size={14} strokeWidth={2.5} /> : <Share2 size={14} />}
+            {copied ? <Check size={15} strokeWidth={2.5} /> : <Share2 size={15} strokeWidth={2} />}
         </button>
     );
 };

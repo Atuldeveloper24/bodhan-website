@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useRef } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { ArrowLeft, ArrowUpRight } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Navbar from '../../home/components/Navbar';
@@ -8,6 +8,7 @@ import Footer from '../../home/components/Footer';
 import TableOfContents from './TableOfContents';
 import BlogContent from './BlogContent';
 import ShareButton from './ShareButton';
+import MosaicCanvas from './MosaicCanvas';
 import { getPostBySlug, formatDate } from '../data/posts';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -86,65 +87,67 @@ const BlogPostPage = () => {
             <Navbar />
 
             <header className="research-hero-atmosphere pt-10 md:pt-14 pb-8 md:pb-10">
-                <div className="research-article-column mx-auto px-5 relative text-center">
-                    <div className="absolute top-0 right-0 md:right-1">
-                        <ShareButton title={post.title} />
-                    </div>
-
-                    <p data-article-intro className="research-type-eyebrow text-[var(--text-orange-500)] mb-4">
+                <div className="research-article-column mx-auto px-5 relative">
+                    <p
+                        data-article-intro
+                        className="research-type-eyebrow text-[var(--text-orange-500)] mb-4 text-center"
+                    >
                         {post.category}
                         <span className="mx-2 text-[var(--color-14)]">·</span>
                         <span className="text-[var(--color-11)]">{formatDate(post.date)}</span>
                     </p>
 
-                    <h1 data-article-intro className="research-type-title text-[var(--text-primary)] mx-auto max-w-[38rem]">
-                        {post.title}
-                    </h1>
+                    <div className="research-hero-mosaic">
+                        <MosaicCanvas className="research-mosaic-layer" />
+                        <div className="research-hero-mosaic-scrim" aria-hidden="true" />
 
-                    {post.heroLinks?.length > 0 && (
-                        <nav
-                            aria-label="Publication links"
-                            data-article-intro
-                            className="flex flex-wrap items-center justify-center gap-x-1 gap-y-2 mt-5"
-                        >
-                            {post.heroLinks.map((link, i) => (
-                                <span key={link.label} className="inline-flex items-center gap-1">
-                                    {i > 0 && (
-                                        <span
-                                            className="text-[var(--color-14)] select-none mx-1.5"
-                                            aria-hidden="true"
-                                        >
-                                            ·
-                                        </span>
-                                    )}
-                                    {link.href.startsWith('/') ? (
-                                        <Link to={link.href} className="research-link-chip inline-flex items-center gap-0.5">
-                                            {link.label}
-                                        </Link>
-                                    ) : (
-                                        <a
-                                            href={link.href}
-                                            target={link.href.startsWith('http') ? '_blank' : undefined}
-                                            rel={
-                                                link.href.startsWith('http')
-                                                    ? 'noopener noreferrer'
-                                                    : undefined
-                                            }
-                                            className="research-link-chip inline-flex items-center gap-0.5 group"
-                                        >
-                                            {link.label}
-                                            {link.href.startsWith('http') && (
-                                                <ArrowUpRight
-                                                    size={12}
-                                                    className="opacity-0 -translate-y-0.5 group-hover:opacity-70 group-hover:translate-y-0 transition-all duration-200"
-                                                />
+                        <div className="research-hero-mosaic-content">
+                            <div className="absolute top-4 right-4 md:top-5 md:right-5 z-10">
+                                <ShareButton title={post.title} />
+                            </div>
+
+                            <h1
+                                data-article-intro
+                                className="research-type-title research-hero-mosaic-title text-[var(--text-primary)] mx-auto max-w-[38rem]"
+                            >
+                                {post.title}
+                            </h1>
+
+                            {post.heroLinks?.length > 0 && (
+                                <nav
+                                    aria-label="Publication links"
+                                    data-article-intro
+                                    className="flex flex-wrap items-center justify-center gap-2 mt-6"
+                                >
+                                    {post.heroLinks.map((link) => (
+                                        <span key={link.label} className="inline-flex items-center">
+                                            {link.href.startsWith('/') ? (
+                                                <Link
+                                                    to={link.href}
+                                                    className="research-link-chip research-link-chip-on-mosaic inline-flex items-center gap-0.5"
+                                                >
+                                                    {link.label}
+                                                </Link>
+                                            ) : (
+                                                <a
+                                                    href={link.href}
+                                                    target={link.href.startsWith('http') ? '_blank' : undefined}
+                                                    rel={
+                                                        link.href.startsWith('http')
+                                                            ? 'noopener noreferrer'
+                                                            : undefined
+                                                    }
+                                                    className="research-link-chip research-link-chip-on-mosaic inline-flex items-center"
+                                                >
+                                                    {link.label}
+                                                </a>
                                             )}
-                                        </a>
-                                    )}
-                                </span>
-                            ))}
-                        </nav>
-                    )}
+                                        </span>
+                                    ))}
+                                </nav>
+                            )}
+                        </div>
+                    </div>
                 </div>
             </header>
 
@@ -153,7 +156,7 @@ const BlogPostPage = () => {
                     <Link
                         to="/research"
                         data-article-intro
-                        className="inline-flex items-center gap-2 text-[13px] text-[var(--color-11)] hover:text-[var(--text-orange-500)] mb-7 transition-colors"
+                        className="inline-flex items-center gap-2 research-type-caption hover:text-[var(--text-orange-500)] mb-7 transition-colors"
                     >
                         <ArrowLeft size={14} />
                         All publications
