@@ -33,7 +33,7 @@ export const posts = [
         heroSummary:
             "Today we're releasing Bodhan Scribe, a 1.2B-parameter multilingual automatic speech recognition model trained on over 1.35 million hours of speech that supports 25 Indian languages, multiple transcription formats, and production-ready streaming and offline inference.",
         heroLinks: [
-            { label: 'Hugging Face', href: '#' },
+            { label: 'Hugging Face', href: 'https://huggingface.co/bodhan-ai/models' },
             { label: 'GitHub', href: '#' },
             { label: 'Paper', href: '#' },
             { label: 'Demo', href: 'https://value-candidates-oakland-capitol.trycloudflare.com' },
