@@ -5,12 +5,13 @@ import gsap from 'gsap';
 
 import Icon from '../../../assets/Icon.png';
 import MoELogo from '../../../assets/Ministry_of_Education_India.png';
+import ModelIcon from '../../developers/components/ModelIcon';
+import { models } from '../../developers/data/models';
 
 const researchDropdown = [
     { label: 'Overview', to: '/research', description: 'Areas, featured work, and updates' },
     { label: 'Blog', to: '/research/blog', description: 'Technical posts and releases' },
     { label: 'Publications', to: '/research/publications', description: 'Papers and formal publications' },
-    { label: 'Models', to: '/research/models', description: 'Model cards and demos' },
     {
         label: 'Research Problems',
         to: '/research/problems',
@@ -18,9 +19,21 @@ const researchDropdown = [
     },
 ];
 
+const developersDropdown = [
+    ...models.map((model) => ({
+        label: model.name,
+        to: model.href,
+        description: model.codename,
+        icon: model.icon,
+        accent: model.accent,
+    })),
+    { label: 'All models', to: '/developers', description: 'Browse every Bodhan model' },
+];
+
 const navLinks = [
     { label: 'Vision', to: '/', scrollTo: 'vision-mission' },
-    { label: 'Research', to: '/research', children: researchDropdown },
+    { label: 'Research', to: '/research', children: researchDropdown, match: '/research' },
+    { label: 'Developers', to: '/developers', children: developersDropdown, match: '/developers' },
     { label: 'Team', to: '/', scrollTo: 'team' },
     { label: 'Careers', to: '/careers' },
     { label: 'Contact', to: '/contact' },
@@ -30,115 +43,98 @@ const navLinks = [
 
 const Navbar = () => {
     const [isOpen, setIsOpen] = useState(false);
-    const [researchOpen, setResearchOpen] = useState(false);
-    const [mobileResearchOpen, setMobileResearchOpen] = useState(false);
-    const researchMenuRef = useRef(null);
-    const dropdownRef = useRef(null);
-    const mobileResearchRef = useRef(null);
+    const [openMenu, setOpenMenu] = useState(null);
+    const [mobileMenu, setMobileMenu] = useState(null);
+    const menuWrapRefs = useRef({});
+    const dropdownRefs = useRef({});
+    const mobileRefs = useRef({});
     const location = useLocation();
 
-    const isResearch = location.pathname.startsWith('/research');
+    const isCreamPage =
+        location.pathname.startsWith('/research') || location.pathname.startsWith('/developers');
 
     useEffect(() => {
         setIsOpen(false);
-        setResearchOpen(false);
-        setMobileResearchOpen(false);
+        setOpenMenu(null);
+        setMobileMenu(null);
     }, [location.pathname]);
 
     useLayoutEffect(() => {
-        if (!dropdownRef.current) return;
+        const entries = Object.entries(dropdownRefs.current).filter(([, el]) => el);
+        if (entries.length === 0) return undefined;
 
         const ctx = gsap.context(() => {
-            if (researchOpen) {
-                gsap.fromTo(
-                    dropdownRef.current,
-                    { autoAlpha: 0, y: -6, scale: 0.98, transformOrigin: 'top left' },
-                    {
-                        autoAlpha: 1,
-                        y: 0,
-                        scale: 1,
-                        duration: 0.32,
-                        ease: 'power3.out',
-                    }
-                );
-                gsap.fromTo(
-                    '[data-dropdown-item]',
-                    { y: 10, autoAlpha: 0 },
-                    {
-                        y: 0,
-                        autoAlpha: 1,
-                        duration: 0.38,
-                        stagger: 0.045,
-                        delay: 0.03,
-                        ease: 'power3.out',
-                    }
-                );
-            } else {
-                gsap.to(dropdownRef.current, {
-                    autoAlpha: 0,
-                    y: -6,
-                    scale: 0.98,
-                    duration: 0.2,
-                    ease: 'power2.in',
-                });
-            }
-        }, researchMenuRef);
+            entries.forEach(([label, el]) => {
+                if (label === openMenu) {
+                    gsap.fromTo(
+                        el,
+                        { autoAlpha: 0, y: -6, scale: 0.98, transformOrigin: 'top left' },
+                        { autoAlpha: 1, y: 0, scale: 1, duration: 0.32, ease: 'power3.out' }
+                    );
+                    gsap.fromTo(
+                        el.querySelectorAll('[data-dropdown-item]'),
+                        { y: 10, autoAlpha: 0 },
+                        {
+                            y: 0,
+                            autoAlpha: 1,
+                            duration: 0.38,
+                            stagger: 0.045,
+                            delay: 0.03,
+                            ease: 'power3.out',
+                        }
+                    );
+                } else {
+                    gsap.to(el, { autoAlpha: 0, y: -6, scale: 0.98, duration: 0.2, ease: 'power2.in' });
+                }
+            });
+        });
 
         return () => ctx.revert();
-    }, [researchOpen]);
+    }, [openMenu]);
 
     useLayoutEffect(() => {
-        if (!mobileResearchRef.current) return;
+        const entries = Object.entries(mobileRefs.current).filter(([, el]) => el);
+        if (entries.length === 0) return undefined;
 
         const ctx = gsap.context(() => {
-            if (mobileResearchOpen) {
-                gsap.fromTo(
-                    mobileResearchRef.current,
-                    { height: 0, opacity: 0 },
-                    {
-                        height: 'auto',
-                        opacity: 1,
-                        duration: 0.32,
-                        ease: 'power3.out',
-                        onComplete: () => gsap.set(mobileResearchRef.current, { clearProps: 'height' }),
-                    }
-                );
-                gsap.fromTo(
-                    '[data-mobile-research-item]',
-                    { x: -8, autoAlpha: 0 },
-                    {
-                        x: 0,
-                        autoAlpha: 1,
-                        duration: 0.3,
-                        stagger: 0.04,
-                        delay: 0.06,
-                        ease: 'power2.out',
-                    }
-                );
-            } else {
-                gsap.to(mobileResearchRef.current, {
-                    height: 0,
-                    opacity: 0,
-                    duration: 0.24,
-                    ease: 'power2.in',
-                });
-            }
-        }, mobileResearchRef);
+            entries.forEach(([label, el]) => {
+                if (label === mobileMenu) {
+                    gsap.fromTo(
+                        el,
+                        { height: 0, opacity: 0 },
+                        {
+                            height: 'auto',
+                            opacity: 1,
+                            duration: 0.32,
+                            ease: 'power3.out',
+                            onComplete: () => gsap.set(el, { clearProps: 'height' }),
+                        }
+                    );
+                    gsap.fromTo(
+                        el.querySelectorAll('[data-mobile-item]'),
+                        { x: -8, autoAlpha: 0 },
+                        { x: 0, autoAlpha: 1, duration: 0.3, stagger: 0.04, delay: 0.06, ease: 'power2.out' }
+                    );
+                } else {
+                    gsap.to(el, { height: 0, opacity: 0, duration: 0.24, ease: 'power2.in' });
+                }
+            });
+        });
 
         return () => ctx.revert();
-    }, [mobileResearchOpen]);
+    }, [mobileMenu]);
 
     useEffect(() => {
-        if (!researchOpen) return undefined;
+        if (!openMenu) return undefined;
 
         const onPointerDown = (event) => {
-            if (!researchMenuRef.current?.contains(event.target)) {
-                setResearchOpen(false);
+            if (!menuWrapRefs.current[openMenu]?.contains(event.target)) {
+                setOpenMenu(null);
             }
         };
 
         const onKeyDown = (event) => {
-            if (event.key === 'Escape') setResearchOpen(false);
+            if (event.key === 'Escape') setOpenMenu(null);
         };
 
         document.addEventListener('pointerdown', onPointerDown);
@@ -147,12 +143,12 @@ const Navbar = () => {
             document.removeEventListener('pointerdown', onPointerDown);
             document.removeEventListener('keydown', onKeyDown);
         };
-    }, [researchOpen]);
+    }, [openMenu]);
 
     const handleNavClick = (link) => {
         setIsOpen(false);
-        setResearchOpen(false);
-        setMobileResearchOpen(false);
+        setOpenMenu(null);
+        setMobileMenu(null);
         if (!link.scrollTo) {
             window.scrollTo(0, 0);
         }
@@ -187,14 +183,14 @@ const Navbar = () => {
     };
 
     const isChildActive = (to) => {
-        if (to === '/research') return location.pathname === '/research';
+        if (to === '/research' || to === '/developers') return location.pathname === to;
         return location.pathname === to || location.pathname.startsWith(`${to}/`);
     };
 
     return (
         <nav
             className={`sticky top-0 z-50 w-full backdrop-blur-sm border-b ${
-                isResearch
+                isCreamPage
                     ? 'bg-[var(--bg-cream-50)]/95 border-[var(--primary-100)]'
                     : 'bg-[var(--navbar-bg)]/95 border-[var(--primary-100)]'
             }`}
@@ -218,37 +214,47 @@ const Navbar = () => {
                     <div className="hidden lg:flex items-center gap-8 ml-10">
                         {navLinks.map((link) => {
                             if (link.children) {
+                                const menuActive = link.match && location.pathname.startsWith(link.match);
+                                const isThisOpen = openMenu === link.label;
                                 return (
                                     <div
                                         key={link.label}
-                                        ref={researchMenuRef}
+                                        ref={(el) => {
+                                            menuWrapRefs.current[link.label] = el;
+                                        }}
                                         className="relative"
-                                        onMouseEnter={() => setResearchOpen(true)}
-                                        onMouseLeave={() => setResearchOpen(false)}
+                                        onMouseEnter={() => setOpenMenu(link.label)}
+                                        onMouseLeave={() => setOpenMenu(null)}
                                     >
                                         <button
                                             type="button"
                                             className={`${linkClass} inline-flex items-center gap-1 ${
-                                                isResearch ? 'text-[var(--text-orange-500)] font-medium' : ''
+                                                menuActive ? 'text-[var(--text-orange-500)] font-medium' : ''
                                             }`}
-                                            aria-expanded={researchOpen}
+                                            aria-expanded={isThisOpen}
                                             aria-haspopup="true"
-                                            onClick={() => setResearchOpen((open) => !open)}
+                                            onClick={() => setOpenMenu((current) => (current === link.label ? null : link.label))}
                                         >
                                             {link.label}
                                             <ChevronDown
                                                 size={14}
                                                 className={`transition-transform duration-300 ${
-                                                    researchOpen ? 'rotate-180' : ''
+                                                    isThisOpen ? 'rotate-180' : ''
                                                 }`}
                                             />
                                         </button>
 
                                         <div
-                                            ref={dropdownRef}
+                                            ref={(el) => {
+                                                dropdownRefs.current[link.label] = el;
+                                            }}
                                             className="absolute left-0 top-full pt-3 invisible opacity-0"
                                         >
-                                            <div className="nav-research-dropdown w-72 rounded-2xl overflow-hidden">
+                                            <div
+                                                className={`nav-research-dropdown rounded-2xl overflow-hidden ${
+                                                    link.children.some((child) => child.icon) ? 'w-80' : 'w-72'
+                                                }`}
+                                            >
                                                 <div className="nav-research-dropdown-glow" aria-hidden="true" />
                                                 <div className="relative p-2">
                                                     {link.children.map((child) => {
@@ -260,8 +266,15 @@ const Navbar = () => {
                                                                 data-dropdown-item
                                                                 onClick={() => handleNavClick(child)}
                                                                 className={`nav-research-item group ${active ? 'is-active' : ''}`}
+                                                                style={child.accent ? { '--model-accent': child.accent } : undefined}
                                                             >
-                                                                <span className="nav-research-item-indicator" aria-hidden="true" />
+                                                                {child.icon ? (
+                                                                    <span className="nav-model-icon" aria-hidden="true">
+                                                                        <ModelIcon name={child.icon} size={16} />
+                                                                    </span>
+                                                                ) : (
+                                                                    <span className="nav-research-item-indicator" aria-hidden="true" />
+                                                                )}
                                                                 <span className="min-w-0 flex-1">
                                                                     <span className="nav-research-item-label">
                                                                         {child.label}
@@ -303,7 +316,7 @@ const Navbar = () => {
             {isOpen && (
                 <div
                     className={`lg:hidden border-t border-[var(--primary-100)] ${
-                        isResearch ? 'bg-[var(--bg-cream-50)]' : 'bg-[var(--navbar-bg)]'
+                        isCreamPage ? 'bg-[var(--bg-cream-50)]' : 'bg-[var(--navbar-bg)]'
                     }`}
                 >
                     <div className="max-w-6xl mx-auto px-6 py-4 flex flex-col gap-1">
@@ -319,28 +332,32 @@ const Navbar = () => {
                         </Link>
                         {navLinks.map((link) => {
                             if (link.children) {
+                                const menuActive = link.match && location.pathname.startsWith(link.match);
+                                const isThisOpen = mobileMenu === link.label;
                                 return (
                                     <div key={link.label} className="py-1">
                                         <button
                                             type="button"
                                             className={`w-full flex items-center justify-between text-base py-2.5 transition-colors ${
-                                                isResearch
+                                                menuActive
                                                     ? 'text-[var(--text-orange-500)] font-medium'
                                                     : 'text-[var(--color-10)]'
                                             }`}
-                                            onClick={() => setMobileResearchOpen((open) => !open)}
-                                            aria-expanded={mobileResearchOpen}
+                                            onClick={() => setMobileMenu((current) => (current === link.label ? null : link.label))}
+                                            aria-expanded={isThisOpen}
                                         >
                                             {link.label}
                                             <ChevronDown
                                                 size={16}
                                                 className={`transition-transform duration-300 ${
-                                                    mobileResearchOpen ? 'rotate-180' : ''
+                                                    isThisOpen ? 'rotate-180' : ''
                                                 }`}
                                             />
                                         </button>
                                         <div
-                                            ref={mobileResearchRef}
+                                            ref={(el) => {
+                                                mobileRefs.current[link.label] = el;
+                                            }}
                                             className="overflow-hidden"
                                             style={{ height: 0, opacity: 0 }}
                                         >
@@ -349,7 +366,7 @@ const Navbar = () => {
                                                     <Link
                                                         key={child.label}
                                                         to={child.to}
-                                                        data-mobile-research-item
+                                                        data-mobile-item
                                                         onClick={() => handleNavClick(child)}
                                                         className={`py-2 text-sm transition-colors ${
                                                             isChildActive(child.to)

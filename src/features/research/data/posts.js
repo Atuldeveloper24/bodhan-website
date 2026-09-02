@@ -302,23 +302,6 @@ export const posts = [
     },
 ];
 
-export const models = [
-    {
-        id: 'bodhan-scribe',
-        name: 'Bodhan Scribe',
-        tagline: 'Multilingual ASR for 25 Indian languages',
-        summary:
-            'A 1.2B-parameter speech recognition model trained on 1.35M hours of speech, with native-script, code-mixed, and romanized output modes.',
-        specs: [
-            { label: 'Languages', value: '25' },
-            { label: 'Parameters', value: '1.2B' },
-            { label: 'Training hours', value: '1.35M' },
-        ],
-        href: '/research/bodhan-asr',
-        demoHref: 'https://value-candidates-oakland-capitol.trycloudflare.com',
-    },
-];
-
 export function getPostBySlug(slug) {
     return posts.find((post) => post.slug === slug);
 }

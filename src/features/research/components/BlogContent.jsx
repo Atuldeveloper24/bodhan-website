@@ -195,7 +195,10 @@ const BlogContent = ({ sections }) => {
                                 <BenchmarkTable
                                     headers={section.table.headers}
                                     rows={section.table.rows}
-                                    caption="Public speech-recognition benchmarks used in this evaluation."
+                                    caption={section.tableProps?.caption ?? 'Public speech-recognition benchmarks used in this evaluation.'}
+                                    {...(section.tableProps?.eyebrow && { eyebrow: section.tableProps.eyebrow })}
+                                    {...(section.tableProps?.title && { title: section.tableProps.title })}
+                                    {...(section.tableProps?.description && { description: section.tableProps.description })}
                                 />
                             )
                         )}

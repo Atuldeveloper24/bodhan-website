@@ -9,6 +9,11 @@ import TenderApplyPage from '../features/tenders/components/TenderApplyPage'
 import PartnersPage from '../features/partners/components/PartnersPage'
 import ResearchPage from '../features/research/components/ResearchPage'
 import BlogPostPage from '../features/research/components/BlogPostPage'
+import DevelopersPage from '../features/developers/components/DevelopersPage'
+import IndicDocParserPage from '../features/developers/components/models/IndicDocParserPage'
+import IndicSpeakPage from '../features/developers/components/models/IndicSpeakPage'
+import IndicTranscribePage from '../features/developers/components/models/IndicTranscribePage'
+import IndicTranslatePage from '../features/developers/components/models/IndicTranslatePage'
 import ResearchProblemsLayout from '../features/research-problems/ResearchProblemsLayout'
 import {
   ResearchProblemsHomePage,
@@ -24,7 +29,11 @@ function App() {
       <Route path="/research" element={<ResearchPage />} />
       <Route path="/research/blog" element={<ResearchPage />} />
       <Route path="/research/publications" element={<ResearchPage />} />
-      <Route path="/research/models" element={<ResearchPage />} />
+      <Route path="/developers" element={<DevelopersPage />} />
+      <Route path="/developers/indic-doc-parser" element={<IndicDocParserPage />} />
+      <Route path="/developers/indic-speak" element={<IndicSpeakPage />} />
+      <Route path="/developers/indic-transcribe" element={<IndicTranscribePage />} />
+      <Route path="/developers/indic-translate" element={<IndicTranslatePage />} />
       <Route path="/research/problems" element={<ResearchProblemsLayout />}>
         <Route index element={<ResearchProblemsHomePage />} />
         <Route path="vertical/:verticalId" element={<ResearchProblemsVerticalPage />} />

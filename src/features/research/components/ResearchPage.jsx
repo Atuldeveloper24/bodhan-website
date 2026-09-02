@@ -2,10 +2,9 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { ArrowUpRight } from 'lucide-react';
 import Navbar from '../../home/components/Navbar';
 import Footer from '../../home/components/Footer';
-import { posts, models, researchAreas, getFeaturedPost, formatDate } from '../data/posts';
+import { posts, researchAreas, getFeaturedPost, formatDate } from '../data/posts';
 
 const FILTERS = ['All', 'Publication', 'Release', 'Milestone'];
 const INDIC_GLYPHS = ['अ', 'আ', 'ਅ', 'અ', 'ଅ', 'அ', 'అ', 'ಅ', 'മ'];
@@ -36,14 +35,6 @@ const VIEW_CONFIG = {
         emptyMessage: 'No publications yet.',
         forceFilter: 'Publication',
     },
-    models: {
-        title: 'Models',
-        subtitle: 'Open models built for Indian languages, classrooms, and production use.',
-        showAreas: false,
-        showFeatured: false,
-        listTitle: null,
-        emptyMessage: 'No models published yet.',
-    },
 };
 
 gsap.registerPlugin(ScrollTrigger);
@@ -51,7 +42,6 @@ gsap.registerPlugin(ScrollTrigger);
 const getViewFromPath = (pathname) => {
     if (pathname.endsWith('/blog')) return 'blog';
     if (pathname.endsWith('/publications')) return 'publications';
-    if (pathname.endsWith('/models')) return 'models';
     return 'overview';
 };
 
@@ -180,42 +170,6 @@ const ResearchPage = () => {
         return () => context.revert();
     }, [activeFilter, view]);
 
-    useLayoutEffect(() => {
-        const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-        if (reduceMotion || view !== 'models') return undefined;
-
-        const context = gsap.context(() => {
-            gsap.fromTo(
-                '[data-model-card]',
-                { y: 24, opacity: 0, scale: 0.98 },
-                {
-                    y: 0,
-                    opacity: 1,
-                    scale: 1,
-                    duration: 0.65,
-                    stagger: 0.1,
-                    ease: 'power3.out',
-                    clearProps: 'transform,opacity',
-                }
-            );
-            gsap.fromTo(
-                '[data-model-spec]',
-                { y: 10, opacity: 0 },
-                {
-                    y: 0,
-                    opacity: 1,
-                    duration: 0.4,
-                    stagger: 0.05,
-                    delay: 0.2,
-                    ease: 'power2.out',
-                    clearProps: 'transform,opacity',
-                }
-            );
-        }, pageRef);
-
-        return () => context.revert();
-    }, [view]);
-
     const featured = getFeaturedPost();
 
     const filteredPosts = useMemo(() => {
@@ -228,8 +182,6 @@ const ResearchPage = () => {
         if (activeFilter === 'All') return posts;
         return posts.filter((post) => post.category === activeFilter);
     }, [view, activeFilter]);
-
-    const showPostList = view !== 'models';
 
     return (
         <div ref={pageRef} className="min-h-screen research-page">
@@ -344,135 +296,64 @@ const ResearchPage = () => {
                     </section>
                 )}
 
-                {view === 'models' && (
-                    <section className="pb-12 md:pb-16" data-research-content>
-                        <div className="grid gap-5">
-                            {models.map((model) => (
-                                <article
-                                    key={model.id}
-                                    data-model-card
-                                    className="research-surface rounded-xl p-6 md:p-8 border border-[var(--primary-100)] transition-all duration-300 hover:border-[var(--text-orange-500)]/30 hover:shadow-lg hover:-translate-y-0.5"
+                <section className="py-12 md:pb-16" data-research-content>
+                    {config.listTitle && (
+                        <h2 className="text-lg font-semibold text-[var(--text-primary)] mb-8">
+                            {config.listTitle}
+                        </h2>
+                    )}
+
+                    {view === 'overview' && (
+                        <div className="flex flex-wrap gap-6 mb-10">
+                            {FILTERS.map((filter) => (
+                                <button
+                                    key={filter}
+                                    type="button"
+                                    onClick={() => setActiveFilter(filter)}
+                                    className={`text-sm transition-colors ${
+                                        activeFilter === filter
+                                            ? 'text-[var(--text-orange-500)] font-semibold'
+                                            : 'text-[var(--color-11)] hover:text-[var(--text-primary)]'
+                                    }`}
                                 >
-                                    <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-6">
-                                        <div className="min-w-0">
-                                            <p className="research-type-eyebrow text-[var(--text-orange-500)] mb-2">
-                                                Model
-                                            </p>
-                                            <h2 className="text-2xl md:text-3xl font-semibold text-[var(--text-primary)] tracking-tight mb-2">
-                                                {model.name}
-                                            </h2>
-                                            <p className="text-sm text-[var(--color-11)] mb-4">
-                                                {model.tagline}
-                                            </p>
-                                            <p className="text-[var(--color-10)] leading-relaxed font-serif text-[17px] max-w-2xl">
-                                                {model.summary}
-                                            </p>
-                                        </div>
-                                        <div className="flex flex-wrap gap-2.5 shrink-0">
-                                            <Link
-                                                to={model.href}
-                                                className="inline-flex items-center gap-1.5 text-sm font-medium px-4 py-2 rounded-full bg-[var(--text-primary)] text-white hover:bg-black transition-colors"
-                                            >
-                                                Read more
-                                                <ArrowUpRight size={14} />
-                                            </Link>
-                                            {model.demoHref && (
-                                                <a
-                                                    href={model.demoHref}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="inline-flex items-center gap-1.5 text-sm font-medium px-4 py-2 rounded-full border border-[var(--primary-100)] text-[var(--text-primary)] hover:border-[var(--text-orange-500)] hover:text-[var(--text-orange-500)] transition-colors"
-                                                >
-                                                    Demo
-                                                    <ArrowUpRight size={14} />
-                                                </a>
-                                            )}
-                                        </div>
-                                    </div>
-                                    <div className="grid grid-cols-3 gap-3 mt-6 pt-6 border-t border-[var(--primary-100)]">
-                                        {model.specs.map(({ label, value }) => (
-                                            <div key={label} data-model-spec>
-                                                <p className="research-type-eyebrow text-[var(--color-11)] mb-1">
-                                                    {label}
-                                                </p>
-                                                <p className="text-lg font-medium text-[var(--text-primary)]">
-                                                    {value}
-                                                </p>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </article>
+                                    {filter}
+                                </button>
                             ))}
                         </div>
+                    )}
 
-                        {models.length === 0 && (
-                            <p className="text-[var(--color-11)] py-12 text-center">
-                                {config.emptyMessage}
-                            </p>
-                        )}
-                    </section>
-                )}
+                    <div ref={postListRef} className="divide-y divide-[var(--primary-100)]">
+                        {filteredPosts.map((post) => (
+                            <Link
+                                key={post.slug}
+                                to={`/research/${post.slug}`}
+                                data-publication-row
+                                className="grid grid-cols-1 md:grid-cols-[180px_1fr] gap-4 md:gap-12 py-8 group transition-colors hover:bg-[var(--bg-cream-50)]/60 -mx-4 px-4 rounded-lg"
+                            >
+                                <div>
+                                    <p className="text-sm text-[var(--color-10)]">{post.category}</p>
+                                    <p className="text-sm text-[var(--color-11)] mt-1">
+                                        {formatDate(post.date)}
+                                    </p>
+                                </div>
+                                <div>
+                                    <h3 className="text-xl md:text-2xl font-semibold text-[var(--text-primary)] group-hover:text-[var(--text-orange-500)] transition-colors mb-2 leading-snug">
+                                        {post.title}
+                                    </h3>
+                                    <p className="text-[var(--color-10)] leading-relaxed font-serif text-[17px]">
+                                        {post.summary}
+                                    </p>
+                                </div>
+                            </Link>
+                        ))}
+                    </div>
 
-                {showPostList && (
-                    <section className="py-12 md:pb-16" data-research-content>
-                        {config.listTitle && (
-                            <h2 className="text-lg font-semibold text-[var(--text-primary)] mb-8">
-                                {config.listTitle}
-                            </h2>
-                        )}
-
-                        {view === 'overview' && (
-                            <div className="flex flex-wrap gap-6 mb-10">
-                                {FILTERS.map((filter) => (
-                                    <button
-                                        key={filter}
-                                        type="button"
-                                        onClick={() => setActiveFilter(filter)}
-                                        className={`text-sm transition-colors ${
-                                            activeFilter === filter
-                                                ? 'text-[var(--text-orange-500)] font-semibold'
-                                                : 'text-[var(--color-11)] hover:text-[var(--text-primary)]'
-                                        }`}
-                                    >
-                                        {filter}
-                                    </button>
-                                ))}
-                            </div>
-                        )}
-
-                        <div ref={postListRef} className="divide-y divide-[var(--primary-100)]">
-                            {filteredPosts.map((post) => (
-                                <Link
-                                    key={post.slug}
-                                    to={`/research/${post.slug}`}
-                                    data-publication-row
-                                    className="grid grid-cols-1 md:grid-cols-[180px_1fr] gap-4 md:gap-12 py-8 group transition-colors hover:bg-[var(--bg-cream-50)]/60 -mx-4 px-4 rounded-lg"
-                                >
-                                    <div>
-                                        <p className="text-sm text-[var(--color-10)]">{post.category}</p>
-                                        <p className="text-sm text-[var(--color-11)] mt-1">
-                                            {formatDate(post.date)}
-                                        </p>
-                                    </div>
-                                    <div>
-                                        <h3 className="text-xl md:text-2xl font-semibold text-[var(--text-primary)] group-hover:text-[var(--text-orange-500)] transition-colors mb-2 leading-snug">
-                                            {post.title}
-                                        </h3>
-                                        <p className="text-[var(--color-10)] leading-relaxed font-serif text-[17px]">
-                                            {post.summary}
-                                        </p>
-                                    </div>
-                                </Link>
-                            ))}
-                        </div>
-
-                        {filteredPosts.length === 0 && (
-                            <p className="text-[var(--color-11)] py-12 text-center">
-                                {config.emptyMessage}
-                            </p>
-                        )}
-                    </section>
-                )}
+                    {filteredPosts.length === 0 && (
+                        <p className="text-[var(--color-11)] py-12 text-center">
+                            {config.emptyMessage}
+                        </p>
+                    )}
+                </section>
             </main>
 
             <Footer />
