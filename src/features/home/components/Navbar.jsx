@@ -9,14 +9,13 @@ import ModelIcon from '../../developers/components/ModelIcon';
 import { models } from '../../developers/data/models';
 
 const researchDropdown = [
-    { label: 'Overview', to: '/research', description: 'Areas, featured work, and updates' },
-    { label: 'Blog', to: '/research/blog', description: 'Technical posts and releases' },
-    { label: 'Publications', to: '/research/publications', description: 'Papers and formal publications' },
     {
         label: 'Research Problems',
         to: '/research/problems',
         description: 'Open problems in AI for education',
     },
+    { label: 'Blog', to: '/research/blog', description: 'Technical posts and releases' },
+    { label: 'Publications', to: '/research/publications', description: 'Papers and formal publications' },
 ];
 
 const developersDropdown = [
