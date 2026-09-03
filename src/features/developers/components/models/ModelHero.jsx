@@ -1,17 +1,18 @@
 import { Link } from 'react-router-dom';
 import { motion as Motion, useReducedMotion } from 'motion/react';
-import { ArrowLeft, ArrowUpRight } from 'lucide-react';
+import { ArrowLeft, ArrowUpRight, BookOpen } from 'lucide-react';
 import AnimatedTitle from '../../../../components/AnimatedTitle';
 
 const EASE = [0.25, 0.46, 0.45, 0.94];
 
-// `display` gives the headline the larger, airier treatment for pages whose
-// title is a full sentence rather than just the model name.
-const ModelHero = ({ eyebrow, title, tagline, specs, accent, primaryCta, secondaryCta, note, display }) => {
+// The hero carries the model's name, one line on what it does, the links out,
+// and the numbers band — including price — that used to sit at the foot of
+// the page.
+const ModelHero = ({ eyebrow, title, tagline, stats, accent, primaryCta, secondaryCta, blogCta, note }) => {
     const reduceMotion = useReducedMotion();
 
-    // The hero is above the fold, so it plays on mount: each piece arrives just
-    // behind the title's word-by-word reveal.
+    // Above the fold, so it plays on mount: each piece arrives just behind the
+    // title's word-by-word reveal.
     const rise = (delay) =>
         reduceMotion
             ? {}
@@ -32,18 +33,13 @@ const ModelHero = ({ eyebrow, title, tagline, specs, accent, primaryCta, seconda
                 {eyebrow}
             </Motion.p>
 
-            <AnimatedTitle
-                as="h1"
-                text={title}
-                className={`model-title${display ? ' is-display' : ''}`}
-                delay={0.12}
-            />
+            <AnimatedTitle as="h1" text={title} className="model-title" delay={0.12} />
 
-            <Motion.p className="model-tagline" {...rise(0.42)}>
+            <Motion.p className="model-tagline" {...rise(0.34)}>
                 {tagline}
             </Motion.p>
 
-            <Motion.div className="model-cta-row" {...rise(0.52)}>
+            <Motion.div className="model-cta-row" {...rise(0.44)}>
                 {primaryCta && (
                     <a
                         href={primaryCta.href}
@@ -55,6 +51,12 @@ const ModelHero = ({ eyebrow, title, tagline, specs, accent, primaryCta, seconda
                         <ArrowUpRight size={14} aria-hidden="true" />
                     </a>
                 )}
+                {blogCta && (
+                    <Link to={blogCta.href} className="model-cta-secondary">
+                        <BookOpen size={14} aria-hidden="true" />
+                        {blogCta.label}
+                    </Link>
+                )}
                 {secondaryCta && (
                     <a href={secondaryCta.href} className="model-cta-secondary">
                         {secondaryCta.label}
@@ -63,20 +65,20 @@ const ModelHero = ({ eyebrow, title, tagline, specs, accent, primaryCta, seconda
             </Motion.div>
 
             {note && (
-                <Motion.p className="model-note" {...rise(0.58)}>
+                <Motion.p className="model-note" {...rise(0.5)}>
                     {note}
                 </Motion.p>
             )}
 
-            {specs && (
-                <div className="model-spec-strip">
-                    {specs.map((spec, i) => (
-                        <Motion.div key={spec.label} className="model-spec" {...rise(0.62 + i * 0.08)}>
-                            <p className="model-spec-value">{spec.value}</p>
-                            <p className="model-spec-label">{spec.label}</p>
-                        </Motion.div>
+            {stats && (
+                <Motion.div className="stat-band model-hero-band" {...rise(0.56)}>
+                    {stats.map((s) => (
+                        <div key={s.label} className={`stat-band-item${s.isPrice ? ' is-price' : ''}`}>
+                            <p className="stat-band-value">{s.value}</p>
+                            <p className="stat-band-label">{s.label}</p>
+                        </div>
                     ))}
-                </div>
+                </Motion.div>
             )}
         </header>
     );

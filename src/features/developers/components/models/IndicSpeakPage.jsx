@@ -4,6 +4,16 @@ import Navbar from '../../../home/components/Navbar';
 import Footer from '../../../home/components/Footer';
 import ModelHero from './ModelHero';
 import Reveal from '../../../../components/Reveal';
+import { getModelById } from '../../data/models';
+
+const model = getModelById('indic-speak');
+
+const STATS = [
+    { value: '22', label: 'Languages + English' },
+    { value: 'Multiple', label: 'Voices / language' },
+    { value: '~200 ms', label: 'Response time' },
+    { value: model.price.value, label: model.price.label, isPrice: true },
+];
 
 const WORDS = ['आज', 'हम', 'fractions', 'के', 'बारे', 'में', 'सीखेंगे'];
 const VOICES = ['Ananya', 'Rohan'];
@@ -100,15 +110,12 @@ const IndicSpeakPage = () => (
         <main className="model-page-main">
             <ModelHero
                 eyebrow="Developers · Model"
-                title="Indic-Speak"
+                title={model.name}
                 tagline="Text in, a classroom-ready voice out — 22 Indian languages, code-mixed sentences included."
                 accent="var(--brand-blue)"
-                specs={[
-                    { label: 'Languages', value: '22 + English' },
-                    { label: 'Voices / language', value: 'Multiple' },
-                    { label: 'Response time', value: '~200 ms' },
-                ]}
+                stats={STATS}
                 primaryCta={{ label: 'Hugging Face', href: '#' }}
+                blogCta={model.blog}
                 secondaryCta={{ label: 'Contact', href: '/contact' }}
                 note="Early checkpoint — shared for integration testing, not final voice quality."
             />

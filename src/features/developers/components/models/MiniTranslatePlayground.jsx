@@ -1,14 +1,19 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Loader2 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 
 // One rail of choices on the right, one source/output pair on the left.
 // Used twice on the translate page — once to pick a language, once to pick a
 // form — rather than one playground trying to cover every combination.
-const MiniTranslatePlayground = ({ railLabel, items, renderPane }) => {
+// `onSelect` lets the parent load whatever the current choice needs.
+const MiniTranslatePlayground = ({ railLabel, items, renderPane, onSelect }) => {
     const [activeId, setActiveId] = useState(items[0]?.id);
     const active = items.find((item) => item.id === activeId) ?? items[0];
     const pane = renderPane(active);
+
+    useEffect(() => {
+        onSelect?.(activeId);
+    }, [activeId, onSelect]);
 
     const body = (side) => {
         if (pane.loading) {
