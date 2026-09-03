@@ -3349,16 +3349,20 @@ body {
 }
 
 .model-hero {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  align-items: start;
-  gap: 1.5rem 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
   padding-bottom: 2.5rem;
   border-bottom: 1px solid var(--primary-100);
 }
 
+.model-hero .model-back-link {
+  align-self: flex-start;
+}
+
 .model-eyebrow {
-  margin: 0 0 0.6rem;
+  margin: 1.5rem 0 0.6rem;
   font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.08em;
@@ -3367,7 +3371,7 @@ body {
 }
 
 .model-title {
-  margin: 0 0 0.6rem;
+  margin: 0 0 0.7rem;
   font-family: var(--font-manrope);
   font-size: clamp(2rem, 4.5vw, 3rem);
   font-weight: 700;
@@ -3376,7 +3380,7 @@ body {
 }
 
 .model-tagline {
-  max-width: 40rem;
+  max-width: 36rem;
   margin: 0;
   font-size: 1.0625rem;
   line-height: 1.55;
@@ -3384,7 +3388,7 @@ body {
 }
 
 .model-note {
-  max-width: 40rem;
+  max-width: 36rem;
   margin: 1rem 0 0;
   font-size: 0.8125rem;
   font-style: italic;
@@ -3394,6 +3398,7 @@ body {
 .model-cta-row {
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
   gap: 0.65rem;
   margin-top: 1.5rem;
 }
@@ -3437,21 +3442,16 @@ body {
   font-size: 0.8125rem;
 }
 
-.model-hero-visual {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 7.5rem;
-  height: 7.5rem;
-  border-radius: 999px;
-  background: var(--bg-cream-100);
-}
-
 .model-spec-strip {
-  grid-column: 1 / -1;
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
   gap: 1.5rem 2.5rem;
+  margin-top: 2rem;
+}
+
+.model-spec {
+  text-align: center;
 }
 
 .model-spec-value {
@@ -3503,18 +3503,6 @@ body {
 @media (min-width: 768px) {
   .model-panel {
     padding: 2rem;
-  }
-}
-
-@media (max-width: 640px) {
-  .model-hero {
-    grid-template-columns: 1fr;
-  }
-
-  .model-hero-visual {
-    order: -1;
-    width: 5.5rem;
-    height: 5.5rem;
   }
 }
 
@@ -3851,105 +3839,202 @@ body {
   }
 }
 
-/* ── Developers: model index ── */
-.dev-header {
-  padding-bottom: 2rem;
-  border-bottom: 1px solid var(--primary-100);
-}
-
-.dev-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1rem;
-  padding-top: 2rem;
-}
-
-@media (max-width: 760px) {
-  .dev-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-.dev-card {
-  position: relative;
+/* ── Developers: the mark as a model index, one screen, no scroll ── */
+.dev-stage-page {
+  height: 100dvh;
+  overflow: hidden;
   display: flex;
-  align-items: flex-start;
-  gap: 0.9rem;
-  padding: 1.35rem;
-  border-radius: 18px;
-  border: 1px solid var(--primary-100);
-  background: rgba(255, 255, 255, 0.7);
-  transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+  flex-direction: column;
 }
 
-.dev-card:hover {
-  border-color: color-mix(in srgb, var(--model-accent) 45%, white);
-  transform: translateY(-2px);
-  box-shadow: 0 12px 28px rgba(46, 50, 56, 0.07);
-}
-
-.dev-card-icon {
-  display: inline-flex;
+.dev-stage {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
   align-items: center;
   justify-content: center;
-  width: 2.4rem;
-  height: 2.4rem;
-  flex: none;
-  border-radius: 12px;
-  background: color-mix(in srgb, var(--model-accent) 12%, white);
-  color: var(--model-accent);
+  /* room either side for the labels to sit outside the mark */
+  padding: 4rem clamp(9rem, 22vw, 17rem) 2.5rem;
 }
 
-.dev-card-body {
-  display: block;
-  min-width: 0;
-}
-
-.dev-card-name {
-  display: block;
-  font-size: 1.0625rem;
+.dev-stage-eyebrow {
+  position: absolute;
+  top: 5.75rem;
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0;
+  font-size: 0.72rem;
   font-weight: 700;
-  color: var(--text-primary);
-}
-
-.dev-card-codename {
-  display: block;
-  margin-top: 0.1rem;
-  font-size: 0.8125rem;
-  color: var(--model-accent);
-}
-
-.dev-card-summary {
-  display: block;
-  margin-top: 0.6rem;
-  font-size: 0.875rem;
-  line-height: 1.55;
-  color: var(--color-10);
-}
-
-.dev-card-specs {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.35rem 1rem;
-  margin-top: 0.85rem;
-  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
   color: var(--color-11);
 }
 
-.dev-card-specs b {
-  color: var(--text-primary);
+/* the mark */
+.dev-mark {
+  position: relative;
+  height: 100%;
+  max-height: min(30rem, 62vh);
+  aspect-ratio: 5172 / 5305;
+  margin: 0 auto;
+  overflow: visible;
+}
+
+/* clips the entrance sheen to the artwork itself, leaving pins (siblings,
+   positioned relative to .dev-mark) free to sit outside its bounds */
+.dev-mark-image-wrap {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.dev-mark-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  transition: opacity 0.35s ease;
+}
+
+.dev-mark.has-active .dev-mark-img {
+  opacity: 0.42;
+}
+
+/* a single light glint that sweeps across on arrival — sells the "unfold" */
+.dev-mark-sheen {
+  position: absolute;
+  top: -20%;
+  width: 42%;
+  height: 140%;
+  background: linear-gradient(
+    100deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.85) 50%,
+    transparent 100%
+  );
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+
+/* One labelled pin per model. The mark already draws its own four dots, so we
+   add none — each pin is a full-width row at its dot's height whose leader line
+   points at that dot and whose label sits in the gutter outside the artwork.
+   Full width gives the leader a definite basis for its percentage geometry. */
+.dev-pin {
+  --pin-accent: var(--text-orange-500);
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 0;
+  transition: opacity 0.25s ease;
+}
+
+.dev-pin-visual {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 0;
+}
+
+/* leader line, from just short of the mark's dot out to the label */
+.dev-pin-leader {
+  position: absolute;
+  top: 0;
+  height: 1px;
+  background: var(--color-14);
+  opacity: 0.5;
+  transition: background-color 0.2s ease, opacity 0.2s ease;
+}
+
+.dev-pin:hover .dev-pin-leader,
+.dev-pin.is-active .dev-pin-leader {
+  background: var(--pin-accent);
+  opacity: 1;
+}
+
+/* the label, parked in the gutter clear of the mark */
+.dev-pin-label {
+  position: absolute;
+  top: 0;
+  display: block;
+  white-space: nowrap;
+  transform: translateY(-50%);
+  transition: transform 0.22s ease;
+}
+
+.dev-pin-left .dev-pin-label {
+  text-align: right;
+}
+
+.dev-pin:hover .dev-pin-label {
+  transform: translateY(-50%) scale(1.03);
+}
+
+.dev-pin-left:hover .dev-pin-label {
+  transform-origin: right center;
+}
+
+.dev-pin-right:hover .dev-pin-label {
+  transform-origin: left center;
+}
+
+.dev-pin-name {
+  display: block;
+  font-family: var(--font-manrope);
+  font-size: clamp(0.9rem, 1.5vw, 1.0625rem);
   font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--text-primary);
+  transition: color 0.2s ease;
 }
 
-.dev-card-arrow {
-  flex: none;
-  color: var(--color-14);
-  transition: color 0.2s ease, transform 0.2s ease;
+.dev-pin:hover .dev-pin-name,
+.dev-pin.is-active .dev-pin-name {
+  color: var(--pin-accent);
 }
 
-.dev-card:hover .dev-card-arrow {
-  color: var(--model-accent);
-  transform: translate(2px, -2px);
+.dev-pin-codename {
+  display: block;
+  font-size: clamp(0.66rem, 1vw, 0.75rem);
+  color: var(--color-11);
+}
+
+.dev-pin.is-dimmed {
+  opacity: 0.4;
+}
+
+/* Stacked and scrollable on small screens — one screen is a desktop luxury */
+@media (max-width: 860px) {
+  .dev-stage-page {
+    height: auto;
+    overflow: visible;
+  }
+
+  .dev-stage {
+    padding: 4.5rem 1rem 3rem;
+  }
+
+  .dev-mark {
+    max-height: none;
+    width: 54%;
+  }
+
+  .dev-pin-name {
+    font-size: 0.82rem;
+  }
+
+  .dev-pin-codename {
+    font-size: 0.62rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dev-pin,
+  .dev-pin-label,
+  .dev-pin-leader {
+    transition: none !important;
+  }
 }
 
 /* ── Model page: examples (lens + slide) ── */
@@ -3959,18 +4044,24 @@ body {
   color: var(--color-11);
 }
 
-.lens-frame {
+/* Before/after slider: page scan on top, clipped; OCR output beneath.
+   Height-driven so the whole comparison fits on one screen — width follows
+   from the aspect ratio of the composite's half, set inline per example. */
+.compare-frame {
   position: relative;
   overflow: hidden;
-  margin-top: 1.25rem;
+  height: min(62vh, 30rem);
+  width: auto;
+  max-width: 100%;
+  margin: 1.25rem auto 0;
   border-radius: 14px;
   border: 1px solid var(--ed-border);
-  background: var(--ed-inner);
-  cursor: crosshair;
+  background: var(--white);
+  user-select: none;
 }
 
 /* Only there to detect a missing file — never shown */
-.lens-probe {
+.compare-probe {
   position: absolute;
   width: 1px;
   height: 1px;
@@ -3978,39 +4069,75 @@ body {
   pointer-events: none;
 }
 
-.lens-base {
+.compare-layer {
   position: absolute;
   inset: 0;
   background-repeat: no-repeat;
-  background-position: left top;
 }
 
-.lens-glass {
-  position: absolute;
-  pointer-events: none;
-  border-radius: 999px;
-  border: 3px solid var(--ed-orange);
-  background-repeat: no-repeat;
-  background-color: var(--white);
-  box-shadow:
-    0 0 0 1px rgba(255, 255, 255, 0.9) inset,
-    0 14px 34px rgba(46, 50, 56, 0.28);
+.compare-layer-top {
+  border-right: 2px solid white;
 }
 
-.lens-hint {
+.compare-label {
   position: absolute;
-  right: 0.7rem;
-  bottom: 0.7rem;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
+  top: 0.7rem;
+  z-index: 1;
   padding: 0.3rem 0.7rem;
   border-radius: 999px;
   background: rgba(44, 36, 28, 0.8);
   color: white;
-  font-size: 0.72rem;
-  font-weight: 600;
+  font-size: 0.68rem;
+  font-weight: 650;
   pointer-events: none;
+}
+
+.compare-label-left {
+  left: 0.7rem;
+}
+
+.compare-label-right {
+  right: 0.7rem;
+  background: color-mix(in srgb, var(--ed-orange) 82%, black);
+}
+
+.compare-handle {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 2;
+  width: 2px;
+  margin-left: -1px;
+  background: white;
+  box-shadow: 0 0 0 1px rgba(44, 36, 28, 0.12);
+  cursor: ew-resize;
+  touch-action: none;
+}
+
+.compare-handle-grip {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  display: grid;
+  place-items: center;
+  width: 2.2rem;
+  height: 2.2rem;
+  border-radius: 999px;
+  transform: translate(-50%, -50%);
+  background: white;
+  color: var(--ed-orange);
+  box-shadow: 0 6px 18px rgba(46, 50, 56, 0.22);
+  transition: transform 0.15s ease;
+}
+
+.compare-handle:hover .compare-handle-grip,
+.compare-handle:focus-visible .compare-handle-grip {
+  transform: translate(-50%, -50%) scale(1.1);
+}
+
+.compare-handle:focus-visible {
+  outline: 2px solid var(--ed-orange);
+  outline-offset: 2px;
 }
 
 .example-footer {
@@ -4022,38 +4149,26 @@ body {
   margin-top: 0.85rem;
 }
 
-/* Magnifier is a mouse affordance — hide it on touch/coarse pointers */
-@media (pointer: coarse) {
-  .lens-glass,
-  .lens-hint {
-    display: none;
-  }
-
-  .lens-frame {
-    cursor: default;
-  }
-}
-
-.lens-missing {
+.compare-missing {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 0.6rem;
-  min-height: 18rem;
+  width: 100%;
+  height: 18rem;
   padding: 1.5rem;
   text-align: center;
   color: var(--ed-text-2);
-  cursor: default;
 }
 
-.lens-missing p {
+.compare-missing p {
   margin: 0;
   font-size: 0.8125rem;
   line-height: 1.6;
 }
 
-.lens-missing code {
+.compare-missing code {
   display: block;
   margin-top: 0.35rem;
   font-family: var(--font-mono, monospace);
@@ -4071,16 +4186,6 @@ body {
 
 .example-stats b {
   color: var(--ed-text);
-}
-
-.example-output {
-  max-height: 32rem;
-  margin-top: 0.85rem;
-  overflow-y: auto;
-  padding: 1rem 1.1rem;
-  border-radius: 14px;
-  background: var(--ed-inner);
-  border: 1px solid var(--ed-border);
 }
 
 .example-ocr-block {
@@ -4111,6 +4216,163 @@ body {
 
 @media (prefers-reduced-motion: reduce) {
   .example-slide {
+    animation: none !important;
+  }
+}
+
+/* ── Culture backdrop (per-language motifs) ── */
+.model-panel.has-culture {
+  position: relative;
+  overflow: hidden;
+}
+
+.culture-content {
+  position: relative;
+  z-index: 1;
+}
+
+.culture-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  color: var(--culture-accent);
+  animation: culture-in 0.65s ease both;
+}
+
+@keyframes culture-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.culture-tint {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 70% 60% at 85% 0%, var(--culture-from) 0%, transparent 70%),
+    radial-gradient(ellipse 60% 50% at 0% 100%, var(--culture-to) 0%, transparent 65%);
+}
+
+/* Illustrated banner: full strength, its own space, text never on top of it */
+.culture-banner {
+  position: relative;
+  margin: 1.1rem 0 1.25rem;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid var(--ed-border);
+  background: var(--ed-inner);
+  animation: culture-in 0.6s ease both;
+}
+
+.culture-banner img {
+  display: block;
+  width: 100%;
+  height: clamp(9rem, 20vw, 13rem);
+  object-fit: cover;
+  object-position: center 42%;
+}
+
+/* Warm wash ties photography to the site's palette and keeps the label legible */
+.culture-banner::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    0deg,
+    rgba(44, 36, 28, 0.28) 0%,
+    rgba(44, 36, 28, 0.06) 34%,
+    rgba(255, 249, 240, 0.06) 100%
+  );
+}
+
+.culture-banner-credit {
+  position: absolute;
+  right: 0.85rem;
+  bottom: 0.85rem;
+  z-index: 1;
+  max-width: 60%;
+  font-size: 0.62rem;
+  line-height: 1.4;
+  text-align: right;
+  color: rgba(255, 255, 255, 0.92);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
+}
+
+.culture-banner-label {
+  position: absolute;
+  z-index: 1;
+  left: 0.85rem;
+  bottom: 0.85rem;
+  padding: 0.3rem 0.75rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(4px);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--culture-accent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .culture-banner {
+    animation: none !important;
+  }
+}
+
+.culture-pattern {
+  position: absolute;
+  inset: 0;
+  opacity: 0.06;
+}
+
+.culture-glyphs {
+  position: absolute;
+  inset: 0;
+}
+
+.culture-glyph {
+  position: absolute;
+  font-size: clamp(2.5rem, 6vw, 4.5rem);
+  font-weight: 600;
+  line-height: 1;
+  color: var(--culture-accent);
+  opacity: 0.09;
+  animation: culture-float 7s ease-in-out infinite;
+}
+
+.culture-glyph-1 { top: 6%; right: 6%; animation-delay: 0s; }
+.culture-glyph-2 { bottom: 10%; right: 16%; animation-delay: 1.4s; font-size: clamp(2rem, 4vw, 3rem); }
+.culture-glyph-3 { top: 42%; right: 30%; animation-delay: 2.8s; font-size: clamp(1.6rem, 3vw, 2.4rem); }
+.culture-glyph-4 { bottom: 30%; left: 3%; animation-delay: 4.2s; font-size: clamp(1.6rem, 3vw, 2.4rem); }
+
+@keyframes culture-float {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-12px) rotate(3deg); }
+}
+
+.culture-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+}
+
+.culture-region {
+  margin: 0;
+  padding: 0.25rem 0.7rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--culture-accent) 12%, white);
+  font-size: 0.72rem;
+  font-weight: 650;
+  letter-spacing: 0.02em;
+  color: var(--culture-accent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .culture-backdrop,
+  .culture-glyph {
     animation: none !important;
   }
 }

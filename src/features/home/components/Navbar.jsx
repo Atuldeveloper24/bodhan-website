@@ -201,13 +201,13 @@ const Navbar = () => {
                         onClick={() => window.scrollTo(0, 0)}
                         className="flex items-center gap-2.5 shrink-0"
                     >
+                        <img src={Icon} alt="Bodhan" className="h-10 md:h-11 w-auto object-contain" />
+                        <div className="w-px h-7 bg-[var(--primary-100)]" />
                         <img
                             src={MoELogo}
                             alt="Ministry of Education"
                             className="h-9 md:h-10 w-auto object-contain"
                         />
-                        <div className="w-px h-7 bg-[var(--primary-100)]" />
-                        <img src={Icon} alt="Bodhan" className="h-10 md:h-11 w-auto object-contain" />
                     </Link>
 
                     <div className="hidden lg:flex items-center gap-8 ml-10">

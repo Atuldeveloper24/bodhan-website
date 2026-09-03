@@ -1,38 +1,62 @@
-import { useRef, useState } from 'react';
-import { ImageOff, ScanSearch } from 'lucide-react';
-import ReactMarkdown from 'react-markdown';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { ImageOff, MoveHorizontal } from 'lucide-react';
 import { DOC_EXAMPLES } from '../../data/docParserExamples';
 
-const LENS_SIZE = 260;
-const ZOOM = 2.6;
+const DEFAULT_POS = 50;
 
-// The image is a composite: page scan on the left, OCR output on the right.
-// The frame shows only the left portion; the lens samples the right portion at
-// the same relative position, so hovering a block reveals how it was parsed.
-// Remounted via `key={src}`, so state resets with the image — no effect needed.
-const XRayLens = ({ example }) => {
+// Each example is one composite image: page scan on the left half, the model's
+// rendered OCR output on the right half. Both halves share the same dimensions,
+// so each is cropped to fill the same frame — the scan on top, clipped by the
+// handle, revealing the rendered output beneath. The frame is sized off its
+// height so the whole comparison fits on screen without scrolling.
+const CompareSlider = ({ example }) => {
     const frameRef = useRef(null);
-    const [lens, setLens] = useState(null);
+    const [pos, setPos] = useState(DEFAULT_POS);
+    const [dragging, setDragging] = useState(false);
     const [failed, setFailed] = useState(false);
 
     const { image: src, split, width, height } = example;
+    const halfAspect = (width * split) / height;
 
-    const onMove = (event) => {
+    // Scale the composite so the chosen half exactly fills the frame.
+    const leftSize = `${100 / split}% 100%`;
+    const rightSize = `${100 / (1 - split)}% 100%`;
+
+    const setFromClientX = useCallback((clientX) => {
         const frame = frameRef.current;
         if (!frame) return;
         const rect = frame.getBoundingClientRect();
-        const x = event.clientX - rect.left;
-        const y = event.clientY - rect.top;
-        if (x < 0 || y < 0 || x > rect.width || y > rect.height) {
-            setLens(null);
-            return;
-        }
-        setLens({ x, y, frameWidth: rect.width, frameHeight: rect.height });
+        const ratio = ((clientX - rect.left) / rect.width) * 100;
+        setPos(Math.min(100, Math.max(0, ratio)));
+    }, []);
+
+    useEffect(() => {
+        if (!dragging) return undefined;
+
+        const onMove = (event) => setFromClientX(event.clientX);
+        const onUp = () => setDragging(false);
+
+        window.addEventListener('pointermove', onMove);
+        window.addEventListener('pointerup', onUp);
+        return () => {
+            window.removeEventListener('pointermove', onMove);
+            window.removeEventListener('pointerup', onUp);
+        };
+    }, [dragging, setFromClientX]);
+
+    const onKeyDown = (event) => {
+        const step = event.shiftKey ? 10 : 3;
+        if (event.key === 'ArrowLeft') setPos((p) => Math.max(0, p - step));
+        else if (event.key === 'ArrowRight') setPos((p) => Math.min(100, p + step));
+        else if (event.key === 'Home') setPos(0);
+        else if (event.key === 'End') setPos(100);
+        else return;
+        event.preventDefault();
     };
 
     if (failed) {
         return (
-            <div className="lens-frame lens-missing">
+            <div className="compare-frame compare-missing">
                 <ImageOff size={22} aria-hidden="true" />
                 <p>
                     Add the composite image at
@@ -42,89 +66,61 @@ const XRayLens = ({ example }) => {
         );
     }
 
-    // The frame is the left portion only, so the whole composite spans 1/split frames.
-    const fullWidthPct = 100 / split;
-    const leftAspect = (width * split) / height;
-
-    let glassStyle = null;
-    if (lens) {
-        const zoomedWidth = (lens.frameWidth / split) * ZOOM;
-        const zoomedHeight = zoomedWidth * (height / width);
-
-        // Same relative position, but inside the right-hand portion of the composite.
-        const nx = split + (lens.x / lens.frameWidth) * (1 - split);
-        const ny = lens.y / lens.frameHeight;
-
-        glassStyle = {
-            left: `${lens.x - LENS_SIZE / 2}px`,
-            top: `${lens.y - LENS_SIZE / 2}px`,
-            width: `${LENS_SIZE}px`,
-            height: `${LENS_SIZE}px`,
-            backgroundImage: `url(${src})`,
-            backgroundSize: `${zoomedWidth}px ${zoomedHeight}px`,
-            backgroundPosition: `${LENS_SIZE / 2 - nx * zoomedWidth}px ${LENS_SIZE / 2 - ny * zoomedHeight}px`,
-        };
-    }
-
     return (
-        <div
-            className="lens-frame"
-            ref={frameRef}
-            style={{ aspectRatio: leftAspect }}
-            onMouseMove={onMove}
-            onMouseLeave={() => setLens(null)}
-        >
-            {/* Hidden probe: reports a missing/broken file without showing the composite */}
-            <img src={src} alt="" className="lens-probe" onError={() => setFailed(true)} />
+        <div className="compare-frame" ref={frameRef} style={{ aspectRatio: halfAspect }}>
+            {/* Hidden probe: reports a missing/broken file without breaking the layout */}
+            <img src={src} alt="" className="compare-probe" onError={() => setFailed(true)} />
 
-            <span
-                className="lens-base"
-                style={{ backgroundImage: `url(${src})`, backgroundSize: `${fullWidthPct}% 100%` }}
+            <div
+                className="compare-layer"
+                style={{ backgroundImage: `url(${src})`, backgroundSize: rightSize, backgroundPosition: 'right top' }}
                 role="img"
-                aria-label={`${example.label} page with detected layout blocks in reading order`}
+                aria-label={`${example.label} example — the model's OCR output`}
             />
 
-            {glassStyle && <span className="lens-glass" style={glassStyle} aria-hidden="true" />}
+            <div
+                className="compare-layer compare-layer-top"
+                style={{
+                    clipPath: `inset(0 ${100 - pos}% 0 0)`,
+                    backgroundImage: `url(${src})`,
+                    backgroundSize: leftSize,
+                    backgroundPosition: 'left top',
+                }}
+                role="img"
+                aria-label={`${example.label} page scan with detected layout blocks in reading order`}
+            />
 
-            {!lens && (
-                <span className="lens-hint" aria-hidden="true">
-                    <ScanSearch size={13} />
-                    Hover the page to reveal the parsed output
+            <span className="compare-label compare-label-left">Page scan</span>
+            <span className="compare-label compare-label-right">OCR output</span>
+
+            <div
+                className="compare-handle"
+                style={{ left: `${pos}%` }}
+                role="slider"
+                tabIndex={0}
+                aria-label="Reveal more page scan or more OCR output"
+                aria-valuenow={Math.round(pos)}
+                aria-valuemin={0}
+                aria-valuemax={100}
+                aria-orientation="horizontal"
+                onPointerDown={(event) => {
+                    event.preventDefault();
+                    setDragging(true);
+                }}
+                onKeyDown={onKeyDown}
+            >
+                <span className="compare-handle-grip">
+                    <MoveHorizontal size={13} aria-hidden="true" />
                 </span>
-            )}
+            </div>
         </div>
     );
 };
 
-const OcrOutput = ({ blocks }) => (
-    <div className="dp-markdown example-ocr">
-        {blocks.map((block, index) =>
-            block.type === 'latex' ? (
-                <pre key={index} className="dp-markdown-latex">
-                    {block.value}
-                </pre>
-            ) : (
-                <div key={index} className="example-ocr-block">
-                    <ReactMarkdown>{block.value}</ReactMarkdown>
-                </div>
-            )
-        )}
-    </div>
-);
-
 const DocParserExamples = () => {
     const [activeId, setActiveId] = useState(DOC_EXAMPLES[0].id);
-    const [direction, setDirection] = useState(1);
-    const [showText, setShowText] = useState(false);
 
-    const activeIndex = DOC_EXAMPLES.findIndex((e) => e.id === activeId);
-    const example = DOC_EXAMPLES[activeIndex] ?? DOC_EXAMPLES[0];
-
-    const select = (id) => {
-        const nextIndex = DOC_EXAMPLES.findIndex((e) => e.id === id);
-        setDirection(nextIndex > activeIndex ? 1 : -1);
-        setActiveId(id);
-    };
+    const example = DOC_EXAMPLES.find((e) => e.id === activeId) ?? DOC_EXAMPLES[0];
 
     return (
         <div className="model-panel">
@@ -136,38 +132,14 @@ const DocParserExamples = () => {
                         role="tab"
                         aria-selected={activeId === e.id}
                         className={activeId === e.id ? 'is-active' : undefined}
-                        onClick={() => select(e.id)}
+                        onClick={() => setActiveId(e.id)}
                     >
                         {e.label}
                     </button>
                 ))}
-                <span className="dp-sample-meta">
-                    {example.tag} <span aria-hidden="true">·</span> {example.note}
-                </span>
             </div>
 
-            <div key={example.id} className={`example-slide ${direction > 0 ? 'from-right' : 'from-left'}`}>
-                <XRayLens key={example.image} example={example} />
-
-                <div className="example-footer">
-                    <div className="example-stats">
-                        {example.stats.map((stat) => (
-                            <span key={stat.label}>
-                                <b>{stat.value}</b> {stat.label}
-                            </span>
-                        ))}
-                    </div>
-                    <button type="button" className="dp-text-btn" onClick={() => setShowText((open) => !open)}>
-                        {showText ? 'Hide' : 'Show'} output as text
-                    </button>
-                </div>
-
-                {showText && (
-                    <div className="example-output">
-                        <OcrOutput blocks={example.ocr} />
-                    </div>
-                )}
-            </div>
+            <CompareSlider key={example.image} example={example} />
         </div>
     );
 };

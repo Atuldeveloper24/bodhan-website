@@ -74,7 +74,6 @@ const TranscribeExamples = () => {
                         {e.label}
                     </button>
                 ))}
-                <span className="dp-sample-meta">{example.tag}</span>
             </div>
 
             <div className="audio-player">

@@ -197,7 +197,6 @@ const IndicTranslatePage = () => (
                 title="Indic-Translate"
                 tagline="Whole documents in, whole documents out — 44 directions across English and 22 Indian languages."
                 accent="var(--model-violet)"
-                mascotMood="read"
                 specs={[
                     { label: 'Directions', value: '44' },
                     { label: 'Parameters', value: '7.94B' },

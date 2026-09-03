@@ -3,7 +3,6 @@ import { Play, Pause, RotateCcw } from 'lucide-react';
 import Navbar from '../../../home/components/Navbar';
 import Footer from '../../../home/components/Footer';
 import ModelHero from './ModelHero';
-import Mascot from './Mascot';
 
 const WORDS = ['आज', 'हम', 'fractions', 'के', 'बारे', 'में', 'सीखेंगे'];
 const VOICES = ['Ananya', 'Rohan'];
@@ -50,7 +49,6 @@ const SpeakDemo = () => {
     return (
         <div className="model-panel speak-panel">
             <div className="speak-top">
-                <Mascot mood="speak" accent="var(--brand-blue)" size={72} active={playing} />
                 <div className="speak-voice-tabs" role="tablist" aria-label="Voice">
                     {VOICES.map((v) => (
                         <button
@@ -104,7 +102,6 @@ const IndicSpeakPage = () => (
                 title="Indic-Speak"
                 tagline="Text in, a classroom-ready voice out — 22 Indian languages, code-mixed sentences included."
                 accent="var(--brand-blue)"
-                mascotMood="speak"
                 specs={[
                     { label: 'Languages', value: '22 + English' },
                     { label: 'Voices / language', value: 'Multiple' },
