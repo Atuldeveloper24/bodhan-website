@@ -3,6 +3,7 @@ import { Play, Pause, RotateCcw } from 'lucide-react';
 import Navbar from '../../../home/components/Navbar';
 import Footer from '../../../home/components/Footer';
 import ModelHero from './ModelHero';
+import Reveal from '../../../../components/Reveal';
 
 const WORDS = ['आज', 'हम', 'fractions', 'के', 'बारे', 'में', 'सीखेंगे'];
 const VOICES = ['Ananya', 'Rohan'];
@@ -112,10 +113,10 @@ const IndicSpeakPage = () => (
                 note="Early checkpoint — shared for integration testing, not final voice quality."
             />
 
-            <section className="model-section">
+            <Reveal as="section" className="model-section">
                 <p className="model-section-label">Try it</p>
                 <SpeakDemo />
-            </section>
+            </Reveal>
         </main>
         <Footer />
     </div>

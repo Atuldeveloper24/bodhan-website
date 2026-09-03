@@ -1,7 +1,6 @@
 export const models = [
     {
         id: 'indic-transcribe',
-        dot: { x: 42.3, y: 48.3, filled: false, part: 'wing', side: 'left' },
         name: 'Indic-Transcribe',
         codename: 'Speech to Text',
         icon: 'mic',
@@ -18,7 +17,6 @@ export const models = [
     },
     {
         id: 'indic-speak',
-        dot: { x: 53.3, y: 18.8, filled: true, part: 'head', side: 'left' },
         name: 'Indic-Speak',
         codename: 'Text to Speech',
         icon: 'speaker',
@@ -34,9 +32,8 @@ export const models = [
         href: '/developers/indic-speak',
     },
     {
-        id: 'indic-doc-parser',
-        dot: { x: 46.9, y: 84.5, filled: false, part: 'foot', side: 'right' },
-        name: 'IndicDocParser',
+        id: 'indic-ocr',
+        name: 'Indic-OCR',
         codename: 'Document Digitisation',
         icon: 'document',
         accent: 'var(--text-orange-500)',
@@ -48,11 +45,10 @@ export const models = [
             { label: 'Layout labels', value: '37' },
             { label: 'Parameters', value: '33M + 0.8B' },
         ],
-        href: '/developers/indic-doc-parser',
+        href: '/developers/indic-ocr',
     },
     {
         id: 'indic-translate',
-        dot: { x: 75.0, y: 73.1, filled: false, part: 'body', side: 'right' },
         name: 'Indic-Translate',
         codename: 'Translation',
         icon: 'languages',
