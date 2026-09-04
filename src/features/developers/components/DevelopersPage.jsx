@@ -8,8 +8,7 @@ import ModelGlyph from './ModelGlyph';
 import AccentAurora from './AccentAurora';
 import DevReveal from './DevReveal';
 import DevHeadline from './DevHeadline';
-import { LICENSE, models } from '../data/models';
-import { CONSOLE_URL } from '../../../config/links';
+import { models } from '../data/models';
 import '../developers.css';
 
 // Totals for the header strip — read off the model data so they cannot drift
@@ -143,30 +142,6 @@ const DevelopersPage = () => {
                     {models.map((model) => (
                         <ModelCard key={model.id} model={model} />
                     ))}
-                </DevReveal>
-
-                <DevReveal as="section" className="dx-closing">
-                    <div className="dx-closing-copy">
-                        <h2>Open weights, one API</h2>
-                        <p>
-                            Every model here is released under the <b>{LICENSE}</b> — download the
-                            weights and run them yourself, or reach all four through one hosted API.
-                        </p>
-                    </div>
-                    <div className="dx-closing-actions">
-                        <a
-                            href={CONSOLE_URL}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="model-cta-primary model-cta-dark"
-                        >
-                            Go to Dashboard
-                            <ArrowUpRight size={14} aria-hidden="true" />
-                        </a>
-                        <Link to="/contact" className="model-cta-secondary">
-                            Talk to us
-                        </Link>
-                    </div>
                 </DevReveal>
             </main>
 

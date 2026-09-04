@@ -77,6 +77,9 @@ const WaveGlyph = () => (
 
 const EQ_BARS = [0.42, 0.72, 1, 0.6, 0.86, 0.5];
 
+const ORB_X = 192;
+const ORB_Y = H / 2;
+
 // The text going in, code-mixed — the case the model is built for — read out
 // by the voice in the middle. The orb carries a letter so the circle reads as
 // "this is being spoken" rather than as an unexplained dot.
@@ -85,6 +88,26 @@ const TTS_LINES = [
     { y: 62, words: ['Bodhan', 'हूँ'] },
 ];
 
+/**
+ * A wavefront leaving the orb.
+ *
+ * Arcs rather than whole circles: sound in this card travels the one direction
+ * the card is read — out of the sentence on the left, through the voice, into
+ * the waveform on the right — and a full ring expanding out of the orb runs
+ * backwards over the text it is supposed to be reading.
+ */
+const FRONT_R = 24;
+const FRONT_SPREAD = 54; // degrees either side of straight ahead
+
+const frontPath = (r, deg) => {
+    const a = (deg * Math.PI) / 180;
+    const x = (ORB_X + r * Math.cos(a)).toFixed(2);
+    const dy = (r * Math.sin(a)).toFixed(2);
+    // top → bottom the long way round the front of the orb, so the arc bulges
+    // towards the waveform
+    return `M ${x} ${ORB_Y - dy} A ${r} ${r} 0 0 1 ${x} ${Number(ORB_Y) + Number(dy)}`;
+};
+
 const VoiceGlyph = () => (
     <>
         <g className="mg-in">
@@ -92,17 +115,20 @@ const VoiceGlyph = () => (
             <GlyphLine className="mg-glyph-line mg-line-native" x="16" y={TTS_LINES[1].y} words={TTS_LINES[1].words} />
         </g>
 
-        {/* the speaker: rings leaving the orb, one per phrase */}
+        {/* the speaker: a breath around the orb, then wavefronts heading out */}
         <g className="mg-orb-group">
+            <circle className="mg-halo" cx={ORB_X} cy={ORB_Y} r="21" strokeWidth="1.2" />
+
             {[0, 1, 2].map((i) => (
-                <circle key={i} className="mg-ring" cx="192" cy={H / 2} r="20" strokeWidth="1.5" />
+                <path key={i} className="mg-front" d={frontPath(FRONT_R, FRONT_SPREAD)} strokeWidth="1.5" />
             ))}
+
             {/* the disc and the letter on it scale as one group: GSAP resolves
                 an SVG transform origin against a <g> reliably, where a <text>
                 with its own transform-box drifts out of the disc */}
             <g className="mg-orb-core">
-                <circle className="mg-orb" cx="192" cy={H / 2} r="17" />
-                <text className="mg-orb-letter" x="192" y={H / 2} textAnchor="middle" dominantBaseline="central">
+                <circle className="mg-orb" cx={ORB_X} cy={ORB_Y} r="17" />
+                <text className="mg-orb-letter" x={ORB_X} y={ORB_Y} textAnchor="middle" dominantBaseline="central">
                     अ
                 </text>
             </g>
@@ -243,32 +269,59 @@ const buildWave = (root) => {
 const buildVoice = (root) => {
     const tl = gsap.timeline({ repeat: -1, defaults: { ease: 'sine.inOut' } });
     const words = root.querySelectorAll('.mg-word');
-    const rings = root.querySelectorAll('.mg-ring');
+    const halo = root.querySelector('.mg-halo');
+    const fronts = root.querySelectorAll('.mg-front');
     const orb = root.querySelector('.mg-orb-core');
     const bars = root.querySelectorAll('.mg-eq-bar');
 
-    // the sentence is read word by word, then the voice takes over
+    // Everything the orb throws off is scaled about the orb's own centre in
+    // user units. `svgOrigin` is the reliable way to say that for a <path>
+    // whose bounding box is nowhere near the point it turns around.
+    const fromOrb = { svgOrigin: `${ORB_X} ${ORB_Y}` };
+
+    // 1. the sentence is read, a word at a time
     tl.fromTo(words, { opacity: 0.18 }, { opacity: 1, duration: 0.26, stagger: 0.14, ease: 'power2.out' }, 0)
-        .fromTo(orb, { scale: 0.75, transformOrigin: '50% 50%' }, { scale: 1.06, duration: 0.4 }, 0.55)
-        .to(orb, { scale: 0.96, duration: 0.6 }, 0.95)
+
+        // 2. the voice draws breath on the last word, then settles — the small
+        //    overshoot is what makes the orb read as speaking rather than
+        //    throbbing on a timer
+        .fromTo(orb, { scale: 0.84, transformOrigin: '50% 50%' }, { scale: 1.1, duration: 0.32, ease: 'back.out(2.4)' }, 0.48)
+        .to(orb, { scale: 1, duration: 0.7, ease: 'elastic.out(1, 0.62)' }, 0.8)
+        .fromTo(halo, { ...fromOrb, scale: 0.86, opacity: 0 }, { scale: 1.22, opacity: 0.45, duration: 0.32 }, 0.48)
+        .to(halo, { scale: 0.95, opacity: 0, duration: 0.7, ease: 'power2.out' }, 0.8)
+
+        // 3. three wavefronts leave the orb towards the waveform. Forward only:
+        //    the arcs never travel back across the sentence on the left.
         .fromTo(
-            rings,
-            { scale: 0.5, opacity: 0.65, transformOrigin: '50% 50%' },
-            { scale: 2.1, opacity: 0, duration: 1.5, ease: 'power1.out', stagger: 0.42 },
-            0.6,
+            fronts,
+            { ...fromOrb, scale: 0.6, opacity: 0 },
+            { scale: 1.75, duration: 1.35, ease: 'power2.out', stagger: 0.26 },
+            0.62,
         )
+        .to(fronts, { opacity: 0.55, duration: 0.2, ease: 'none', stagger: 0.26 }, 0.62)
+        .to(fronts, { opacity: 0, duration: 0.95, ease: 'power1.in', stagger: 0.26 }, 0.86)
+
+        // 4. the waveform picks up just as the first front reaches it, and the
+        //    bars carry on for as long as the voice does
         .fromTo(
             bars,
             { scaleY: 0.16 },
             {
                 scaleY: (i, el) => 0.5 + Number(el.style.getPropertyValue('--h')) * 0.95,
-                duration: 0.34,
-                stagger: { each: 0.07, yoyo: true, repeat: 3 },
+                duration: 0.32,
+                ease: 'power2.out',
+                stagger: { each: 0.065, yoyo: true, repeat: 3 },
             },
-            0.7,
+            1,
         )
-        .to(bars, { scaleY: 0.16, duration: 0.4, stagger: 0.05 }, 2.3)
-        .set({}, {}, 3);
+        // the yoyo lands the last bar back down at 2.61; settling before that
+        // would put two tweens on the same scaleY at once
+        .to(bars, { scaleY: 0.16, duration: 0.42, stagger: 0.05 }, 2.61)
+
+        // 5. the sentence dims back to where the loop starts, so the repeat is
+        //    a breath rather than a cut
+        .to(words, { opacity: 0.18, duration: 0.4, stagger: 0.05 }, 2.5)
+        .set({}, {}, 3.3);
 
     return tl;
 };

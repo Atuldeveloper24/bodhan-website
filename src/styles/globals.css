@@ -3848,10 +3848,6 @@ body {
   color: var(--model-emerald);
 }
 
-.transcribe-mode-tabs {
-  margin-bottom: 1rem;
-}
-
 .transcribe-caption {
   margin: 0;
   font-size: 1.25rem;

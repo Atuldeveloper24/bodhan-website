@@ -142,11 +142,21 @@
   fill: var(--mg-grad);
 }
 
-.mg-ring {
+/* the breath around the orb, and the wavefronts it sends towards the waveform.
+   Both are scaled about the orb's centre by GSAP's `svgOrigin`, which needs the
+   default view-box transform box — do not put `transform-box: fill-box` here,
+   it would send each arc turning about its own bounding box instead. */
+.mg-halo,
+.mg-front {
   fill: none;
   stroke: var(--mg-to, currentColor);
-  transform-box: fill-box;
-  transform-origin: 50% 50%;
+  opacity: 0;
+}
+
+/* the stroke stays the same weight however far the front has travelled */
+.mg-front {
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
 }
 
 .mg-page {
@@ -542,82 +552,6 @@ main.models-page-main {
   font-size: 0.74rem;
   font-weight: 650;
   color: var(--model-accent);
-}
-
-/* ── Closing band: licence, and the two ways out ─────────────────────────── */
-
-/* The page used to end on the last model card, which read as a page that had
-   been cut off. This is the sign-off: what the models are licensed under, and
-   the two things a developer does next. */
-.dx-closing {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1.5rem 2rem;
-  margin: 2.5rem 0 1rem;
-  padding: 1.8rem 1.9rem;
-  border-radius: 24px;
-  border: 1px solid transparent;
-  background:
-    linear-gradient(rgba(255, 255, 255, 0.82), rgba(255, 252, 247, 0.82)) padding-box,
-    linear-gradient(120deg, #E2691F, #A6410A) border-box;
-  box-shadow: 0 20px 44px -26px color-mix(in srgb, var(--text-orange-500) 45%, transparent);
-}
-
-.dx-closing-copy {
-  flex: 1 1 26rem;
-  min-width: 0;
-}
-
-.dx-closing-copy h2 {
-  margin: 0 0 0.4rem;
-  font-family: var(--font-manrope);
-  font-size: clamp(1.25rem, 2.2vw, 1.55rem);
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  color: var(--text-primary);
-}
-
-.dx-closing-copy p {
-  max-width: 36rem;
-  margin: 0;
-  font-size: 0.9rem;
-  line-height: 1.6;
-  color: var(--color-10);
-}
-
-.dx-closing-copy b {
-  font-weight: 650;
-  color: var(--text-orange-500);
-}
-
-.dx-closing-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.6rem;
-}
-
-/* the band's own CTAs sit on a white card, so the outlined one needs a fill */
-.dx-closing .model-cta-secondary {
-  background: rgba(255, 255, 255, 0.8);
-}
-
-@media (max-width: 620px) {
-  .dx-closing {
-    padding: 1.4rem 1.25rem;
-  }
-
-  .dx-closing-actions {
-    width: 100%;
-  }
-
-  .dx-closing-actions > * {
-    flex: 1 1 auto;
-    justify-content: center;
-  }
 }
 
 /* ── Model page shell ────────────────────────────────────────────────────── */
@@ -1327,9 +1261,17 @@ main.models-page-main {
 
 /* ── Headline words ─────────────────────────────────────────────────────── */
 
+/* The mask that the reveal slides each word out of. It has to clip the top and
+   the sides, but not the bottom: at this size a line box of 1.04 sits above the
+   font's own descender, so a plain `overflow: hidden` cuts the tail off every
+   g, y and p in the heading. The padding gives the descender room and the
+   negative margin takes the same amount back out of the layout, so nothing
+   below the heading moves. */
 .dh-word {
   display: inline-block;
   overflow: hidden;
+  padding-bottom: 0.2em;
+  margin-bottom: -0.2em;
   vertical-align: bottom;
 }
 
@@ -1391,12 +1333,6 @@ main.models-page-main {
    the example changed and the rail (which takes its height from the main
    pane) jumped with it. So each panel gets a fixed height and scrolls its own
    overflow. */
-.transcribe-caption {
-  height: 9rem;
-  overflow-y: auto;
-  scrollbar-width: thin;
-}
-
 .sx-text,
 .sx-text.is-long {
   height: 9rem;
@@ -1477,4 +1413,557 @@ main.models-page-main {
 
 .tl-tabrow .tl-tabs {
   margin-bottom: 0;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Transcribe stage — the "See it transcribe" card
+   ═══════════════════════════════════════════════════════════════════════════
+
+   Scoped to .tx-stage throughout. The player (.audio-player, .audio-wave,
+   .audio-play, .audio-time) and the rail (.pg-*) are shared with the Speak
+   and Translate playgrounds, so every refinement in here is qualified by the
+   stage class and none of it reaches the other cards.
+
+   The motion this markup is built for lives in TranscribeExamples.jsx: GSAP
+   owns the entrance, the sliding mode pill, the rail marker, the play ring,
+   the idle meter, and the level the bars are traced at. What is left to CSS
+   is the per-word arrival, which is driven off two custom properties written
+   by the audio clock (--read on the paragraph, --i on each word) and so has
+   to be a style calculation rather than a tween. */
+
+.tx-stage .pg-card {
+  padding: 1.15rem;
+  gap: 1.15rem;
+}
+
+.tx-main {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+/* ── Header: which sample, what it is, and what the model is doing ───────── */
+
+.tx-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.6rem 1rem;
+}
+
+.tx-head-copy {
+  min-width: 0;
+}
+
+.tx-title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--ed-text);
+}
+
+.tx-note {
+  margin: 0.15rem 0 0;
+  font-size: 0.78rem;
+  color: var(--ed-text-2);
+}
+
+.tx-head-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.tx-detected,
+.tx-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.65rem;
+  border-radius: 999px;
+  border: 1px solid var(--ed-border);
+  background: var(--ed-inner);
+  font-size: 0.72rem;
+  white-space: nowrap;
+}
+
+.tx-detected-label {
+  color: var(--ed-text-2);
+}
+
+.tx-detected b {
+  font-weight: 700;
+  color: var(--ed-text);
+}
+
+/* The status pill is the one place the card says what stage it is at, so it
+   carries the model's colour while there is sound and settles to a finished
+   green when the last word has landed. */
+.tx-status {
+  font-weight: 650;
+  color: var(--ed-text-2);
+}
+
+.tx-status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: currentColor;
+  opacity: 0.55;
+}
+
+.tx-status.is-listening,
+.tx-status.is-writing {
+  border-color: color-mix(in srgb, var(--model-accent) 30%, transparent);
+  background: color-mix(in srgb, var(--model-accent) 8%, white);
+  color: color-mix(in srgb, var(--model-accent) 88%, black);
+}
+
+.tx-status.is-listening .tx-status-dot,
+.tx-status.is-writing .tx-status-dot {
+  opacity: 1;
+  animation: tx-dot 1.1s ease-in-out infinite;
+}
+
+.tx-status.is-done {
+  border-color: color-mix(in srgb, var(--model-emerald) 28%, transparent);
+  background: color-mix(in srgb, var(--model-emerald) 7%, white);
+  color: var(--model-emerald);
+}
+
+.tx-status.is-done .tx-status-dot {
+  opacity: 1;
+}
+
+@keyframes tx-dot {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(0.55); opacity: 0.4; }
+}
+
+/* ── Player ──────────────────────────────────────────────────────────────── */
+
+.tx-stage .audio-player {
+  margin: 0;
+  padding: 0.8rem 1rem;
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.95), var(--ed-inner));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.tx-stage .audio-player.is-playing {
+  border-color: color-mix(in srgb, var(--model-accent) 26%, transparent);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    0 10px 30px -22px color-mix(in srgb, var(--model-accent) 70%, transparent);
+}
+
+.tx-play-wrap {
+  position: relative;
+  display: inline-flex;
+  flex: none;
+}
+
+/* The ring GSAP breathes out of the button while the clip runs. The shared
+   `mic-pulse` box-shadow is turned off with it, so the button keeps its own
+   gradient shadow steady underneath. */
+.tx-play-ring {
+  position: absolute;
+  inset: -1px;
+  border-radius: 999px;
+  border: 2px solid color-mix(in srgb, var(--model-accent) 55%, transparent);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.tx-stage .audio-play {
+  cursor: pointer;
+}
+
+.tx-stage .audio-play.is-playing {
+  animation: none;
+}
+
+.tx-stage .audio-track {
+  position: relative;
+  padding: 0.15rem 0;
+  border-radius: 10px;
+}
+
+.tx-stage .audio-wave {
+  height: 52px;
+}
+
+/* Every bar is a full-height element scaled to its own level, so the row
+   never relayouts and the trace is a transform GSAP can write per frame.
+   --l is the resting level; while the clip plays GSAP overwrites the
+   transform with the level the analyser is actually reporting. */
+.tx-stage .audio-wave span,
+.tx-stage .audio-wave span.is-played {
+  transform-origin: 50% 50%;
+  transform: scaleY(var(--l, 0.18));
+  transition: background-color 0.25s ease;
+}
+
+/* the shared bounce animates the same transform, which would fight the trace */
+.tx-stage .audio-wave.is-playing span.is-played {
+  animation: none;
+}
+
+/* the line the writing is happening at, moved every frame with the clock */
+.tx-playhead {
+  position: absolute;
+  top: 0.15rem;
+  bottom: 0.15rem;
+  left: 0;
+  width: 2px;
+  margin-left: -1px;
+  border-radius: 999px;
+  background: var(--model-gradient, var(--model-accent));
+  box-shadow: 0 0 10px color-mix(in srgb, var(--model-accent) 45%, transparent);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.tx-playhead.is-on {
+  opacity: 0.9;
+}
+
+.tx-playhead::before {
+  content: '';
+  position: absolute;
+  top: -3px;
+  left: 50%;
+  width: 7px;
+  height: 7px;
+  margin-left: -3.5px;
+  border-radius: 999px;
+  background: var(--model-accent);
+}
+
+.tx-stage .audio-time {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.3rem;
+}
+
+.tx-stage .audio-time b {
+  font-weight: 700;
+  color: var(--ed-text);
+}
+
+.tx-stage .audio-time span {
+  opacity: 0.45;
+}
+
+/* ── Mode tabs ───────────────────────────────────────────────────────────── */
+
+/* One pill slides between the three modes rather than two backgrounds
+   swapping, so changing the output mode reads as one movement. */
+.tx-modes {
+  position: relative;
+  display: inline-flex;
+  align-self: flex-start;
+  gap: 0.1rem;
+  padding: 0.25rem;
+  border-radius: 999px;
+  background: var(--ed-inner-2);
+  border: 1px solid var(--ed-border);
+}
+
+.tx-modes-pill {
+  position: absolute;
+  top: 0.25rem;
+  bottom: 0.25rem;
+  left: 0;
+  width: 0;
+  border-radius: 999px;
+  background: white;
+  box-shadow: 0 2px 8px -4px rgba(46, 50, 56, 0.35);
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.tx-mode {
+  position: relative;
+  z-index: 1;
+  padding: 0.34rem 0.8rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 650;
+  color: var(--ed-text-2);
+  cursor: pointer;
+  transition: color 0.25s ease;
+}
+
+.tx-mode:hover {
+  color: var(--ed-text);
+}
+
+.tx-mode.is-active {
+  color: color-mix(in srgb, var(--model-accent) 88%, black);
+}
+
+/* ── Transcript panel ────────────────────────────────────────────────────── */
+
+.tx-panel {
+  --tx-panel-h: 10.5rem;
+  position: relative;
+}
+
+/* Every example is a different length — six words of Sanskrit next to fifty
+   of a film lyric — so the box is a fixed height and scrolls its own
+   overflow. Left to size itself the card jumped every time the sample
+   changed, and the rail (which takes its height from this pane) with it. */
+.tx-stage .tx-caption {
+  height: var(--tx-panel-h);
+  margin: 0;
+  padding: 1.05rem 1.15rem;
+  border-radius: 16px;
+  border: 1px solid var(--ed-border);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), var(--ed-inner));
+  /* an inset rule rather than a border-left, so it stays put while the text
+     inside scrolls */
+  box-shadow: inset 2px 0 0 color-mix(in srgb, var(--model-accent) 30%, transparent);
+  font-size: 1.3rem;
+  line-height: 1.7;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--model-accent) 30%, transparent) transparent;
+  /* GSAP fades a new transcript in; the shared keyframe would fight it */
+  animation: none;
+}
+
+/* Each word carries its index; the paragraph carries the read head as a
+   fraction of a word, updated every frame from the audio clock. --p is that
+   word's own progress, 0 before the head reaches it and 1 once it has passed,
+   which drives the whole arrival: the word lifts into place as it fades up.
+
+   No transition on opacity or transform: the values are already continuous,
+   and a transition on top of them only adds lag. Colour is the exception —
+   it is toggled by a class, not computed, so it gets to ease. */
+.tx-stage .audio-transcript.is-live .tx-word {
+  --p: clamp(0, calc(var(--read, 0) - var(--i)), 1);
+  display: inline-block;
+  opacity: var(--p);
+  transform: translateY(calc((1 - var(--p)) * 0.3em));
+  color: inherit;
+  transition: color 0.7s ease, text-shadow 0.7s ease;
+}
+
+/* The word being written right now is the only one carrying a blur, so the
+   filter is on one element at a time however long the transcript is. The
+   amount peaks mid-crossing and is zero at both ends, so a word comes into
+   focus as it lands and nothing else on the line is ever blurred. */
+.tx-stage .audio-transcript.is-live .tx-word.is-head {
+  filter: blur(calc(var(--p) * (1 - var(--p)) * 7px));
+  color: color-mix(in srgb, var(--model-accent) 92%, black);
+  text-shadow: 0 0 18px color-mix(in srgb, var(--model-accent) 22%, transparent);
+  transition: none;
+}
+
+.tx-stage .audio-transcript.is-live .tx-caret {
+  width: 0.14em;
+  min-width: 3px;
+  height: 1.15em;
+  margin-left: 0.06em;
+  border-radius: 999px;
+  box-shadow: 0 0 12px color-mix(in srgb, var(--model-accent) 45%, transparent);
+}
+
+/* Nothing has been heard yet, so the panel holds a meter of its own: the
+   model is waiting to listen rather than broken. GSAP runs the bars. */
+.tx-idle {
+  position: absolute;
+  inset: 0 0 auto;
+  height: var(--tx-panel-h);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.7rem;
+  padding: 1rem;
+  text-align: center;
+  pointer-events: none;
+}
+
+.tx-idle-meter {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 26px;
+}
+
+.tx-idle-bar {
+  width: 3px;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--model-gradient, var(--model-accent));
+  transform: scaleY(0.26);
+  transform-origin: 50% 50%;
+  opacity: 0.75;
+}
+
+.tx-stage .tx-prompt {
+  position: static;
+  margin: 0;
+  font-size: 0.85rem;
+  font-style: normal;
+  color: var(--ed-text-2);
+}
+
+.tx-panel-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: 0.55rem;
+  padding: 0 0.15rem;
+}
+
+.tx-count {
+  font-size: 0.72rem;
+  color: var(--ed-text-2);
+}
+
+.tx-copy {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.32rem;
+  padding: 0.28rem 0.62rem;
+  border-radius: 999px;
+  border: 1px solid var(--ed-border);
+  background: white;
+  font-size: 0.72rem;
+  font-weight: 650;
+  color: var(--ed-text-2);
+  cursor: pointer;
+  transition: color 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.tx-copy:hover {
+  border-color: color-mix(in srgb, var(--model-accent) 34%, transparent);
+  background: color-mix(in srgb, var(--model-accent) 6%, white);
+  color: color-mix(in srgb, var(--model-accent) 88%, black);
+}
+
+/* ── Rail ────────────────────────────────────────────────────────────────── */
+
+.tx-stage .tx-list {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: none;
+  padding-right: 0.25rem;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--model-accent) 25%, transparent) transparent;
+}
+
+/* The highlight behind the active sample is one element that slides, so
+   picking another sample is a movement down the list rather than a swap. The
+   rows themselves stay transparent and sit above it. */
+.tx-marker {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 0;
+  border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--model-accent) 34%, transparent);
+  background: color-mix(in srgb, var(--model-accent) 8%, white);
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.tx-stage .tx-item {
+  position: relative;
+  z-index: 1;
+}
+
+.tx-stage .tx-item.is-active {
+  border-color: transparent;
+  background: transparent;
+}
+
+.tx-eq {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 12px;
+  margin-left: auto;
+  flex: none;
+}
+
+.tx-eq span {
+  width: 2px;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--model-accent);
+  transform: scaleY(0.28);
+  transform-origin: 50% 100%;
+}
+
+/* ── Narrow screens ─────────────────────────────────────────────────────── */
+
+@media (max-width: 900px) {
+  /* the rail turns into a scrolling row, where a full-width marker makes no
+     sense — the row paints its own highlight again */
+  .tx-stage .tx-list {
+    flex: none;
+    flex-direction: row;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding-right: 0;
+    padding-bottom: 0.25rem;
+  }
+
+  .tx-stage .pg-rail-scroll {
+    mask-image: linear-gradient(to right, black 0, black calc(100% - 1.6rem), transparent 100%);
+  }
+
+  .tx-marker {
+    display: none;
+  }
+
+  .tx-stage .tx-item.is-active {
+    border-color: color-mix(in srgb, var(--model-accent) 34%, transparent);
+    background: color-mix(in srgb, var(--model-accent) 8%, white);
+  }
+}
+
+@media (max-width: 620px) {
+  .tx-panel {
+    --tx-panel-h: 12rem;
+  }
+
+  .tx-stage .tx-caption {
+    font-size: 1.08rem;
+  }
+
+  .tx-head-meta {
+    flex-wrap: wrap;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* These beat the unscoped reduced-motion rules above by specificity, so the
+     stage has to repeat them: the transcript reads as finished text and
+     nothing moves. */
+  .tx-stage .audio-transcript.is-live .tx-word,
+  .tx-stage .audio-transcript.is-live .tx-word.is-head {
+    opacity: 1;
+    transform: none;
+    filter: none;
+    text-shadow: none;
+  }
+
+  .tx-status-dot,
+  .tx-status.is-listening .tx-status-dot,
+  .tx-status.is-writing .tx-status-dot {
+    animation: none;
+  }
 }

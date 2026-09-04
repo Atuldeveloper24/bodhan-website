@@ -23,7 +23,9 @@ const DevHeadline = ({ as: Tag = 'h1', className, words, delay = 0.08 }) => {
 
         const tween = gsap.fromTo(
             parts,
-            { yPercent: 110, opacity: 0 },
+            // clear of the mask's bottom edge, which now sits a descender's
+            // worth below the line box (see .dh-word)
+            { yPercent: 126, opacity: 0 },
             {
                 yPercent: 0,
                 opacity: 1,
