@@ -21,9 +21,41 @@ const PRIMARY = {
     viz: { from: '#E2691F', to: '#B45309' },
 };
 
-// ⚠️ PRICING IS PLACEHOLDER — every `price` below is a stand-in so the hero
-// band has something to show. Replace each value with the real published rate
-// before this goes live; the console at console.bodhan.ai is the source of truth.
+/** Every model in the family is released under the same licence. */
+export const LICENSE = 'Indic Open Model License v1.0';
+
+// The two checkpoints Indic-Transcribe ships in, and the one it does not ship
+// yet. They diverge only in post-training, which is why the parameter count and
+// the language coverage are the same for both and only the output modes differ.
+//
+// A variant may carry its own `specs`; where it does not, the model's own specs
+// are shown. `soon` marks a checkpoint that is announced but not yet shipped —
+// its tab is present and labelled, but not selectable.
+const TRANSCRIBE_VARIANTS = [
+    {
+        id: 'flex',
+        label: 'Flex',
+        summary:
+            'All three output modes — native script, mixed script, and fully romanized — for about 1.6 OIWER on native-script accuracy.',
+        specs: [
+            { label: 'Languages', value: '27' },
+            { label: 'Parameters', value: '1.2B' },
+            { label: 'Output modes', value: '3' },
+        ],
+    },
+    {
+        id: 'core',
+        label: 'Core',
+        summary:
+            "Transcribes into each language's own script, and it is the more accurate of the two. It will also identify the language for you when you do not pass one.",
+        specs: [
+            { label: 'Languages', value: '27' },
+            { label: 'Parameters', value: '1.2B' },
+            { label: 'Output mode', value: 'Native script' },
+        ],
+    },
+];
+
 export const models = [
     {
         id: 'indic-transcribe',
@@ -34,13 +66,13 @@ export const models = [
         ...PRIMARY,
         tagline: 'Speech recognition for 27 Indian languages',
         summary:
-            'Robust multilingual ASR with native-script, mixed-script, and romanized output, plus built-in language identification.',
+            "27 languages, their dialects and accents, in the script each one is actually written in — with English mixed in mid-sentence, over classroom noise and phone lines.",
         specs: [
             { label: 'Languages', value: '27' },
             { label: 'Parameters', value: '1.2B' },
             { label: 'Output modes', value: '3' },
         ],
-        price: { value: '₹30', label: 'per audio hour' },
+        variants: TRANSCRIBE_VARIANTS,
         blog: { label: 'Read the ASR post', href: '/research/bodhan-asr' },
         href: '/developers/indic-transcribe',
     },
@@ -59,7 +91,6 @@ export const models = [
             { label: 'Voices', value: 'Multiple / language' },
             { label: 'Response time', value: '~200 ms' },
         ],
-        price: { value: '₹90', label: 'per 1M characters' },
         blog: { label: 'Read the blog', href: BLOGS.speak },
         href: '/developers/indic-speak',
     },
@@ -78,7 +109,6 @@ export const models = [
             { label: 'Layout labels', value: '37' },
             { label: 'Parameters', value: '33M + 0.8B' },
         ],
-        price: { value: '₹40', label: 'per 1,000 pages' },
         blog: { label: 'Read the blog', href: BLOGS.ocr },
         href: '/developers/indic-ocr',
     },
@@ -97,7 +127,6 @@ export const models = [
             { label: 'Parameters', value: '7.94B' },
             { label: 'Context', value: '32K tokens' },
         ],
-        price: { value: '₹60', label: 'per 1M characters' },
         blog: { label: 'Read the blog', href: BLOGS.translate },
         href: '/developers/indic-translate',
     },

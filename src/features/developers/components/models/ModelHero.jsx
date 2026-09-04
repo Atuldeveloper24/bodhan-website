@@ -1,6 +1,6 @@
 import { useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, ArrowUpRight, BookOpen } from 'lucide-react';
+import { ArrowLeft, ArrowUpRight, BookOpen, Scale } from 'lucide-react';
 import ModelTitleIntro from './ModelTitleIntro';
 import DevHeadline from '../DevHeadline';
 import AccentAurora from '../AccentAurora';
@@ -11,7 +11,7 @@ const isExternal = (href) => /^https?:\/\//.test(href ?? '');
 
 /**
  * The hero carries the model's name, one line on what it does, the links out,
- * and the numbers band — including price.
+ * and the numbers band.
  *
  * It is above the fold, so the entrance plays on mount rather than on scroll:
  * each piece arrives just behind the title's own reveal. Everything is a
@@ -20,7 +20,6 @@ const isExternal = (href) => /^https?:\/\//.test(href ?? '');
  * do exactly that.
  */
 const ModelHero = ({
-    eyebrow,
     title,
     tagline,
     stats,
@@ -31,6 +30,7 @@ const ModelHero = ({
     blogCta,
     note,
     intro,
+    license,
 }) => {
     const ref = useRef(null);
 
@@ -83,10 +83,6 @@ const ModelHero = ({
                 <ArrowLeft size={14} aria-hidden="true" />
                 All models
             </Link>
-
-            <p className="model-eyebrow" data-hero-rise>
-                {eyebrow}
-            </p>
 
             {intro ? (
                 <ModelTitleIntro variant={intro} text={title} className="model-title" />
@@ -146,6 +142,13 @@ const ModelHero = ({
                         </Link>
                     ))}
             </div>
+
+            {license && (
+                <p className="model-license" data-hero-rise>
+                    <Scale size={13} aria-hidden="true" />
+                    Released under the <b>{license}</b>
+                </p>
+            )}
 
             {note && (
                 <p className="model-note" data-hero-rise>

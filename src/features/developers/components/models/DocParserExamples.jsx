@@ -32,6 +32,26 @@ const LABEL_ACCENT = {
     Table: '#8A5A2B',
 };
 
+// Where the model gave per-block coordinates, the region it is reading is
+// outlined on the scan. Its boxes are [top, left, bottom, right] out of 1000.
+//
+// Only the gallery pages carry coordinates; the composite examples do not — but
+// their images already have the model's own layout boxes burned into them, so
+// the scan side shows the layout either way. A box derived from reading
+// progress was tried here instead and removed: on a page that already has the
+// real boxes printed on it, a second approximate one sliding over the top is
+// noise that contradicts what is underneath.
+const boxFor = (block) => {
+    if (!block?.box) return null;
+    const [top, left, bottom, right] = block.box;
+    return {
+        top: top / 10,
+        left: left / 10,
+        height: (bottom - top) / 10,
+        width: (right - left) / 10,
+    };
+};
+
 // Two shapes reach here: gallery pages carry the model's blocks directly, while
 // the composite examples carry a flat `ocr` list that `layout` groups back up.
 const toBlocks = ({ ocr, layout, blocks }) => {
@@ -82,6 +102,7 @@ const DocReader = ({ example }) => {
     const [run, setRun] = useState(0);
 
     const stageRef = useRef(null);
+    const blocksRef = useRef(null);
     const inView = useInView(stageRef, { once: true, amount: 0.25 });
     const reduceMotion = useReducedMotion();
 
@@ -120,8 +141,20 @@ const DocReader = ({ example }) => {
         return () => clearInterval(timer);
     }, [blocks.length, inView, reduceMotion, run]);
 
+    // The column is a fixed box, so a long page runs past the bottom of it.
+    // Follow the block that just landed, and go back to the top on a replay.
+    useEffect(() => {
+        const el = blocksRef.current;
+        if (!el) return;
+        el.scrollTo({
+            top: done ? el.scrollHeight : 0,
+            behavior: reduceMotion || !done ? 'auto' : 'smooth',
+        });
+    }, [done, reduceMotion]);
+
     const reading = done < blocks.length;
     const current = blocks[done];
+    const currentBox = boxFor(current);
 
     return (
         <div className={`ocr-stage${reading ? ' is-reading' : ''}`} ref={stageRef}>
@@ -146,16 +179,16 @@ const DocReader = ({ example }) => {
                             onError={() => setFailed(true)}
                         />
 
-                        {/* the region being read right now */}
-                        {reading && current?.box && (
+                        {/* where the reader is right now */}
+                        {reading && currentBox && (
                             <span
                                 className="ocr-box"
                                 style={{
-                                    '--ocr-accent': LABEL_ACCENT[current.label] ?? '#57534E',
-                                    top: `${current.box[0] / 10}%`,
-                                    left: `${current.box[1] / 10}%`,
-                                    height: `${(current.box[2] - current.box[0]) / 10}%`,
-                                    width: `${(current.box[3] - current.box[1]) / 10}%`,
+                                    '--ocr-accent': LABEL_ACCENT[current?.label] ?? '#57534E',
+                                    top: `${currentBox.top}%`,
+                                    left: `${currentBox.left}%`,
+                                    height: `${currentBox.height}%`,
+                                    width: `${currentBox.width}%`,
                                 }}
                             />
                         )}
@@ -175,11 +208,14 @@ const DocReader = ({ example }) => {
                     )}
                 </p>
 
-                <div className="ocr-blocks" dir={example.rtl ? 'rtl' : undefined}>
-                    {blocks.slice(0, done).map((block) => (
+                <div className="ocr-blocks" ref={blocksRef} dir={example.rtl ? 'rtl' : undefined}>
+                    {blocks.slice(0, done).map((block, i) => (
                         <div
                             key={block.n}
-                            className="ocr-block"
+                            /* the newest block is the one being written; that marker is on
+                               every example, which is what makes the reader read the same
+                               way whether or not the model gave us its boxes */
+                            className={`ocr-block${reading && i === done - 1 ? ' is-writing' : ''}`}
                             style={{ '--ocr-accent': LABEL_ACCENT[block.label] ?? '#57534E' }}
                         >
                             <span className="ocr-block-tag">
@@ -249,7 +285,7 @@ const DocParserExamples = () => {
                                 href={CONSOLE_URL}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="model-cta-primary model-cta-small"
+                                className="model-cta-primary model-cta-small model-cta-dark"
                             >
                                 Go to Dashboard
                                 <ArrowUpRight size={13} aria-hidden="true" />

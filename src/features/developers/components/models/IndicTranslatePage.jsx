@@ -5,7 +5,7 @@ import ModelHero from './ModelHero';
 import MiniTranslatePlayground from './MiniTranslatePlayground';
 import DevReveal from '../DevReveal';
 import SHOWCASE from '../../data/translateShowcase.json';
-import { getModelById } from '../../data/models';
+import { LICENSE, getModelById } from '../../data/models';
 import '../../developers.css';
 
 const model = getModelById('indic-translate');
@@ -15,7 +15,6 @@ const STATS = [
     { value: '44', label: 'Directions' },
     { value: '32K', label: 'Token context' },
     { value: '7.94B', label: 'Parameters' },
-    { value: model.price.value, label: model.price.label, isPrice: true },
 ];
 
 const FORM_ICONS = {
@@ -36,9 +35,16 @@ const SUB_ICONS = {
 
 const { forms } = SHOWCASE;
 
+// Rail order. Document goes last: it is the one entry that brings its own row
+// of sub-tabs and the longest panes, so opening the playground on it led with
+// the heaviest example. Ranked rather than listed, so a form the showcase gains
+// later still appears — it just lands before Document rather than dropping out.
+const FORM_RANK = { sentence: 0, romanized: 1, codemix: 2, transliteration: 3, document: 9 };
+const ordered = [...forms].sort((a, b) => (FORM_RANK[a.id] ?? 5) - (FORM_RANK[b.id] ?? 5));
+
 // Five capabilities, as the blog groups them. Document carries the five
 // structures as tabs rather than five separate rail entries.
-const items = forms.map((f) => {
+const items = ordered.map((f) => {
     const Icon = FORM_ICONS[f.id] ?? FileText;
     return {
         id: f.id,
@@ -82,7 +88,6 @@ const IndicTranslatePage = () => (
             style={{ '--model-accent': model.accent, '--model-gradient': model.gradient }}
         >
             <ModelHero
-                eyebrow="Developers · Model"
                 title={model.name}
                 intro="translate"
                 tagline="English and all 22 Eighth Schedule languages, in both directions — with Markdown, LaTeX, code and tables coming out the way they went in."
@@ -92,6 +97,7 @@ const IndicTranslatePage = () => (
                 primaryCta={{ label: 'Hugging Face', href: '#' }}
                 blogCta={model.blog}
                 secondaryCta={{ label: 'Contact', href: '/contact' }}
+                license={LICENSE}
             />
 
             <DevReveal as="section" className="model-section">

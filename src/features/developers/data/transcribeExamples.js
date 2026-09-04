@@ -39,13 +39,13 @@ export const AUDIO_EXAMPLES = [
         note: 'Classical Tamil verse',
         audio: '/examples/speech/tamil-thirukkural.wav',
         lang: 'ta',
+        // The recording is the couplet only — the gloss that follows it is not
+        // spoken on the clip, so it is not in the transcript either. All three
+        // modes cover the same words.
         modes: {
-            native:
-                'அகர முதல எழுத்தெல்லாம் ஆதிபகவன் உதற்றே உலகு எழுத்துக்கள் அனைத்தும் ஆ என்ற முதல் எழுத்தை தலைமையாகக் கொண்டதாகும் அதுபோல இந்நாம் வாழும் இந்த உலகம் அனைத்தும் கடவுளை முதன்மையாகக் கொண்டதாகும்',
-            mixed:
-                'Agara முதல எழுத்தெல்லாம் Adi Bhagavan உதற்றே உலகு எழுத்துக்கள் அனைத்தும் A என்ற 1st எழுத்தை தலைமையாகக் கொண்டதாகும் அதுபோல இந்நாம் வாழும் இந்த உலகம் அனைத்தும் கடவுளை முதன்மையாகக் கொண்டதாகும்',
-            romanized:
-                'Agara mudhala ezhuthukkal anaithum aa endra mudhal ezhuthai thalaimaiyaaga kondadaagum adhupola naam vaazhum indha ulagam anaithum kadavulai mudhanmaiyaaga kondadhaagum',
+            native: 'அகர முதல எழுத்தெல்லாம் ஆதிபகவன் உதற்றே உலகு',
+            mixed: 'Agara முதல எழுத்தெல்லாம் Adi Bhagavan உதற்றே உலகு',
+            romanized: 'Agara mudhala ezhuthellaam Adi Bhagavan udhatre ulagu',
         },
     },
     {

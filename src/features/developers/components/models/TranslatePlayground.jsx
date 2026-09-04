@@ -253,7 +253,7 @@ const TranslatePlayground = () => {
                                 href={CONSOLE_URL}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="model-cta-primary model-cta-small"
+                                className="model-cta-primary model-cta-small model-cta-dark"
                             >
                                 Go to Dashboard
                                 <ArrowUpRight size={13} aria-hidden="true" />

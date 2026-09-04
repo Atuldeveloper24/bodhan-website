@@ -98,7 +98,6 @@ const SpeakExamples = () => {
                             <div className="sx-chips">
                                 {example.voice && <span className="sx-chip">{example.voice}</span>}
                                 {example.langLabel && <span className="sx-chip">{example.langLabel}</span>}
-                                {example.judge != null && <span className="sx-chip">judge {example.judge}/5</span>}
                             </div>
                         </div>
 
@@ -177,7 +176,7 @@ const SpeakExamples = () => {
                                 href={CONSOLE_URL}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="model-cta-primary model-cta-small"
+                                className="model-cta-primary model-cta-small model-cta-dark"
                             >
                                 Go to Dashboard
                                 <ArrowUpRight size={13} aria-hidden="true" />

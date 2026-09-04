@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ArrowUpRight, Pause, Play } from 'lucide-react';
 import { AUDIO_EXAMPLES, MODE_LABELS } from '../../data/transcribeExamples';
 import { assetUrl } from '../../data/assetUrl';
@@ -6,13 +6,24 @@ import { CONSOLE_URL } from '../../../../config/links';
 
 const BARS = Array.from({ length: 64 }, (_, i) => 20 + ((i * 37) % 64));
 
-// How far behind the audio the transcript runs, as a fraction of the clip.
-// Small and constant: a word should land just after it is said. There is no
-// per-word timing in the data, so the read head moves linearly — anything
-// fancier drifts away from the audio rather than towards it. (It used to
-// advance as ratio ** 2.2, which meant a fifth of the words had appeared by
-// the halfway mark and the rest arrived in a rush at the end.)
-const TRAIL = 0.05;
+// The transcript follows the audio rather than racing it. Nothing is written
+// for the first TRAIL of the clip — the model is listening — and the last words
+// land TAIL after the audio has already stopped, so the writing is still
+// catching up when the room goes quiet. Both are fractions of the clip's own
+// length, so a nine-second sample and a five-minute one read at the same
+// relative pace.
+//
+// Between them they set the pace: the words are spread over WINDOW of the
+// clip's length rather than crammed into it. These are the two numbers to turn
+// if the transcript wants to be slower or later still.
+//
+// The head itself moves linearly. There is no per-word timing in the data, and
+// anything fancier drifts away from the audio rather than towards it — it used
+// to advance as ratio ** 2.2, which meant a fifth of the words had appeared by
+// the halfway mark and the rest arrived in a rush at the end.
+const TRAIL = 0.18;
+const TAIL = 0.3;
+const WINDOW = 1 + TAIL - TRAIL;
 
 const clamp01 = (n) => Math.min(1, Math.max(0, n));
 
@@ -40,6 +51,9 @@ const TranscribeExamples = () => {
     const [bar, setBar] = useState(0);
     const [head, setHead] = useState(0);
 
+    // The audio is over but the transcript is still landing its last words.
+    const [tailing, setTailing] = useState(false);
+
     // The panel starts blank: the transcript is written as the audio runs, so
     // there is nothing to show until someone presses play.
     const [started, setStarted] = useState(false);
@@ -53,9 +67,11 @@ const TranscribeExamples = () => {
     // custom property: CSS fades each word in as the head crosses it, which is
     // what makes the line arrive smoothly instead of a word at a time on the
     // four-or-so timeupdate events a second the browser sends.
+    // `played` runs 0 → 1 while the audio plays and on to 1 + TAIL while the
+    // transcript catches up after it has finished.
     const writeHead = useCallback(
         (played, count) => {
-            const at = clamp01((played - TRAIL) / (1 - TRAIL)) * count;
+            const at = clamp01((played - TRAIL) / WINDOW) * count;
             captionRef.current?.style.setProperty('--read', String(at));
             setHead(Math.min(count, Math.floor(at)));
         },
@@ -80,8 +96,34 @@ const TranscribeExamples = () => {
         return () => cancelAnimationFrame(frameRef.current);
     }, [playing, words.length, writeHead]);
 
+    // The audio has stopped but the transcript has not caught up yet: keep the
+    // head moving on the wall clock until it reaches the last word.
+    useEffect(() => {
+        if (!tailing) return undefined;
+
+        const duration = audioRef.current?.duration;
+        const spanMs = Number.isFinite(duration) && duration > 0 ? TAIL * duration * 1000 : 0;
+
+        const startedAt = performance.now();
+        let frame = 0;
+        const step = () => {
+            // with no duration to pace against, land the last words at once
+            const through = spanMs > 0 ? Math.min(1, (performance.now() - startedAt) / spanMs) : 1;
+            writeHead(1 + through * TAIL, words.length);
+            if (through >= 1) {
+                setTailing(false);
+                return;
+            }
+            frame = requestAnimationFrame(step);
+        };
+
+        frame = requestAnimationFrame(step);
+        return () => cancelAnimationFrame(frame);
+    }, [tailing, words.length, writeHead]);
+
     const reset = useCallback(() => {
         setPlaying(false);
+        setTailing(false);
         setElapsed(0);
         setBar(0);
         setHead(0);
@@ -99,8 +141,12 @@ const TranscribeExamples = () => {
     const toggle = () => {
         const audio = audioRef.current;
         if (!audio) return;
-        if (audio.paused) audio.play().catch(() => {});
-        else audio.pause();
+        if (audio.paused) {
+            setTailing(false);
+            audio.play().catch(() => {});
+        } else {
+            audio.pause();
+        }
     };
 
     // The clock only needs to tick; the meter and the transcript are driven by
@@ -119,6 +165,7 @@ const TranscribeExamples = () => {
         setElapsed(audio.currentTime);
         setBar(Math.round(at * BARS.length));
         setStarted(true);
+        setTailing(false);
         writeHead(at, words.length);
     };
 
@@ -176,10 +223,10 @@ const TranscribeExamples = () => {
                                 onPause={() => setPlaying(false)}
                                 onEnded={() => {
                                     setPlaying(false);
-                                    // land on the last word rather than a frame short of it
                                     setBar(BARS.length);
-                                    setHead(words.length);
-                                    captionRef.current?.style.setProperty('--read', String(words.length));
+                                    // the transcript is still a few words behind — let it
+                                    // finish writing rather than snapping it to the end
+                                    setTailing(true);
                                 }}
                                 onTimeUpdate={onTimeUpdate}
                                 onLoadedMetadata={() => setDuration(audioRef.current?.duration ?? 0)}
@@ -209,14 +256,18 @@ const TranscribeExamples = () => {
                             lang={mode === 'romanized' ? 'en' : example.lang}
                             aria-live="off"
                         >
+                            {/* The caret marks where the transcript is being written, so it
+                                follows the word arriving now rather than sitting in front of
+                                it. It is its own element, not a pseudo on the word, because
+                                the word is mid-fade — a pseudo would inherit that opacity and
+                                the caret would dim and brighten with every word. */}
                             {words.map((word, i) => (
-                                <span
-                                    key={i}
-                                    className={`tx-word${i === head ? ' is-cursor' : ''}`}
-                                    style={{ '--i': i }}
-                                >
-                                    {word}{' '}
-                                </span>
+                                <Fragment key={i}>
+                                    <span className="tx-word" style={{ '--i': i }}>
+                                        {word}
+                                    </span>
+                                    {i === head && <span className="tx-caret" aria-hidden="true" />}{' '}
+                                </Fragment>
                             ))}
 
                             {!started && (
@@ -253,7 +304,7 @@ const TranscribeExamples = () => {
                                 href={CONSOLE_URL}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="model-cta-primary model-cta-small"
+                                className="model-cta-primary model-cta-small model-cta-dark"
                             >
                                 Go to Dashboard
                                 <ArrowUpRight size={13} aria-hidden="true" />

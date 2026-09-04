@@ -1,4 +1,4 @@
-import { useId, useRef } from 'react';
+import { Fragment, useId, useRef } from 'react';
 import { ScrollTrigger, gsap, useGsapAnimation } from '../devMotion';
 
 /**
@@ -23,6 +23,27 @@ const WAVE_BARS = Array.from({ length: 26 }, (_, i) => {
     return Math.max(0.14, envelope * detail);
 });
 
+// What the audio becomes. Real words rather than placeholder rules: the same
+// utterance in native script and romanized, which is what the model's output
+// modes actually are, so the right half of the card says what it does instead
+// of leaving a blank space beside the waveform.
+const ASR_LINES = [
+    { y: 40, words: ['सात', 'रंग', 'दिखेंगे'] },
+    { y: 62, words: ['saat', 'rang', 'dikhenge'] },
+];
+
+/** One line of output, word by word, so the words can land one at a time. */
+const GlyphLine = ({ className, x, y, words }) => (
+    <text className={className} x={x} y={y} xmlSpace="preserve">
+        {words.map((word, i) => (
+            <Fragment key={i}>
+                {i > 0 && ' '}
+                <tspan className="mg-word">{word}</tspan>
+            </Fragment>
+        ))}
+    </text>
+);
+
 const WaveGlyph = () => (
     <>
         <g className="mg-wave">
@@ -40,20 +61,12 @@ const WaveGlyph = () => (
             ))}
         </g>
 
-        {/* what the audio becomes: three lines of transcript drawing in */}
-        <g className="mg-lines">
-            {[0, 1, 2].map((i) => (
-                <line
-                    key={i}
-                    className="mg-line"
-                    x1="168"
-                    y1={30 + i * 18}
-                    x2={i === 2 ? 262 : 302}
-                    y2={30 + i * 18}
-                    strokeWidth="4"
-                    strokeLinecap="round"
-                />
-            ))}
+        {/* the seam between what went in and what came out */}
+        <line className="mg-seam" x1="155" y1="22" x2="155" y2={H - 22} strokeWidth="1" />
+
+        <g className="mg-out">
+            <GlyphLine className="mg-glyph-line mg-line-native" x="168" y={ASR_LINES[0].y} words={ASR_LINES[0].words} />
+            <GlyphLine className="mg-glyph-line mg-line-roman" x="168" y={ASR_LINES[1].y} words={ASR_LINES[1].words} />
         </g>
 
         <line className="mg-head" x1="0" y1="8" x2="0" y2={H - 8} strokeWidth="1.5" />
@@ -64,29 +77,35 @@ const WaveGlyph = () => (
 
 const EQ_BARS = [0.42, 0.72, 1, 0.6, 0.86, 0.5];
 
+// The text going in, code-mixed — the case the model is built for — read out
+// by the voice in the middle. The orb carries a letter so the circle reads as
+// "this is being spoken" rather than as an unexplained dot.
+const TTS_LINES = [
+    { y: 40, words: ['नमस्ते,', 'मैं'] },
+    { y: 62, words: ['Bodhan', 'हूँ'] },
+];
+
 const VoiceGlyph = () => (
     <>
-        <g className="mg-lines mg-lines-left">
-            {[0, 1, 2].map((i) => (
-                <line
-                    key={i}
-                    className="mg-line"
-                    x1="16"
-                    y1={30 + i * 18}
-                    x2={i === 2 ? 96 : 124}
-                    y2={30 + i * 18}
-                    strokeWidth="4"
-                    strokeLinecap="round"
-                />
-            ))}
+        <g className="mg-in">
+            <GlyphLine className="mg-glyph-line mg-line-native" x="16" y={TTS_LINES[0].y} words={TTS_LINES[0].words} />
+            <GlyphLine className="mg-glyph-line mg-line-native" x="16" y={TTS_LINES[1].y} words={TTS_LINES[1].words} />
         </g>
 
         {/* the speaker: rings leaving the orb, one per phrase */}
         <g className="mg-orb-group">
             {[0, 1, 2].map((i) => (
-                <circle key={i} className="mg-ring" cx="196" cy={H / 2} r="16" strokeWidth="1.5" />
+                <circle key={i} className="mg-ring" cx="192" cy={H / 2} r="20" strokeWidth="1.5" />
             ))}
-            <circle className="mg-orb" cx="196" cy={H / 2} r="13" />
+            {/* the disc and the letter on it scale as one group: GSAP resolves
+                an SVG transform origin against a <g> reliably, where a <text>
+                with its own transform-box drifts out of the disc */}
+            <g className="mg-orb-core">
+                <circle className="mg-orb" cx="192" cy={H / 2} r="17" />
+                <text className="mg-orb-letter" x="192" y={H / 2} textAnchor="middle" dominantBaseline="central">
+                    अ
+                </text>
+            </g>
         </g>
 
         <g className="mg-eq">
@@ -192,7 +211,8 @@ const BridgeGlyph = () => (
 const buildWave = (root) => {
     const tl = gsap.timeline({ repeat: -1, defaults: { ease: 'sine.inOut' } });
     const bars = root.querySelectorAll('.mg-wave-bar');
-    const lines = root.querySelectorAll('.mg-line');
+    const words = root.querySelectorAll('.mg-word');
+    const seam = root.querySelector('.mg-seam');
     const head = root.querySelector('.mg-head');
 
     tl.fromTo(
@@ -204,8 +224,17 @@ const buildWave = (root) => {
         .to(bars, { scaleY: 0.18, duration: 0.5, stagger: { each: 0.035, from: 'start' } }, 0.85)
         .fromTo(head, { x: 8, opacity: 0 }, { x: 300, opacity: 1, duration: 1.5, ease: 'none' }, 0)
         .to(head, { opacity: 0, duration: 0.25 }, 1.5)
-        .fromTo(lines, { drawSVG: '0%' }, { drawSVG: '100%', duration: 0.45, stagger: 0.18, ease: 'power2.out' }, 0.5)
-        .to(lines, { drawSVG: '100% 100%', duration: 0.3, stagger: 0.08 }, 2.4)
+        .fromTo(seam, { opacity: 0 }, { opacity: 1, duration: 0.4 }, 0.35)
+        // The transcript lands a word at a time, behind the head crossing the
+        // waveform — the same order the live demo writes in. Opacity only: a
+        // <tspan> does not honour a CSS transform in every browser.
+        .fromTo(
+            words,
+            { opacity: 0 },
+            { opacity: 1, duration: 0.3, stagger: 0.13, ease: 'power2.out' },
+            0.5,
+        )
+        .to(words, { opacity: 0.16, duration: 0.28, stagger: 0.03 }, 2.66)
         .set({}, {}, 3);
 
     return tl;
@@ -213,12 +242,13 @@ const buildWave = (root) => {
 
 const buildVoice = (root) => {
     const tl = gsap.timeline({ repeat: -1, defaults: { ease: 'sine.inOut' } });
-    const lines = root.querySelectorAll('.mg-line');
+    const words = root.querySelectorAll('.mg-word');
     const rings = root.querySelectorAll('.mg-ring');
-    const orb = root.querySelector('.mg-orb');
+    const orb = root.querySelector('.mg-orb-core');
     const bars = root.querySelectorAll('.mg-eq-bar');
 
-    tl.fromTo(lines, { drawSVG: '0%' }, { drawSVG: '100%', duration: 0.4, stagger: 0.14, ease: 'power2.out' }, 0)
+    // the sentence is read word by word, then the voice takes over
+    tl.fromTo(words, { opacity: 0.18 }, { opacity: 1, duration: 0.26, stagger: 0.14, ease: 'power2.out' }, 0)
         .fromTo(orb, { scale: 0.75, transformOrigin: '50% 50%' }, { scale: 1.06, duration: 0.4 }, 0.55)
         .to(orb, { scale: 0.96, duration: 0.6 }, 0.95)
         .fromTo(

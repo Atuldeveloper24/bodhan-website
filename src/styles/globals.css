@@ -2760,9 +2760,12 @@ summary:focus-visible,
   width: 34rem;
 }
 
+/* Two columns side by side: the models on the left, Resources beside them
+   rather than stacked underneath. The APIs column is the wider of the two,
+   because its rows carry a model name and a codename under it. */
 .nav-mega-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1.15fr 1fr;
   gap: 0.25rem;
   padding: 0.5rem;
 }
@@ -3441,15 +3444,6 @@ body {
   align-self: flex-start;
 }
 
-.model-eyebrow {
-  margin: 1.5rem 0 0.6rem;
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--text-orange-500);
-}
-
 .model-title {
   margin: 0 0 0.7rem;
   font-family: var(--font-manrope);
@@ -3474,6 +3468,30 @@ body {
   font-size: 1.0625rem;
   line-height: 1.55;
   color: var(--color-10);
+}
+
+/* the licence the model is published under, sat just under the links out */
+.model-license {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 1.1rem 0 0;
+  padding: 0.34rem 0.85rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--model-accent, var(--text-orange-500)) 22%, var(--primary-100));
+  background: rgba(255, 255, 255, 0.6);
+  font-size: 0.78rem;
+  color: var(--color-11);
+}
+
+.model-license svg {
+  flex: none;
+  color: var(--model-accent, var(--text-orange-500));
+}
+
+.model-license b {
+  font-weight: 650;
+  color: var(--text-primary);
 }
 
 .model-note {
@@ -4491,13 +4509,19 @@ body {
   color: inherit;
 }
 
-/* the cursor the words are landing at */
-.audio-transcript.is-live .tx-word.is-cursor::before {
-  content: '';
+/* The caret the words are landing at. It follows the word arriving now — it
+   used to be a ::before on that word, which drew it in front of the word it
+   belonged to — and it is a real element rather than a pseudo, so the word's
+   own fade-in does not dim it. Off unless the transcript is live. */
+.tx-caret {
+  display: none;
+}
+
+.audio-transcript.is-live .tx-caret {
   display: inline-block;
   width: 0.5em;
   height: 1.05em;
-  margin-left: 0.05em;
+  margin-left: 0.08em;
   border-radius: 1px;
   vertical-align: text-bottom;
   background: color-mix(in srgb, var(--model-emerald) 60%, transparent);
@@ -4507,6 +4531,10 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .audio-transcript.is-live .tx-word {
     color: inherit;
+  }
+
+  .audio-transcript.is-live .tx-caret {
+    animation: none;
   }
 }
 
@@ -5124,6 +5152,178 @@ body {
   font-size: calc(2.55cqw * var(--ocr-scale, 1));
   line-height: 1.5;
   color: var(--ed-text);
+}
+
+/* ── OCR reader: the scan on the left, the reconstruction beside it ──────── */
+
+/* Three columns run across the playground: the page being read, the blocks the
+   model emits for it, and the example rail (which belongs to .pg-card, not
+   here). The column template and the box heights live in developers.css,
+   beside the rest of the model-coloured rules; the structure is here.
+
+   `display: grid` is load-bearing and was missing: developers.css set a
+   `grid-template-columns` on a box that was still `display: block`, so the
+   template was ignored and the reconstruction stacked underneath the scan
+   instead of sitting next to it. */
+.ocr-stage {
+  display: grid;
+  align-items: start;
+}
+
+.ocr-scan {
+  margin: 0;
+  min-width: 0;
+}
+
+.ocr-read {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+/* "Scan" on one side, "IndicOCR" on the other */
+.ocr-side-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0 0 0.6rem;
+  font-size: 0.64rem;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+/* the live marker, on while the page is being worked through */
+.ocr-reading {
+  font-weight: 650;
+  letter-spacing: 0.02em;
+  text-transform: none;
+}
+
+.ocr-reading::before {
+  content: '';
+  display: inline-block;
+  width: 0.4em;
+  height: 0.4em;
+  margin-right: 0.4em;
+  border-radius: 999px;
+  background: currentColor;
+  vertical-align: 0.12em;
+  animation: ocr-pulse 1.1s ease-in-out infinite;
+}
+
+@keyframes ocr-pulse {
+  0%, 100% { opacity: 0.3; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1.2); }
+}
+
+.ocr-replay {
+  margin-left: auto;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+/* The page itself. The composite images hold the scan and the model's output
+   side by side with a caption above them, so the image is positioned inside
+   this box and clipped to it: only the page card shows. */
+.ocr-scan-crop {
+  position: relative;
+  overflow: hidden;
+  border-radius: 12px;
+  border: 1px solid var(--light-94);
+  background: var(--white);
+}
+
+.ocr-scan-img {
+  position: absolute;
+  display: block;
+  max-width: none;
+  height: auto;
+}
+
+/* The region being read right now, drawn over the scan. It slides from one
+   block to the next rather than blinking between them, which is what makes
+   the reading order legible. */
+.ocr-box {
+  position: absolute;
+  z-index: 1;
+  border: 2px solid var(--ocr-accent, #57534E);
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--ocr-accent, #57534E) 14%, transparent);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.7);
+  transition:
+    top 0.3s cubic-bezier(0.33, 1, 0.68, 1),
+    left 0.3s cubic-bezier(0.33, 1, 0.68, 1),
+    width 0.3s cubic-bezier(0.33, 1, 0.68, 1),
+    height 0.3s cubic-bezier(0.33, 1, 0.68, 1),
+    border-color 0.3s ease,
+    background-color 0.3s ease;
+  pointer-events: none;
+}
+
+/* the blocks, in the order they were read; the box height is in developers.css */
+.ocr-blocks {
+  overflow-y: auto;
+  padding-right: 0.4rem;
+  scrollbar-width: thin;
+  font-size: 0.84rem;
+  line-height: 1.5;
+  color: var(--ed-text, var(--text-primary));
+}
+
+/* a block arrives rather than appears */
+.ocr-block {
+  animation: ocr-block-in 0.34s cubic-bezier(0.33, 1, 0.68, 1) both;
+}
+
+/* the block being written right now — the one live marker every example has,
+   whether or not the model gave coordinates to outline on the scan */
+.ocr-block.is-writing {
+  border-color: var(--ocr-accent, #57534E);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ocr-accent, #57534E) 12%, transparent);
+}
+
+.ocr-block.is-writing .ocr-block-tag {
+  animation: ocr-tag-pulse 1.1s ease-in-out infinite;
+}
+
+@keyframes ocr-tag-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
+}
+
+@keyframes ocr-block-in {
+  from { opacity: 0; transform: translateY(7px); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ocr-box { transition: none; }
+  .ocr-reading::before { animation: none; opacity: 1; }
+  .ocr-block { animation: none; }
+  .ocr-block.is-writing .ocr-block-tag { animation: none; }
+}
+
+.ocr-missing {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1.5rem;
+  font-size: 0.78rem;
+  text-align: center;
+  color: var(--color-11);
+}
+
+.ocr-missing p {
+  margin: 0;
+}
+
+.ocr-missing code {
+  display: block;
+  margin-top: 0.3rem;
+  font-size: 0.72rem;
+  word-break: break-all;
 }
 
 /* one detected block: a tinted box carrying its reading-order number and label */
