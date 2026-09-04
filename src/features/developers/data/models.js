@@ -1,7 +1,18 @@
+// ⚠️ TEMPORARY BLOG URLS — these are Cloudflare quick-tunnel addresses for the
+// posts as they stand today. They die when the tunnel does; swap each for its
+// permanent home (or an on-site /research/<slug>) once published.
+const BLOGS = {
+    speak: 'https://commented-millions-gave-association.trycloudflare.com/indic-speak.html',
+    ocr: 'https://dow-dual-chem-tutorial.trycloudflare.com/',
+    translate: 'https://amended-comfort-recognized-hearts.trycloudflare.com/',
+};
+
+// ⚠️ PRICING IS PLACEHOLDER — every `price` below is a stand-in so the hero
+// band has something to show. Replace each value with the real published rate
+// before this goes live; the console at console.bodhan.ai is the source of truth.
 export const models = [
     {
         id: 'indic-transcribe',
-        dot: { x: 42.3, y: 48.3, filled: false, part: 'wing', side: 'left' },
         name: 'Indic-Transcribe',
         codename: 'Speech to Text',
         icon: 'mic',
@@ -14,11 +25,12 @@ export const models = [
             { label: 'Parameters', value: '1.2B' },
             { label: 'Output modes', value: '3' },
         ],
+        price: { value: '₹30', label: 'per audio hour' },
+        blog: { label: 'Read the ASR post', href: '/research/bodhan-asr' },
         href: '/developers/indic-transcribe',
     },
     {
         id: 'indic-speak',
-        dot: { x: 53.3, y: 18.8, filled: true, part: 'head', side: 'left' },
         name: 'Indic-Speak',
         codename: 'Text to Speech',
         icon: 'speaker',
@@ -31,12 +43,13 @@ export const models = [
             { label: 'Voices', value: 'Multiple / language' },
             { label: 'Response time', value: '~200 ms' },
         ],
+        price: { value: '₹90', label: 'per 1M characters' },
+        blog: { label: 'Read the blog', href: BLOGS.speak },
         href: '/developers/indic-speak',
     },
     {
-        id: 'indic-doc-parser',
-        dot: { x: 46.9, y: 84.5, filled: false, part: 'foot', side: 'right' },
-        name: 'IndicDocParser',
+        id: 'indic-ocr',
+        name: 'Indic-OCR',
         codename: 'Document Digitisation',
         icon: 'document',
         accent: 'var(--text-orange-500)',
@@ -48,11 +61,12 @@ export const models = [
             { label: 'Layout labels', value: '37' },
             { label: 'Parameters', value: '33M + 0.8B' },
         ],
-        href: '/developers/indic-doc-parser',
+        price: { value: '₹40', label: 'per 1,000 pages' },
+        blog: { label: 'Read the blog', href: BLOGS.ocr },
+        href: '/developers/indic-ocr',
     },
     {
         id: 'indic-translate',
-        dot: { x: 75.0, y: 73.1, filled: false, part: 'body', side: 'right' },
         name: 'Indic-Translate',
         codename: 'Translation',
         icon: 'languages',
@@ -65,6 +79,8 @@ export const models = [
             { label: 'Parameters', value: '7.94B' },
             { label: 'Context', value: '32K tokens' },
         ],
+        price: { value: '₹60', label: 'per 1M characters' },
+        blog: { label: 'Read the blog', href: BLOGS.translate },
         href: '/developers/indic-translate',
     },
 ];

@@ -1,40 +1,105 @@
-import { useRef, useState } from 'react';
+import { AlignLeft, ArrowLeftRight, Blend, FileCode2, FileText, Sigma, Table2, Type } from 'lucide-react';
 import Navbar from '../../../home/components/Navbar';
 import Footer from '../../../home/components/Footer';
-import './indic-translate/translate.css';
-import useTranslateAnimations from './indic-translate/useTranslateAnimations';
-import TranslateHero from './indic-translate/TranslateHero';
-import TranslateOverview from './indic-translate/TranslateOverview';
-import TranslateLiveDemo from './indic-translate/TranslateLiveDemo';
-import TranslateExamplesGallery from './indic-translate/TranslateExamplesGallery';
-import TranslateClosing from './indic-translate/TranslateClosing';
+import ModelHero from './ModelHero';
+import MiniTranslatePlayground from './MiniTranslatePlayground';
+import Reveal from '../../../../components/Reveal';
+import SHOWCASE from '../../data/translateShowcase.json';
+import { getModelById } from '../../data/models';
 
-const IndicTranslatePage = () => {
-    const pageRef = useRef(null);
-    // The demo's mode lives here so the capability cards in the overview can
-    // hand it straight to the matching animation.
-    const [demoMode, setDemoMode] = useState('sentence');
-    useTranslateAnimations(pageRef);
+const model = getModelById('indic-translate');
 
-    const pickCapability = (mode) => {
-        setDemoMode(mode);
-        document.querySelector('#demo')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    };
+const STATS = [
+    { value: '22', label: 'Languages + English' },
+    { value: '44', label: 'Directions' },
+    { value: '32K', label: 'Token context' },
+    { value: '7.94B', label: 'Parameters' },
+    { value: model.price.value, label: model.price.label, isPrice: true },
+];
 
-    return (
-        <div className="min-h-screen itr-page" ref={pageRef}>
-            <div className="itr-ground" aria-hidden="true" />
-            <Navbar />
-            <main id="top">
-                <TranslateHero />
-                <TranslateOverview onPickCapability={pickCapability} />
-                <TranslateLiveDemo mode={demoMode} onModeChange={setDemoMode} />
-                <TranslateExamplesGallery />
-                <TranslateClosing />
-            </main>
-            <Footer />
-        </div>
-    );
+const FORM_ICONS = {
+    sentence: AlignLeft,
+    document: FileText,
+    romanized: Type,
+    codemix: Blend,
+    transliteration: ArrowLeftRight,
 };
+
+const SUB_ICONS = {
+    markdown: FileText,
+    latex: Sigma,
+    code: FileCode2,
+    tables: Table2,
+    selective: Blend,
+};
+
+const { forms } = SHOWCASE;
+
+// Five capabilities, as the blog groups them. Document carries the five
+// structures as tabs rather than five separate rail entries.
+const items = forms.map((f) => {
+    const Icon = FORM_ICONS[f.id] ?? FileText;
+    return {
+        id: f.id,
+        badge: <Icon size={16} aria-hidden="true" />,
+        name: f.form,
+        sublabel: f.subs ? 'Markdown, LaTeX, code, tables' : f.lang.name,
+        tabs: f.subs?.map((s) => {
+            const SubIcon = SUB_ICONS[s.id] ?? FileText;
+            return { id: s.id, label: s.form, icon: <SubIcon size={13} aria-hidden="true" /> };
+        }),
+    };
+});
+
+const paneFor = (f) => {
+    const nativeDir = f.lang.rtl ? 'rtl' : undefined;
+    return {
+        sourceLabel: f.sourceLabel,
+        sourceText: f.source,
+        sourceLang: f.sourceIsNative ? f.lang.tag : 'en',
+        sourceDir: f.sourceIsNative ? nativeDir : undefined,
+        outputLabel: f.outputLabel,
+        outputText: f.output,
+        outputLang: f.outputIsLatin ? 'en' : f.lang.tag,
+        outputDir: f.outputIsLatin ? undefined : nativeDir,
+        markdown: f.markdown,
+        alt: f.alt ? { ...f.alt, lang: f.lang.tag, dir: nativeDir } : null,
+    };
+};
+
+const renderPane = (item, tabId) => {
+    const f = forms.find((x) => x.id === item.id);
+    if (!f.subs) return paneFor(f);
+    return paneFor(f.subs.find((s) => s.id === tabId) ?? f.subs[0]);
+};
+
+const IndicTranslatePage = () => (
+    <div className="min-h-screen research-page">
+        <Navbar />
+        <main className="model-page-main">
+            <ModelHero
+                eyebrow="Developers · Model"
+                title={model.name}
+                intro="translate"
+                tagline="English and all 22 Eighth Schedule languages, in both directions — with Markdown, LaTeX, code and tables coming out the way they went in."
+                accent="var(--model-violet)"
+                stats={STATS}
+                primaryCta={{ label: 'Hugging Face', href: '#' }}
+                blogCta={model.blog}
+                secondaryCta={{ label: 'Contact', href: '/contact' }}
+            />
+
+            <Reveal as="section" className="model-section">
+                <h2 className="model-section-title">Every kind of translation</h2>
+                <p className="model-section-dek">
+                    Every form the model handles, each shown in a different language — sentences and
+                    whole documents, native script and Roman.
+                </p>
+                <MiniTranslatePlayground items={items} renderPane={renderPane} />
+            </Reveal>
+        </main>
+        <Footer />
+    </div>
+);
 
 export default IndicTranslatePage;

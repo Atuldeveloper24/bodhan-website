@@ -10,7 +10,7 @@ import PartnersPage from '../features/partners/components/PartnersPage'
 import ResearchPage from '../features/research/components/ResearchPage'
 import BlogPostPage from '../features/research/components/BlogPostPage'
 import DevelopersPage from '../features/developers/components/DevelopersPage'
-import IndicDocParserPage from '../features/developers/components/models/IndicDocParserPage'
+import IndicOcrPage from '../features/developers/components/models/IndicOcrPage'
 import IndicSpeakPage from '../features/developers/components/models/IndicSpeakPage'
 import IndicTranscribePage from '../features/developers/components/models/IndicTranscribePage'
 import IndicTranslatePage from '../features/developers/components/models/IndicTranslatePage'
@@ -30,7 +30,7 @@ function App() {
       <Route path="/research/blog" element={<ResearchPage />} />
       <Route path="/research/publications" element={<ResearchPage />} />
       <Route path="/developers" element={<DevelopersPage />} />
-      <Route path="/developers/indic-doc-parser" element={<IndicDocParserPage />} />
+      <Route path="/developers/indic-ocr" element={<IndicOcrPage />} />
       <Route path="/developers/indic-speak" element={<IndicSpeakPage />} />
       <Route path="/developers/indic-transcribe" element={<IndicTranscribePage />} />
       <Route path="/developers/indic-translate" element={<IndicTranslatePage />} />

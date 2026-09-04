@@ -2756,6 +2756,87 @@ summary:focus-visible,
   color: var(--text-orange-500);
 }
 
+/* ── Nav CTA: straight out to the console ── */
+.nav-dashboard-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex: none;
+  padding: 0.5rem 0.9rem;
+  border-radius: 999px;
+  background: var(--text-primary);
+  color: white;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.nav-dashboard-btn:hover {
+  background: var(--color-9);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px rgba(46, 50, 56, 0.18);
+}
+
+.nav-dashboard-btn svg {
+  transition: transform 0.2s ease;
+}
+
+.nav-dashboard-btn:hover svg {
+  transform: translate(2px, -2px);
+}
+
+.nav-dashboard-btn-mobile {
+  justify-content: center;
+  margin-top: 0.75rem;
+  padding: 0.7rem 1rem;
+  font-size: 0.9375rem;
+}
+
+/* ── Nav Developers dropdown: two-column mega menu (APIs + Resources) ── */
+.nav-mega-dropdown {
+  width: 34rem;
+}
+
+.nav-mega-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.25rem;
+  padding: 1.1rem 0.5rem;
+}
+
+.nav-mega-col {
+  display: flex;
+  flex-direction: column;
+  padding: 0 0.5rem;
+}
+
+.nav-mega-col-resources {
+  border-left: 1px solid var(--primary-100);
+}
+
+.nav-mega-col-title {
+  margin: 0 0 0.35rem 0.75rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-14);
+}
+
+.nav-mega-viewall {
+  margin: 0.3rem 0.75rem 0;
+  padding: 0.4rem 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text-orange-500);
+  transition: color 0.2s ease;
+}
+
+.nav-mega-viewall:hover {
+  color: var(--text-hover);
+}
+
 /* Feature cards — Inference Performance style */
 .research-feature-grid {
   display: grid;
@@ -3105,7 +3186,7 @@ body {
   }
 }
 
-/* ── IndicDocParser playground ── */
+/* ── Indic-OCR playground ── */
 .dp-sample-tabs {
   display: inline-flex;
   gap: 0.35rem;
@@ -3379,6 +3460,15 @@ body {
   color: var(--text-primary);
 }
 
+/* full-sentence headlines get more size and air */
+.model-title.is-display {
+  max-width: 30rem;
+  margin: 0.35rem auto 1rem;
+  font-size: clamp(2.25rem, 5.2vw, 3.5rem);
+  line-height: 1.12;
+  letter-spacing: -0.03em;
+}
+
 .model-tagline {
   max-width: 36rem;
   margin: 0;
@@ -3423,6 +3513,7 @@ body {
 .model-cta-secondary {
   display: inline-flex;
   align-items: center;
+  gap: 0.4rem;
   padding: 0.6rem 1.15rem;
   border-radius: 999px;
   border: 1px solid var(--primary-100);
@@ -3839,336 +3930,1279 @@ body {
   }
 }
 
-/* ── Developers: the mark as a model index, one screen, no scroll ── */
-.dev-stage-page {
-  height: 100dvh;
+/* ── Developers: model index ── */
+/* Tighter than the shared model-page-main shell — this page's whole point
+   is that all four models sit in one row with nothing to scroll past. */
+.models-page-main {
+  padding-top: 2.25rem;
+  padding-bottom: 3rem;
+}
+
+.dev-header {
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--primary-100);
+}
+
+.dev-header .model-eyebrow {
+  margin-top: 0;
+}
+
+.dev-header .model-title {
+  font-size: clamp(1.75rem, 4vw, 2.25rem);
+  margin-bottom: 0.4rem;
+}
+
+.dev-header .model-tagline {
+  font-size: 0.95rem;
+}
+
+/* All four models on one row, so nothing needs scrolling to be seen */
+.dev-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.85rem;
+  padding-top: 1.25rem;
+}
+
+@media (max-width: 1080px) {
+  .dev-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 620px) {
+  .dev-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.dev-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 1.1rem;
+  border-radius: 18px;
+  border: 1px solid var(--primary-100);
+  background: rgba(255, 255, 255, 0.7);
+  transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.dev-card:hover {
+  border-color: color-mix(in srgb, var(--model-accent) 45%, white);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px rgba(46, 50, 56, 0.07);
+}
+
+.dev-card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 0.9rem;
+}
+
+.dev-card-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.1rem;
+  height: 2.1rem;
+  flex: none;
+  border-radius: 11px;
+  background: color-mix(in srgb, var(--model-accent) 12%, white);
+  color: var(--model-accent);
+}
+
+.dev-card-name {
+  display: block;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--text-primary);
+}
+
+.dev-card-codename {
+  display: block;
+  margin-top: 0.1rem;
+  font-size: 0.8125rem;
+  color: var(--model-accent);
+}
+
+.dev-card-summary {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
   overflow: hidden;
+  margin-top: 0.55rem;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: var(--color-10);
+}
+
+/* pinned to the bottom so the spec rows line up across cards */
+.dev-card-specs {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  column-gap: 0.9rem;
+  row-gap: 0.25rem;
+  margin-top: auto;
+  padding-top: 0.85rem;
+  font-size: 0.72rem;
+  color: var(--color-11);
+}
+
+.dev-card-specs b {
+  color: var(--text-primary);
+  font-weight: 700;
+}
+
+.dev-card-arrow {
+  flex: none;
+  color: var(--color-14);
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.dev-card:hover .dev-card-arrow {
+  color: var(--model-accent);
+  transform: translate(2px, -2px);
+}
+
+/* ── Section headings shared by the model pages ── */
+.model-section-title {
+  margin: 0 0 0.5rem;
+  font-family: var(--font-manrope);
+  font-size: clamp(1.4rem, 2.6vw, 1.9rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  text-align: center;
+  color: var(--text-primary);
+}
+
+.model-section-dek {
+  max-width: 34rem;
+  margin: 0 auto 1.75rem;
+  font-size: 0.9375rem;
+  line-height: 1.55;
+  text-align: center;
+  color: var(--color-10);
+}
+
+/* feature cards */
+.feat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  gap: 0.75rem;
+}
+
+.feat-card {
+  padding: 1.1rem;
+  border-radius: 14px;
+  border: 1px solid var(--primary-100);
+  background: rgba(255, 255, 255, 0.7);
+  transition: transform 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease;
+}
+
+.feat-card:hover {
+  transform: translateY(-3px);
+  border-color: color-mix(in srgb, var(--text-orange-500) 35%, white);
+  box-shadow: 0 14px 30px rgba(46, 50, 56, 0.08);
+}
+
+.feat-card-title {
+  margin: 0 0 0.35rem;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--text-orange-500);
+}
+
+.feat-card-detail {
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--color-10);
+}
+
+/* mini playgrounds: a smaller pg-card with just one rail, no mode tabs —
+   used to pick a language or a form without the full playground's sprawl */
+.pg-breakout-compact {
+  width: min(66rem, calc(100vw - 3rem));
+}
+
+.pg-breakout-compact .pg-card {
+  grid-template-columns: minmax(0, 1fr) 13.5rem;
+}
+
+/* the rail scrolls within whatever height the card actually has, rather than a
+   fixed cap that leaves a gap above the foot on a taller card */
+.pg-rail-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding-right: 0.3rem;
+  scrollbar-width: thin;
+}
+
+/* panes grow to meet the rail instead of leaving the card half empty */
+.pg-breakout-compact .pg-main {
   display: flex;
   flex-direction: column;
 }
 
-.dev-stage {
-  position: relative;
+.pg-breakout-compact .tp-pair {
   flex: 1;
-  min-height: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  /* room either side for the labels to sit outside the mark */
-  padding: 4rem clamp(9rem, 22vw, 17rem) 2.5rem;
 }
 
-.dev-stage-eyebrow {
-  position: absolute;
-  top: 5.75rem;
-  left: 50%;
-  transform: translateX(-50%);
-  margin: 0;
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--color-11);
-}
-
-/* the mark */
-.dev-mark {
-  position: relative;
-  height: 100%;
-  max-height: min(30rem, 62vh);
-  aspect-ratio: 5172 / 5305;
-  margin: 0 auto;
-  overflow: visible;
-}
-
-/* clips the entrance sheen to the artwork itself, leaving pins (siblings,
-   positioned relative to .dev-mark) free to sit outside its bounds */
-.dev-mark-image-wrap {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
-}
-
-.dev-mark-img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  transition: opacity 0.35s ease;
-}
-
-.dev-mark.has-active .dev-mark-img {
-  opacity: 0.42;
-}
-
-/* a single light glint that sweeps across on arrival — sells the "unfold" */
-.dev-mark-sheen {
-  position: absolute;
-  top: -20%;
-  width: 42%;
-  height: 140%;
-  background: linear-gradient(
-    100deg,
-    transparent 0%,
-    rgba(255, 255, 255, 0.85) 50%,
-    transparent 100%
-  );
-  mix-blend-mode: screen;
-  pointer-events: none;
-}
-
-/* One labelled pin per model. The mark already draws its own four dots, so we
-   add none — each pin is a full-width row at its dot's height whose leader line
-   points at that dot and whose label sits in the gutter outside the artwork.
-   Full width gives the leader a definite basis for its percentage geometry. */
-.dev-pin {
-  --pin-accent: var(--text-orange-500);
-  position: absolute;
-  left: 0;
-  right: 0;
-  height: 0;
-  transition: opacity 0.25s ease;
-}
-
-.dev-pin-visual {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  height: 0;
-}
-
-/* leader line, from just short of the mark's dot out to the label */
-.dev-pin-leader {
-  position: absolute;
-  top: 0;
-  height: 1px;
-  background: var(--color-14);
-  opacity: 0.5;
-  transition: background-color 0.2s ease, opacity 0.2s ease;
-}
-
-.dev-pin:hover .dev-pin-leader,
-.dev-pin.is-active .dev-pin-leader {
-  background: var(--pin-accent);
-  opacity: 1;
-}
-
-/* the label, parked in the gutter clear of the mark */
-.dev-pin-label {
-  position: absolute;
-  top: 0;
-  display: block;
-  white-space: nowrap;
-  transform: translateY(-50%);
-  transition: transform 0.22s ease;
-}
-
-.dev-pin-left .dev-pin-label {
-  text-align: right;
-}
-
-.dev-pin:hover .dev-pin-label {
-  transform: translateY(-50%) scale(1.03);
-}
-
-.dev-pin-left:hover .dev-pin-label {
-  transform-origin: right center;
-}
-
-.dev-pin-right:hover .dev-pin-label {
-  transform-origin: left center;
-}
-
-.dev-pin-name {
-  display: block;
-  font-family: var(--font-manrope);
-  font-size: clamp(0.9rem, 1.5vw, 1.0625rem);
-  font-weight: 700;
-  letter-spacing: -0.01em;
-  color: var(--text-primary);
-  transition: color 0.2s ease;
-}
-
-.dev-pin:hover .dev-pin-name,
-.dev-pin.is-active .dev-pin-name {
-  color: var(--pin-accent);
-}
-
-.dev-pin-codename {
-  display: block;
-  font-size: clamp(0.66rem, 1vw, 0.75rem);
-  color: var(--color-11);
-}
-
-.dev-pin.is-dimmed {
-  opacity: 0.4;
-}
-
-/* Stacked and scrollable on small screens — one screen is a desktop luxury */
-@media (max-width: 860px) {
-  .dev-stage-page {
-    height: auto;
-    overflow: visible;
-  }
-
-  .dev-stage {
-    padding: 4.5rem 1rem 3rem;
-  }
-
-  .dev-mark {
+@media (max-width: 900px) {
+  .pg-rail-scroll {
     max-height: none;
-    width: 54%;
   }
+}
 
-  .dev-pin-name {
-    font-size: 0.82rem;
-  }
+/* the five document structures, as tabs within the Document capability */
+.tl-tabs {
+  margin-bottom: 0.75rem;
+}
 
-  .dev-pin-codename {
-    font-size: 0.62rem;
-  }
+.tl-tabs button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+/* markdown panes inside a mini playground stay short and scroll */
+.tp-scroll-compact {
+  height: 15rem;
+}
+
+/* a translated document is shown the way it would land in a reader: tables
+   ruled, code set apart, maths typeset */
+.dp-markdown table {
+  width: 100%;
+  margin: 0.5rem 0;
+  border-collapse: collapse;
+  font-size: 0.94em;
+}
+
+.dp-markdown th,
+.dp-markdown td {
+  padding: 0.28rem 0.45rem;
+  border: 1px solid var(--light-94);
+  text-align: start;
+  vertical-align: top;
+}
+
+.dp-markdown th {
+  font-weight: 700;
+  background: var(--ed-inner);
+}
+
+.dp-markdown pre {
+  margin: 0.5rem 0;
+  padding: 0.55rem 0.7rem;
+  overflow-x: auto;
+  border-radius: 8px;
+  border: 1px solid var(--light-94);
+  background: var(--ed-inner);
+}
+
+.dp-markdown code {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.88em;
+}
+
+.dp-markdown :not(pre) > code {
+  padding: 0.05em 0.28em;
+  border-radius: 4px;
+  background: var(--ed-inner);
+}
+
+.dp-markdown ul,
+.dp-markdown ol {
+  margin: 0.4rem 0;
+  padding-inline-start: 1.15rem;
+  list-style: revert;
+}
+
+.dp-markdown li {
+  margin: 0.15rem 0;
+}
+
+.dp-markdown blockquote {
+  margin: 0.5rem 0;
+  padding-inline-start: 0.7rem;
+  border-inline-start: 2px solid var(--primary-100);
+  color: var(--ed-text-2);
+}
+
+.dp-markdown hr {
+  margin: 0.7rem 0;
+  border: 0;
+  border-top: 1px solid var(--light-94);
+}
+
+.dp-markdown .katex-display {
+  margin: 0.5rem 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+/* the output typing itself out, with a caret while it runs */
+.tp-text.is-typing::after {
+  content: '';
+  display: inline-block;
+  width: 0.55em;
+  height: 1.05em;
+  margin-left: 0.06em;
+  border-radius: 1px;
+  vertical-align: text-bottom;
+  background: color-mix(in srgb, var(--model-violet) 55%, transparent);
+  animation: tp-caret 0.85s steps(1, end) infinite;
+}
+
+@keyframes tp-caret {
+  0%, 55% { opacity: 1; }
+  56%, 100% { opacity: 0; }
+}
+
+/* a document is too long to type, so it wipes down instead */
+.tp-wipe {
+  animation: tp-wipe 0.85s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+@keyframes tp-wipe {
+  from { clip-path: inset(0 0 100% 0); }
+  to { clip-path: inset(0 0 0 0); }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .dev-pin,
-  .dev-pin-label,
-  .dev-pin-leader {
-    transition: none !important;
+  .tp-text.is-typing::after,
+  .tp-wipe {
+    animation: none;
   }
 }
 
-/* ── Model page: examples (lens + slide) ── */
+/* the second reading of an output — the full translation beside a code-mixed one */
+.tp-alt {
+  margin: 0.7rem 0 0;
+  padding-top: 0.6rem;
+  border-top: 1px dashed var(--light-94);
+  font-size: 0.82rem;
+  line-height: 1.6;
+  color: var(--ed-text-2);
+}
+
+.tp-alt-label {
+  display: block;
+  margin-bottom: 0.2rem;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-14);
+}
+
+/* rail badge for a language (native-script initial) or a type (an icon) */
+.tl-badge {
+  display: grid;
+  place-items: center;
+  width: 2.1rem;
+  height: 2.1rem;
+  flex: none;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--model-violet) 12%, white);
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--model-violet);
+}
+
+/* stats band — the gradient drifts slowly so the block isn't a flat slab */
+.stat-band {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+  gap: 1rem;
+  padding: 2rem 1.5rem;
+  border-radius: 20px;
+  background: linear-gradient(120deg, #2C241C 0%, #40342A 45%, #2C241C 100%);
+  background-size: 200% 100%;
+  animation: stat-band-drift 18s ease-in-out infinite;
+}
+
+@keyframes stat-band-drift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stat-band {
+    animation: none;
+  }
+}
+
+.stat-band-item {
+  text-align: center;
+}
+
+/* ── Model variants: the shipped flavours of one model, under the hero ── */
+.model-variants {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  margin-top: 1.5rem;
+}
+
+.model-variants-label {
+  margin-right: 0.2rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-14);
+}
+
+.model-variant {
+  padding: 0.3rem 0.8rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--model-accent, var(--text-orange-500)) 32%, transparent);
+  background: color-mix(in srgb, var(--model-accent, var(--text-orange-500)) 7%, white);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--model-accent, var(--text-primary));
+}
+
+/* ── Model title intros: one left-to-right swipe, themed per model ── */
+.mti-stage {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 1.15em;
+}
+
+.mti-stage-stack {
+  flex-direction: column;
+  gap: 0.12em;
+}
+
+.mti-swipe {
+  position: relative;
+  display: inline-block;
+}
+
+.mti-text {
+  display: inline-block;
+}
+
+/* the travelling edge of the swipe */
+.mti-edge {
+  position: absolute;
+  top: -0.08em;
+  bottom: -0.08em;
+  border-radius: 2px;
+  pointer-events: none;
+  background: var(--model-accent, currentColor);
+}
+
+.mti-edge-line {
+  width: 2px;
+  box-shadow: 0 0 14px 3px color-mix(in srgb, var(--model-accent) 45%, transparent);
+}
+
+/* a caret, for text being written down as it is heard */
+.mti-edge-caret {
+  width: 0.055em;
+  opacity: 0.9;
+}
+
+/* transcribe — the audio running under the line being written */
+.mti-wave {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.12em;
+  height: 0.3em;
+}
+
+.mti-wave-bar {
+  display: block;
+  width: 0.055em;
+  height: 100%;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--model-accent) 70%, transparent);
+}
+
+/* translate — the word mid-journey between languages */
+.mti-cycle {
+  display: inline-block;
+  color: var(--model-accent, currentColor);
+}
+
+/* ocr — the handwritten source the scan reads from, sitting exactly over the
+   recognised text so the two swap along one edge */
+.mti-hand {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Kalam', 'Segoe Script', cursive;
+  font-weight: 400;
+  font-size: 0.92em;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  color: #6E5B49;
+  transform: rotate(-1.1deg);
+  pointer-events: none;
+}
+
+.mti-scan-box {
+  position: absolute;
+  inset: -0.16em -0.4em;
+  border: 1.5px dashed color-mix(in srgb, var(--model-accent) 55%, transparent);
+  border-radius: 10px;
+  pointer-events: none;
+}
+
+/* ── Transcribe: the transcript arriving with the audio ── */
+.tx-word {
+  transition: color 0.7s ease;
+}
+
+/* nothing has been heard yet */
+.tx-prompt {
+  position: absolute;
+  inset-inline-start: 0;
+  font-size: 0.9rem;
+  font-style: italic;
+  color: var(--ed-text-2);
+}
+
+.audio-transcript {
+  position: relative;
+}
+
+.audio-transcript.is-live .tx-word {
+  color: transparent;
+}
+
+.audio-transcript.is-live .tx-word.is-heard {
+  color: inherit;
+}
+
+/* the cursor the words are landing at */
+.audio-transcript.is-live .tx-word.is-cursor::before {
+  content: '';
+  display: inline-block;
+  width: 0.5em;
+  height: 1.05em;
+  margin-left: 0.05em;
+  border-radius: 1px;
+  vertical-align: text-bottom;
+  background: color-mix(in srgb, var(--model-emerald) 60%, transparent);
+  animation: tp-caret 0.85s steps(1, end) infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .audio-transcript.is-live .tx-word {
+    color: inherit;
+  }
+}
+
+/* ── Speak examples ── */
+.sx-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+
+.sx-chip {
+  padding: 0.18rem 0.55rem;
+  border-radius: 999px;
+  border: 1px solid var(--light-94);
+  background: var(--white);
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--ed-text-2);
+}
+
+.sx-text {
+  margin: 1rem 0 0;
+  padding: 0.9rem 1rem;
+  border-radius: 12px;
+  border: 1px solid var(--light-94);
+  background: var(--ed-inner);
+  font-size: 1.05rem;
+  line-height: 1.8;
+  color: var(--ed-text);
+}
+
+.sx-text.is-long {
+  max-height: 9rem;
+  overflow-y: auto;
+  font-size: 0.9rem;
+  line-height: 1.85;
+}
+
+
+.sx-group {
+  margin: 0.75rem 0 0.3rem 0.55rem;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-14);
+}
+
+.sx-example {
+  width: 100%;
+}
+
+/* speak — the name, still talking */
+.mti-eq {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.08em;
+  height: 0.62em;
+  margin-left: 0.34em;
+}
+
+.mti-eq span {
+  display: block;
+  width: 0.075em;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--model-accent, currentColor);
+}
+
+/* The band as the hero's footing: warm paper like the rest of the site, with
+   the model's colour kept for the one thing that should stand out — the price. */
+.model-hero-band {
+  position: relative;
+  width: 100%;
+  margin-top: 2rem;
+  padding: 1.15rem 1.25rem;
+  gap: 0.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(7.5rem, 1fr));
+  background: linear-gradient(100deg, #FFF7EC 0%, #FFF1DF 52%, #FFE9D4 100%);
+  border: 1px solid var(--primary-100);
+  box-shadow: 0 12px 30px rgba(46, 50, 56, 0.07);
+}
+
+/* hairline dividers instead of a heavy fill */
+.model-hero-band .stat-band-item + .stat-band-item {
+  box-shadow: inset 1px 0 0 color-mix(in srgb, var(--text-orange-500) 12%, transparent);
+}
+
+.model-hero-band .stat-band-value {
+  font-size: clamp(1.3rem, 2.5vw, 1.75rem);
+  color: var(--text-primary);
+}
+
+.model-hero-band .stat-band-label {
+  font-size: 0.7rem;
+  color: var(--color-11);
+}
+
+.model-hero-band .stat-band-item.is-price {
+  position: relative;
+  border-radius: 12px;
+  padding: 0.3rem 0.5rem;
+  margin: -0.3rem 0;
+  background: linear-gradient(135deg, var(--model-accent) 0%, color-mix(in srgb, var(--model-accent) 78%, var(--text-orange-500)) 100%);
+  box-shadow: 0 6px 16px color-mix(in srgb, var(--model-accent) 30%, transparent);
+}
+
+.model-hero-band .stat-band-item.is-price + .stat-band-item,
+.model-hero-band .stat-band-item.is-price {
+  box-shadow: 0 6px 16px color-mix(in srgb, var(--model-accent) 30%, transparent);
+}
+
+.model-hero-band .is-price .stat-band-value {
+  color: white;
+}
+
+.model-hero-band .is-price .stat-band-label {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+@media (max-width: 620px) {
+  .model-hero-band {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    row-gap: 0.9rem;
+  }
+
+  /* price gets its own row rather than sitting orphaned in a half column */
+  .model-hero-band .stat-band-item.is-price {
+    grid-column: 1 / -1;
+    margin: 0;
+  }
+
+  /* vertical rules only read as rules on one line */
+  .model-hero-band .stat-band-item + .stat-band-item {
+    box-shadow: none;
+  }
+}
+
+.stat-band-value {
+  margin: 0;
+  font-family: var(--font-eb-garamond);
+  font-size: clamp(1.8rem, 4vw, 2.6rem);
+  font-weight: 600;
+  line-height: 1.1;
+  color: white;
+}
+
+.stat-band-label {
+  margin: 0.3rem 0 0;
+  font-size: 0.75rem;
+  letter-spacing: 0.02em;
+  color: rgba(255, 255, 255, 0.66);
+}
+
+/* ── Transcribe playground ── */
+.tx-now {
+  margin: 0;
+  font-size: 0.78rem;
+  color: var(--ed-text-2);
+}
+
+.tx-now b {
+  color: var(--ed-text);
+}
+
+.tx-list {
+  max-height: 22rem;
+  overflow-y: auto;
+  padding-right: 0.25rem;
+}
+
+.tx-badge {
+  display: grid;
+  place-items: center;
+  width: 2.1rem;
+  height: 2.1rem;
+  flex: none;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--model-emerald) 12%, white);
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--model-emerald);
+}
+
+/* ── Translate playground ── */
+.tp-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  margin-bottom: 0.85rem;
+}
+
+.tp-direction {
+  margin: 0;
+  font-size: 0.78rem;
+  color: var(--ed-text-2);
+}
+
+.tp-direction b {
+  color: var(--ed-text);
+}
+
+.tp-doc-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-bottom: 0.85rem;
+}
+
+.tp-doc-picker button {
+  padding: 0.28rem 0.65rem;
+  border-radius: 999px;
+  border: 1px solid var(--light-94);
+  background: white;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--ed-text-2);
+  transition: border-color 0.18s ease, color 0.18s ease, background-color 0.18s ease;
+}
+
+.tp-doc-picker button:hover {
+  border-color: color-mix(in srgb, var(--ed-orange) 40%, white);
+  color: var(--ed-text);
+}
+
+.tp-doc-picker button.is-active {
+  border-color: var(--ed-orange);
+  background: var(--bg-cream-50);
+  color: var(--ed-orange);
+}
+
+.tp-doc-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0 0 0.6rem;
+  font-size: 0.82rem;
+  font-weight: 650;
+  color: var(--ed-text);
+}
+
+.tp-score {
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--ed-emerald) 12%, white);
+  font-size: 0.66rem;
+  font-weight: 700;
+  color: var(--ed-emerald);
+}
+
+.tp-panes {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.tp-pair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+@media (max-width: 720px) {
+  .tp-panes,
+  .tp-pair {
+    grid-template-columns: 1fr;
+  }
+}
+
+.tp-pane {
+  min-width: 0;
+  padding: 0.9rem 1rem;
+  border-radius: 14px;
+  border: 1px solid var(--light-94);
+  background: var(--white);
+}
+
+.tp-pane.is-output {
+  background: var(--ed-inner);
+}
+
+.tp-pane-label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0 0 0.5rem;
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ed-text-2);
+}
+
+.tp-scroll {
+  height: 22rem;
+  overflow-y: auto;
+  padding-right: 0.35rem;
+  font-size: 0.8rem;
+  line-height: 1.6;
+}
+
+.tp-text {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.65;
+  color: var(--ed-text);
+}
+
+.tp-hint,
+.tp-loading {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0.7rem 0 0;
+  font-size: 0.75rem;
+  color: var(--ed-text-2);
+}
+
+.tp-spin {
+  animation: tp-spin 0.9s linear infinite;
+}
+
+@keyframes tp-spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tp-spin {
+    animation-duration: 2.4s;
+  }
+}
+
+/* the language rail */
+.tp-lang-list {
+  max-height: 26rem;
+  overflow-y: auto;
+  padding-right: 0.25rem;
+}
+
+.tp-lang {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.42rem 0.6rem;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  background: transparent;
+  text-align: left;
+  transition: background-color 0.16s ease, border-color 0.16s ease;
+}
+
+.tp-lang:hover {
+  background: var(--light-94);
+}
+
+.tp-lang.is-active {
+  border-color: color-mix(in srgb, var(--text-orange-500) 40%, white);
+  background: var(--bg-cream-50);
+}
+
+.tp-lang-native {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.tp-lang.is-active .tp-lang-native {
+  color: var(--text-orange-500);
+}
+
+.tp-lang-name {
+  flex: none;
+  font-size: 0.68rem;
+  color: var(--color-11);
+}
+
+/* ── Model page: examples ── */
 .model-caption {
   margin: 0.85rem 0 0;
   font-size: 0.8125rem;
   color: var(--color-11);
 }
 
-/* Before/after slider: page scan on top, clipped; OCR output beneath.
-   Height-driven so the whole comparison fits on one screen — width follows
-   from the aspect ratio of the composite's half, set inline per example. */
-.compare-frame {
+/* ── Playground shell: a light app card with an ambient glow behind it ── */
+
+/* lets the playground run wider than the 56rem reading column it sits in */
+.pg-breakout {
+  width: min(74rem, calc(100vw - 3rem));
+  margin-left: 50%;
+  transform: translateX(-50%);
+  margin-top: 1.25rem;
+}
+
+.pg-shell {
   position: relative;
-  overflow: hidden;
-  height: min(62vh, 30rem);
-  width: auto;
-  max-width: 100%;
-  margin: 1.25rem auto 0;
-  border-radius: 14px;
-  border: 1px solid var(--ed-border);
-  background: var(--white);
-  user-select: none;
+  isolation: isolate;
 }
 
-/* Only there to detect a missing file — never shown */
-.compare-probe {
+.pg-glow {
   position: absolute;
-  width: 1px;
-  height: 1px;
-  opacity: 0;
-  pointer-events: none;
+  inset: -1.5rem -1rem -1rem;
+  z-index: -1;
+  border-radius: 32px;
+  background:
+    radial-gradient(ellipse 60% 70% at 12% 0%, rgba(148, 170, 226, 0.42) 0%, transparent 62%),
+    radial-gradient(ellipse 55% 65% at 88% 8%, rgba(226, 176, 152, 0.38) 0%, transparent 60%),
+    radial-gradient(ellipse 70% 60% at 50% 100%, rgba(255, 218, 193, 0.4) 0%, transparent 65%);
+  filter: blur(6px);
 }
 
-.compare-layer {
-  position: absolute;
-  inset: 0;
-  background-repeat: no-repeat;
-}
-
-.compare-layer-top {
-  border-right: 2px solid white;
-}
-
-.compare-label {
-  position: absolute;
-  top: 0.7rem;
-  z-index: 1;
-  padding: 0.3rem 0.7rem;
-  border-radius: 999px;
-  background: rgba(44, 36, 28, 0.8);
-  color: white;
-  font-size: 0.68rem;
-  font-weight: 650;
-  pointer-events: none;
-}
-
-.compare-label-left {
-  left: 0.7rem;
-}
-
-.compare-label-right {
-  right: 0.7rem;
-  background: color-mix(in srgb, var(--ed-orange) 82%, black);
-}
-
-.compare-handle {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  z-index: 2;
-  width: 2px;
-  margin-left: -1px;
-  background: white;
-  box-shadow: 0 0 0 1px rgba(44, 36, 28, 0.12);
-  cursor: ew-resize;
-  touch-action: none;
-}
-
-.compare-handle-grip {
-  position: absolute;
-  top: 50%;
-  left: 50%;
+.pg-card {
   display: grid;
-  place-items: center;
-  width: 2.2rem;
-  height: 2.2rem;
-  border-radius: 999px;
-  transform: translate(-50%, -50%);
-  background: white;
-  color: var(--ed-orange);
-  box-shadow: 0 6px 18px rgba(46, 50, 56, 0.22);
-  transition: transform 0.15s ease;
+  grid-template-columns: minmax(0, 1fr) 17.5rem;
+  gap: 1rem;
+  padding: 1rem;
+  border-radius: 24px;
+  border: 1px solid rgba(46, 50, 56, 0.07);
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 24px 60px rgba(46, 50, 56, 0.1);
 }
 
-.compare-handle:hover .compare-handle-grip,
-.compare-handle:focus-visible .compare-handle-grip {
-  transform: translate(-50%, -50%) scale(1.1);
+.pg-main {
+  min-width: 0;
 }
 
-.compare-handle:focus-visible {
-  outline: 2px solid var(--ed-orange);
-  outline-offset: 2px;
+/* the example rail: matches whatever height the main pane's content actually
+   needs for the current example, and scrolls internally if its own list is
+   longer than that. `contain: size` is load-bearing, not decorative — it
+   tells the grid to treat this column as having no intrinsic size of its own,
+   so the row's height comes from .pg-main alone; the rail is then stretched
+   to that height and its own (possibly longer) content scrolls inside it.
+   Without it, `auto` grid rows size to the *taller* of the two columns, so a
+   9-item list would set the row height even next to two lines of text. */
+.pg-rail {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  /* a floor, not a target: keeps the list browsable (~3 rows) beside an
+     example whose main pane is only a line or two, without capping how tall
+     the rail can grow beside a taller one. `contain: size` ignores content
+     for sizing purposes but still honours an authored min-height. */
+  min-height: 14rem;
+  overflow: hidden;
+  contain: size;
+  padding-left: 1rem;
+  border-left: 1px solid var(--light-94);
 }
 
-.example-footer {
+.pg-rail-label {
+  margin: 0.25rem 0 0.6rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-11);
+}
+
+.pg-rail-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.pg-example {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.55rem;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  background: transparent;
+  text-align: left;
+  transition: background-color 0.18s ease, border-color 0.18s ease;
+}
+
+.pg-example:hover {
+  background: var(--light-94);
+}
+
+.pg-example.is-active {
+  border-color: color-mix(in srgb, var(--text-orange-500) 40%, white);
+  background: var(--bg-cream-50);
+}
+
+.pg-example-thumb {
+  width: 2.6rem;
+  height: 2.6rem;
+  flex: none;
+  border-radius: 7px;
+  border: 1px solid var(--light-94);
+  background-repeat: no-repeat;
+  background-position: left top;
+  background-color: white;
+}
+
+.pg-example-copy {
+  min-width: 0;
+}
+
+.pg-example-name {
+  display: block;
+  font-size: 0.8125rem;
+  font-weight: 650;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pg-example.is-active .pg-example-name {
+  color: var(--text-orange-500);
+}
+
+.pg-example-lang {
+  display: block;
+  margin-top: 0.05rem;
+  font-size: 0.72rem;
+  color: var(--color-11);
+}
+
+/* per-example counts, sat under the rail list */
+.pg-rail-stats {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  margin-top: 0.85rem;
+  gap: 0.15rem 0.9rem;
+  margin-top: 0.9rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid var(--light-94);
+  font-size: 0.72rem;
+  color: var(--color-11);
 }
 
-.compare-missing {
+.pg-rail-stats b {
+  color: var(--text-primary);
+  font-weight: 700;
+}
+
+.pg-rail-foot {
+  margin-top: auto;
+  padding-top: 1.25rem;
+}
+
+.pg-rail-foot p {
+  margin: 0 0 0.5rem;
+  font-size: 0.78rem;
+  color: var(--color-11);
+}
+
+@media (max-width: 900px) {
+  .pg-card {
+    grid-template-columns: 1fr;
+  }
+
+  .pg-rail {
+    padding-left: 0;
+    padding-top: 1rem;
+    border-left: none;
+    border-top: 1px solid var(--light-94);
+  }
+
+  .pg-rail-list {
+    flex-direction: row;
+    overflow-x: auto;
+  }
+
+  .pg-example {
+    flex: none;
+  }
+
+  .pg-rail-foot {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding-top: 1rem;
+  }
+
+  .pg-rail-foot p {
+    margin: 0;
+  }
+}
+
+/* The page on the left, the model's reconstruction building up on the right.
+   Both columns fill the card, so the demo reads as one document being taken
+   apart rather than a page floating in empty space. */
+.ocr-stage {
+  display: grid;
+  grid-template-columns: minmax(0, auto) minmax(0, 1fr);
+  gap: 1rem;
+  align-items: start;
+}
+
+@media (max-width: 820px) {
+  .ocr-stage {
+    grid-template-columns: 1fr;
+  }
+}
+
+.ocr-scan {
+  position: relative;
+  margin: 0;
+  width: min(100%, calc(58vh * var(--page-aspect, 0.65)), 22rem);
+}
+
+.ocr-scan-crop {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: var(--page-aspect, 0.65);
+  border-radius: 12px;
+  border: 1px solid var(--light-94);
+  background: var(--white);
+  box-shadow: 0 8px 22px rgba(46, 50, 56, 0.08);
+}
+
+.ocr-scan-img {
+  position: absolute;
+  max-width: none;
+}
+
+/* the region whose text is being written right now */
+.ocr-box {
+  position: absolute;
+  border: 2px solid var(--ocr-accent);
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--ocr-accent) 12%, transparent);
+  box-shadow: 0 0 0 9999px rgba(255, 255, 255, 0.42);
+  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: none;
+}
+
+.ocr-side-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0 0 0.5rem;
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ed-text-2);
+}
+
+.ocr-reading {
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--text-orange-500);
+  animation: tp-caret 1s steps(1, end) infinite;
+}
+
+.ocr-replay {
+  margin-left: auto;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+/* the reconstruction column */
+.ocr-read {
+  min-width: 0;
+}
+
+.ocr-blocks {
+  max-height: min(58vh, 30rem);
+  overflow-y: auto;
+  padding-right: 0.3rem;
+  font-family: var(--font-manrope);
+  font-size: 0.78rem;
+  line-height: 1.55;
+  color: var(--ed-text);
+  scrollbar-width: thin;
+}
+
+.ocr-missing {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 0.6rem;
-  width: 100%;
-  height: 18rem;
-  padding: 1.5rem;
+  padding: 2rem 1.5rem;
+  border-radius: 12px;
+  border: 1px solid var(--light-94);
   text-align: center;
   color: var(--ed-text-2);
 }
 
-.compare-missing p {
+.ocr-missing p {
   margin: 0;
   font-size: 0.8125rem;
   line-height: 1.6;
 }
 
-.compare-missing code {
+.ocr-missing code {
   display: block;
   margin-top: 0.35rem;
   font-family: var(--font-mono, monospace);
@@ -4176,49 +5210,115 @@ body {
   color: var(--ed-orange);
 }
 
-.example-stats {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.35rem 1.1rem;
-  font-size: 0.75rem;
-  color: var(--ed-text-2);
+/* one detected block: a tinted box carrying its reading-order number and label.
+   Each lands as the model gets to it, so the page assembles in reading order. */
+.ocr-block {
+  position: relative;
+  margin: 1.15em 0 0;
+  padding: 0.42em 0.5em 0.38em;
+  border-radius: 0.3em;
+  border: 1px solid color-mix(in srgb, var(--ocr-accent) 55%, white);
+  background: color-mix(in srgb, var(--ocr-accent) 6%, white);
+  animation: ocr-block-in 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
 }
 
-.example-stats b {
-  color: var(--ed-text);
-}
-
-.example-ocr-block {
-  margin-bottom: 0.4rem;
-}
-
-.example-ocr-block :last-child {
-  margin-bottom: 0;
-}
-
-.example-slide {
-  animation: example-slide-in 0.42s cubic-bezier(0.22, 0.8, 0.3, 1) both;
-}
-
-.example-slide.from-left {
-  animation-name: example-slide-in-left;
-}
-
-@keyframes example-slide-in {
-  from { opacity: 0; transform: translateX(26px); }
-  to { opacity: 1; transform: translateX(0); }
-}
-
-@keyframes example-slide-in-left {
-  from { opacity: 0; transform: translateX(-26px); }
-  to { opacity: 1; transform: translateX(0); }
+@keyframes ocr-block-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.5em);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .example-slide {
-    animation: none !important;
+  .ocr-block {
+    animation: none;
   }
 }
+
+.ocr-block:first-child {
+  margin-top: 0.75em;
+}
+
+.ocr-block-tag {
+  position: absolute;
+  top: -0.85em;
+  left: 0.5em;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35em;
+  padding: 0.1em 0.4em 0.1em 0.15em;
+  border-radius: 0.25em;
+  background: var(--ocr-accent);
+  color: white;
+  font-size: 0.72em;
+  font-weight: 700;
+  line-height: 1.5;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+
+.ocr-block-n {
+  display: inline-block;
+  padding: 0 0.3em;
+  border-radius: 0.2em;
+  background: rgba(0, 0, 0, 0.22);
+}
+
+.ocr-block-text > :first-child {
+  margin-top: 0;
+}
+
+.ocr-block-text > :last-child {
+  margin-bottom: 0;
+}
+
+/* typeset maths: let a long equation scroll rather than burst the page */
+.ocr-block-math {
+  margin: 0.15em 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  font-size: 0.95em;
+}
+
+.ocr-block-math .katex-display {
+  margin: 0.35em 0;
+}
+
+.ocr-block-text .katex,
+.ocr-block-math .katex {
+  font-size: 1.05em;
+}
+
+/* tables come back as HTML; keep the grid legible at page scale */
+.ocr-block-table {
+  overflow-x: auto;
+}
+
+.ocr-block-table table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95em;
+}
+
+.ocr-block-table td,
+.ocr-block-table th {
+  padding: 0.15em 0.4em;
+  border: 1px solid color-mix(in srgb, var(--ocr-accent) 35%, transparent);
+  text-align: start;
+  vertical-align: top;
+}
+
+.ocr-block-table th {
+  font-weight: 700;
+  background: color-mix(in srgb, var(--ocr-accent) 10%, transparent);
+}
+
+
+
+
+
+
+
 
 /* ── Culture backdrop (per-language motifs) ── */
 .model-panel.has-culture {
@@ -4428,7 +5528,8 @@ body {
   flex: 1;
   min-width: 1px;
   border-radius: 2px;
-  background: var(--ed-border);
+  /* readable at rest — an invisible meter reads as a broken one */
+  background: color-mix(in srgb, var(--ed-text-2) 30%, transparent);
   transform: scaleY(0.55);
   transition: background-color 0.18s ease, transform 0.18s ease;
 }
@@ -4449,21 +5550,6 @@ body {
   font-size: 0.75rem;
   font-variant-numeric: tabular-nums;
   color: var(--ed-text-2);
-}
-
-.audio-missing {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  margin: 0 0 1rem;
-  font-size: 0.8rem;
-  color: var(--ed-text-2);
-}
-
-.audio-missing code {
-  font-family: var(--font-mono, monospace);
-  font-size: 0.75rem;
-  color: var(--ed-orange);
 }
 
 .audio-transcript {

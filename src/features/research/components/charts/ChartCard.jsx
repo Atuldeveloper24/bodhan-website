@@ -1,21 +1,31 @@
-import { useEffect, useId, useRef, useState } from 'react';
+import { useCallback, useId, useRef, useState } from 'react';
 import './chartSvg.css';
 
+/**
+ * Width and height of the element the returned ref is attached to.
+ *
+ * A callback ref rather than an effect, so the first measurement happens the
+ * moment the node attaches. ResizeObserver's own first callback is asynchronous
+ * and, in a document that is not currently being rendered, may never arrive —
+ * which would leave an SVG chart with a zero width and nothing drawn into it.
+ * The observer still handles every change after that first measurement.
+ */
 export const useContainerSize = () => {
-    const ref = useRef(null);
+    const observer = useRef(null);
     const [size, setSize] = useState({ width: 0, height: 0 });
 
-    useEffect(() => {
-        const node = ref.current;
-        if (!node) return undefined;
+    const ref = useCallback((node) => {
+        observer.current?.disconnect();
+        observer.current = null;
+        if (!node) return;
 
-        const observer = new ResizeObserver(([entry]) => {
-            const { width, height } = entry.contentRect;
-            setSize({ width, height });
+        const { width, height } = node.getBoundingClientRect();
+        setSize({ width, height });
+
+        observer.current = new ResizeObserver(([entry]) => {
+            setSize({ width: entry.contentRect.width, height: entry.contentRect.height });
         });
-
-        observer.observe(node);
-        return () => observer.disconnect();
+        observer.current.observe(node);
     }, []);
 
     return [ref, size];

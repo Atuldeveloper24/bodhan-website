@@ -1,12 +1,13 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { ArrowRight, ChevronDown, Menu, X } from 'lucide-react';
+import { ArrowRight, ArrowUpRight, BookOpen, Boxes, ChevronDown, CircleDollarSign, Menu, Users, X } from 'lucide-react';
 import gsap from 'gsap';
 
 import Icon from '../../../assets/Icon.png';
 import MoELogo from '../../../assets/Ministry_of_Education_India.png';
 import ModelIcon from '../../developers/components/ModelIcon';
 import { models } from '../../developers/data/models';
+import { CONSOLE_URL } from '../../../config/links';
 
 const researchDropdown = [
     {
@@ -18,21 +19,35 @@ const researchDropdown = [
     { label: 'Publications', to: '/research/publications', description: 'Papers and formal publications' },
 ];
 
-const developersDropdown = [
-    ...models.map((model) => ({
-        label: model.name,
-        to: model.href,
-        description: model.codename,
-        icon: model.icon,
-        accent: model.accent,
-    })),
-    { label: 'All models', to: '/developers', description: 'Browse every Bodhan model' },
+const developersApis = models.map((model) => ({
+    label: model.name,
+    to: model.href,
+    description: model.codename,
+    icon: model.icon,
+    accent: model.accent,
+}));
+
+// Placeholder destinations — wire these up to real pages once they exist.
+const RESOURCE_ICONS = { docs: BookOpen, pricing: CircleDollarSign, integrations: Boxes, community: Users };
+const developersResources = [
+    { label: 'Documentation', to: '#', description: 'Guides and API reference', icon: 'docs', accent: 'var(--model-emerald)' },
+    { label: 'API Pricing', to: '#', description: 'Usage-based pricing', icon: 'pricing', accent: 'var(--brand-blue)' },
+    { label: 'Integrations', to: '#', description: 'Connect Bodhan to your stack', icon: 'integrations', accent: 'var(--text-orange-500)' },
+    { label: 'Community', to: '#', description: 'Get help, share what you build', icon: 'community', accent: 'var(--model-violet)' },
 ];
+
+const developersDropdown = [...developersApis, { label: 'All models', to: '/developers', description: 'Browse every Bodhan model' }];
 
 const navLinks = [
     { label: 'Vision', to: '/', scrollTo: 'vision-mission' },
     { label: 'Research', to: '/research', children: researchDropdown, match: '/research' },
-    { label: 'Developers', to: '/developers', children: developersDropdown, match: '/developers' },
+    {
+        label: 'Developers',
+        to: '/developers',
+        children: developersDropdown,
+        mega: { apis: developersApis, resources: developersResources },
+        match: '/developers',
+    },
     { label: 'Team', to: '/', scrollTo: 'team' },
     { label: 'Careers', to: '/careers' },
     { label: 'Contact', to: '/contact' },
@@ -210,7 +225,7 @@ const Navbar = () => {
                         />
                     </Link>
 
-                    <div className="hidden lg:flex items-center gap-8 ml-10">
+                    <div className="hidden lg:flex items-center gap-6 ml-8">
                         {navLinks.map((link) => {
                             if (link.children) {
                                 const menuActive = link.match && location.pathname.startsWith(link.match);
@@ -249,49 +264,113 @@ const Navbar = () => {
                                             }}
                                             className="absolute left-0 top-full pt-3 invisible opacity-0"
                                         >
-                                            <div
-                                                className={`nav-research-dropdown rounded-2xl overflow-hidden ${
-                                                    link.children.some((child) => child.icon) ? 'w-80' : 'w-72'
-                                                }`}
-                                            >
-                                                <div className="nav-research-dropdown-glow" aria-hidden="true" />
-                                                <div className="relative p-2">
-                                                    {link.children.map((child) => {
-                                                        const active = isChildActive(child.to);
-                                                        return (
+                                            {link.mega ? (
+                                                <div className="nav-research-dropdown nav-mega-dropdown rounded-2xl overflow-hidden">
+                                                    <div className="nav-research-dropdown-glow" aria-hidden="true" />
+                                                    <div className="nav-mega-grid relative">
+                                                        <div className="nav-mega-col">
+                                                            <p className="nav-mega-col-title">APIs</p>
+                                                            {link.mega.apis.map((child) => {
+                                                                const active = isChildActive(child.to);
+                                                                return (
+                                                                    <Link
+                                                                        key={child.label}
+                                                                        to={child.to}
+                                                                        data-dropdown-item
+                                                                        onClick={() => handleNavClick(child)}
+                                                                        className={`nav-research-item group ${active ? 'is-active' : ''}`}
+                                                                        style={child.accent ? { '--model-accent': child.accent } : undefined}
+                                                                    >
+                                                                        <span className="nav-model-icon" aria-hidden="true">
+                                                                            <ModelIcon name={child.icon} size={16} />
+                                                                        </span>
+                                                                        <span className="min-w-0 flex-1">
+                                                                            <span className="nav-research-item-label">{child.label}</span>
+                                                                            <span className="nav-research-item-desc">{child.description}</span>
+                                                                        </span>
+                                                                    </Link>
+                                                                );
+                                                            })}
                                                             <Link
-                                                                key={child.label}
-                                                                to={child.to}
+                                                                to="/developers"
                                                                 data-dropdown-item
-                                                                onClick={() => handleNavClick(child)}
-                                                                className={`nav-research-item group ${active ? 'is-active' : ''}`}
-                                                                style={child.accent ? { '--model-accent': child.accent } : undefined}
+                                                                onClick={() => handleNavClick({})}
+                                                                className="nav-mega-viewall"
                                                             >
-                                                                {child.icon ? (
-                                                                    <span className="nav-model-icon" aria-hidden="true">
-                                                                        <ModelIcon name={child.icon} size={16} />
-                                                                    </span>
-                                                                ) : (
-                                                                    <span className="nav-research-item-indicator" aria-hidden="true" />
-                                                                )}
-                                                                <span className="min-w-0 flex-1">
-                                                                    <span className="nav-research-item-label">
-                                                                        {child.label}
-                                                                    </span>
-                                                                    <span className="nav-research-item-desc">
-                                                                        {child.description}
-                                                                    </span>
-                                                                </span>
-                                                                <ArrowRight
-                                                                    size={14}
-                                                                    className="nav-research-item-arrow"
-                                                                    aria-hidden="true"
-                                                                />
+                                                                View all models
                                                             </Link>
-                                                        );
-                                                    })}
+                                                        </div>
+                                                        <div className="nav-mega-col nav-mega-col-resources">
+                                                            <p className="nav-mega-col-title">Resources</p>
+                                                            {link.mega.resources.map((child) => {
+                                                                const ResourceIcon = RESOURCE_ICONS[child.icon];
+                                                                return (
+                                                                    <Link
+                                                                        key={child.label}
+                                                                        to={child.to}
+                                                                        data-dropdown-item
+                                                                        onClick={() => handleNavClick(child)}
+                                                                        className="nav-research-item group"
+                                                                        style={child.accent ? { '--model-accent': child.accent } : undefined}
+                                                                    >
+                                                                        <span className="nav-model-icon" aria-hidden="true">
+                                                                            {ResourceIcon && <ResourceIcon size={16} />}
+                                                                        </span>
+                                                                        <span className="min-w-0 flex-1">
+                                                                            <span className="nav-research-item-label">{child.label}</span>
+                                                                            <span className="nav-research-item-desc">{child.description}</span>
+                                                                        </span>
+                                                                    </Link>
+                                                                );
+                                                            })}
+                                                        </div>
+                                                    </div>
                                                 </div>
-                                            </div>
+                                            ) : (
+                                                <div
+                                                    className={`nav-research-dropdown rounded-2xl overflow-hidden ${
+                                                        link.children.some((child) => child.icon) ? 'w-80' : 'w-72'
+                                                    }`}
+                                                >
+                                                    <div className="nav-research-dropdown-glow" aria-hidden="true" />
+                                                    <div className="relative p-2">
+                                                        {link.children.map((child) => {
+                                                            const active = isChildActive(child.to);
+                                                            return (
+                                                                <Link
+                                                                    key={child.label}
+                                                                    to={child.to}
+                                                                    data-dropdown-item
+                                                                    onClick={() => handleNavClick(child)}
+                                                                    className={`nav-research-item group ${active ? 'is-active' : ''}`}
+                                                                    style={child.accent ? { '--model-accent': child.accent } : undefined}
+                                                                >
+                                                                    {child.icon ? (
+                                                                        <span className="nav-model-icon" aria-hidden="true">
+                                                                            <ModelIcon name={child.icon} size={16} />
+                                                                        </span>
+                                                                    ) : (
+                                                                        <span className="nav-research-item-indicator" aria-hidden="true" />
+                                                                    )}
+                                                                    <span className="min-w-0 flex-1">
+                                                                        <span className="nav-research-item-label">
+                                                                            {child.label}
+                                                                        </span>
+                                                                        <span className="nav-research-item-desc">
+                                                                            {child.description}
+                                                                        </span>
+                                                                    </span>
+                                                                    <ArrowRight
+                                                                        size={14}
+                                                                        className="nav-research-item-arrow"
+                                                                        aria-hidden="true"
+                                                                    />
+                                                                </Link>
+                                                            );
+                                                        })}
+                                                    </div>
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
                                 );
@@ -299,6 +378,11 @@ const Navbar = () => {
 
                             return <span key={link.label}>{renderLink(link, linkClass)}</span>;
                         })}
+
+                        <a href={CONSOLE_URL} className="nav-dashboard-btn">
+                            Go to Dashboard
+                            <ArrowUpRight size={14} aria-hidden="true" />
+                        </a>
                     </div>
 
                     <button
@@ -391,6 +475,11 @@ const Navbar = () => {
                                 </span>
                             );
                         })}
+
+                        <a href={CONSOLE_URL} className="nav-dashboard-btn nav-dashboard-btn-mobile">
+                            Go to Dashboard
+                            <ArrowUpRight size={15} aria-hidden="true" />
+                        </a>
                     </div>
                 </div>
             )}

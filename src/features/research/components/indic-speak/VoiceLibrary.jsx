@@ -106,7 +106,18 @@ const VoiceField = () => {
                     <p className="isb-voice-desc">
                         {voice.desc}. <span className="isb-voice-best">Best for:</span> {voice.bestFor}.
                     </p>
-                    {clip && <SpeakPlayer src={clip.file} meta={`${picked} · ${LANG_NAME[clip.lang]}`} />}
+                    {/* A voice's library clip is whatever benchmark sentence it drew, which
+                        is usually not its own language — so the label says so. */}
+                    {clip && (
+                        <SpeakPlayer
+                            src={clip.file}
+                            meta={
+                                clip.native
+                                    ? `${picked} · ${LANG_NAME[clip.lang]}`
+                                    : `${picked} · reading ${LANG_NAME[clip.lang]}`
+                            }
+                        />
+                    )}
                 </div>
             )}
 
