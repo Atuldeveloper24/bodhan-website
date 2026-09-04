@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { ArrowUpRight, Pause, Play } from 'lucide-react';
 import SHOWCASE from '../../data/speakShowcase.json';
 import { assetUrl } from '../../data/assetUrl';
@@ -32,18 +32,40 @@ const SpeakExamples = () => {
     const [playing, setPlaying] = useState(false);
     const [elapsed, setElapsed] = useState(0);
     const [duration, setDuration] = useState(0);
+
+    // Which bar the meter has reached. A whole number, followed every frame:
+    // the browser's timeupdate events land about four times a second, which
+    // moves a 48-bar meter in visible jumps.
+    const [bar, setBar] = useState(0);
+
     const audioRef = useRef(null);
+    const frameRef = useRef(0);
 
     const example = items.find((e) => e.id === activeId) ?? items[0];
-    const progress = duration > 0 ? elapsed / duration : 0;
 
-    const select = (id) => {
+    useEffect(() => {
+        if (!playing) return undefined;
+
+        const step = () => {
+            const audio = audioRef.current;
+            if (audio && Number.isFinite(audio.duration) && audio.duration > 0) {
+                setBar(Math.round((audio.currentTime / audio.duration) * BARS.length));
+            }
+            frameRef.current = requestAnimationFrame(step);
+        };
+
+        frameRef.current = requestAnimationFrame(step);
+        return () => cancelAnimationFrame(frameRef.current);
+    }, [playing]);
+
+    const select = useCallback((id) => {
         audioRef.current?.pause();
         setActiveId(id);
         setPlaying(false);
         setElapsed(0);
         setDuration(0);
-    };
+        setBar(0);
+    }, []);
 
     const toggle = () => {
         const audio = audioRef.current;
@@ -59,6 +81,7 @@ const SpeakExamples = () => {
         const ratio = Math.min(1, Math.max(0, (event.clientX - rect.left) / rect.width));
         audio.currentTime = ratio * audio.duration;
         setElapsed(audio.currentTime);
+        setBar(Math.round(ratio * BARS.length));
     };
 
     return (
@@ -94,7 +117,7 @@ const SpeakExamples = () => {
                                     {BARS.map((h, i) => (
                                         <span
                                             key={i}
-                                            className={i / BARS.length <= progress ? 'is-played' : undefined}
+                                            className={i <= bar ? 'is-played' : undefined}
                                             style={{ height: `${h}%`, animationDelay: `${(i % 9) * 60}ms` }}
                                         />
                                     ))}
@@ -112,7 +135,10 @@ const SpeakExamples = () => {
                                 ref={audioRef}
                                 onPlay={() => setPlaying(true)}
                                 onPause={() => setPlaying(false)}
-                                onEnded={() => setPlaying(false)}
+                                onEnded={() => {
+                                    setPlaying(false);
+                                    setBar(BARS.length);
+                                }}
                                 onTimeUpdate={() => setElapsed(audioRef.current?.currentTime ?? 0)}
                                 onLoadedMetadata={() => setDuration(audioRef.current?.duration ?? 0)}
                                 preload="none"

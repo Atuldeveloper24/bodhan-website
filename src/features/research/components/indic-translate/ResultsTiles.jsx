@@ -41,7 +41,7 @@ const CollapsibleChart = ({ chart }) => {
 
     return (
         <details
-            className="itb-collapse"
+            className="chart-collapse"
             onToggle={(event) => {
                 if (event.currentTarget.open) setOpened(true);
                 // A 22-row matrix opening or closing moves everything under it.
@@ -62,17 +62,17 @@ const CollapsedCharts = ({ refs }) =>
     }) ?? null;
 
 const Note = ({ children }) => (
-    <p className="itb-note">
-        <span className="itb-note-dot" aria-hidden="true" />
+    <p className="chart-note">
+        <span className="dot" aria-hidden="true" />
         <span>{children}</span>
     </p>
 );
 
 const HumanEval = ({ humanEval }) => (
-    <div className="itb-human">
-        <h4 className="itb-human-heading">
+    <div className="human-eval">
+        <h4 className="human-eval-heading">
             {humanEval.heading}
-            {humanEval.previousModel && <span className="itb-prev-tag">previous model</span>}
+            {humanEval.previousModel && <span className="prev-tag">previous model</span>}
         </h4>
         <Charts refs={humanEval.charts} />
         <CollapsedCharts refs={humanEval.collapsedCharts} />
@@ -86,12 +86,12 @@ const SubViews = ({ subViews }) => {
 
     return (
         <>
-            <div className="itb-subview" role="group" aria-label="Sentence or document level">
+            <div className="ex-view-toggle" role="group" aria-label="Sentence or document level">
                 {subViews.map((v) => (
                     <button
                         key={v.id}
                         type="button"
-                        className={`itb-subview-btn${v.id === active ? ' is-active' : ''}`}
+                        className={`ex-view-btn${v.id === active ? ' is-active' : ''}`}
                         aria-pressed={v.id === active}
                         onClick={() => setActive(v.id)}
                     >
@@ -178,34 +178,34 @@ const ResultsTiles = ({ section }) => {
     }, [active]);
 
     return (
-        <div className="itb-results">
-            <div className="itb-tiles" role="tablist" aria-label="Evaluation category" ref={tablistRef}>
-                <span className="itb-tile-pill" aria-hidden="true" ref={indicatorRef} />
+        <div className="results-hub">
+            <div className="tile-toggle" role="tablist" aria-label="Evaluation category" ref={tablistRef}>
+                <span className="tile-pill" aria-hidden="true" ref={indicatorRef} />
                 {tiles.map((t) => (
                     <button
                         key={t.id}
                         type="button"
                         role="tab"
-                        id={`itb-tile-tab-${t.id}`}
+                        id={`tile-btn-tab-${t.id}`}
                         aria-selected={t.id === active}
-                        aria-controls={`itb-tile-panel-${t.id}`}
-                        className={`itb-tile${t.id === active ? ' is-active' : ''}`}
+                        aria-controls={`tile-panel-${t.id}`}
+                        className={`tile-btn${t.id === active ? ' is-active' : ''}`}
                         onClick={() => setActive(t.id)}
                     >
-                        <span className="itb-tile-title">{t.label}</span>
-                        <span className="itb-tile-sub">{t.sub}</span>
+                        <span className="tile-btn-title">{t.label}</span>
+                        <span className="tile-btn-sub">{t.sub}</span>
                     </button>
                 ))}
             </div>
 
             <div
                 role="tabpanel"
-                id={`itb-tile-panel-${tile.id}`}
-                aria-labelledby={`itb-tile-tab-${tile.id}`}
-                className="itb-tile-panel"
+                id={`tile-panel-${tile.id}`}
+                aria-labelledby={`tile-btn-tab-${tile.id}`}
+                className="tile-panel"
                 ref={panelRef}
             >
-                <div className="itb-tile-intro">
+                <div className="tile-intro">
                     <h3>{tile.heading}</h3>
                     {tile.content.map((paragraph, i) => (
                         <p key={i} className="research-type-body">

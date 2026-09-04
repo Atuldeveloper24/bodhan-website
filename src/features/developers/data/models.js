@@ -7,6 +7,20 @@ const BLOGS = {
     translate: 'https://amended-comfort-recognized-hearts.trycloudflare.com/',
 };
 
+// One palette for the whole developer section: the site's primary warm
+// gradient. Each model used to carry a colour of its own — emerald, blue,
+// orange, violet — which read as four separate products rather than one
+// family. Spread into every model, so `model.accent` / `model.gradient` /
+// `model.viz` still resolve everywhere they are read.
+//
+// `viz` is the plain-hex pair, because an SVG gradient stop cannot take a CSS
+// gradient or a var().
+const PRIMARY = {
+    accent: 'var(--text-orange-500)',
+    gradient: 'linear-gradient(135deg, #E2691F 0%, #C2410C 52%, #A6410A 100%)',
+    viz: { from: '#E2691F', to: '#B45309' },
+};
+
 // ⚠️ PRICING IS PLACEHOLDER — every `price` below is a stand-in so the hero
 // band has something to show. Replace each value with the real published rate
 // before this goes live; the console at console.bodhan.ai is the source of truth.
@@ -16,7 +30,8 @@ export const models = [
         name: 'Indic-Transcribe',
         codename: 'Speech to Text',
         icon: 'mic',
-        accent: 'var(--model-emerald)',
+        glyph: 'wave',
+        ...PRIMARY,
         tagline: 'Speech recognition for 27 Indian languages',
         summary:
             'Robust multilingual ASR with native-script, mixed-script, and romanized output, plus built-in language identification.',
@@ -34,7 +49,8 @@ export const models = [
         name: 'Indic-Speak',
         codename: 'Text to Speech',
         icon: 'speaker',
-        accent: 'var(--brand-blue)',
+        glyph: 'voice',
+        ...PRIMARY,
         tagline: 'Text-to-speech for 22 Indian languages, built for the classroom',
         summary:
             'A voice engine that reads STEM content and code-mixed sentences the way a teacher would — with multiple voices per language.',
@@ -52,7 +68,8 @@ export const models = [
         name: 'Indic-OCR',
         codename: 'Document Digitisation',
         icon: 'document',
-        accent: 'var(--text-orange-500)',
+        glyph: 'page',
+        ...PRIMARY,
         tagline: 'Document parsing for English and 22 Indian languages',
         summary:
             'Layout detection with reading order, then block-level OCR — for printed and handwritten pages, with math as LaTeX and tables as HTML.',
@@ -70,7 +87,8 @@ export const models = [
         name: 'Indic-Translate',
         codename: 'Translation',
         icon: 'languages',
-        accent: 'var(--model-violet)',
+        glyph: 'bridge',
+        ...PRIMARY,
         tagline: 'Document-length translation across 44 language directions',
         summary:
             'Translates between English and all 22 Eighth Schedule languages, preserving Markdown, LaTeX, and table structure — plus romanized and code-mixed text.',

@@ -1,6 +1,6 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { ArrowRight, ArrowUpRight, ChevronDown, Menu, X } from 'lucide-react';
+import { ArrowRight, ArrowUpRight, BookOpen, ChevronDown, CircleDollarSign, Menu, Plug, X } from 'lucide-react';
 import gsap from 'gsap';
 
 import Icon from '../../../assets/Icon.png';
@@ -27,22 +27,51 @@ const developersApis = models.map((model) => ({
     accent: model.accent,
 }));
 
+function DiscordIcon({ size = 16 }) {
+    return (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z" />
+        </svg>
+    );
+}
+
+const RESOURCE_ICONS = {
+    docs: BookOpen,
+    pricing: CircleDollarSign,
+    integrations: Plug,
+    discord: DiscordIcon,
+};
+
+const developersResources = [
+    { label: 'Documentation', to: '#', description: 'Guides and API reference', resourceIcon: 'docs', accent: 'var(--model-emerald)' },
+    { label: 'API Pricing', to: '#', description: 'Usage-based pricing', resourceIcon: 'pricing', accent: 'var(--brand-blue)' },
+    { label: 'Integrations', to: '#', description: 'Connect Bodhan to your stack', resourceIcon: 'integrations', accent: 'var(--text-orange-500)' },
+    { label: 'Join Discord', to: '#', description: 'Community support and updates', resourceIcon: 'discord', accent: 'var(--color-14)' },
+];
+
 const developersDropdown = [...developersApis, { label: 'All models', to: '/developers', description: 'Browse every Bodhan model' }];
 
-// Placeholder destinations — wire these up once we know where each product lives.
 const productsDropdown = [
-    { label: 'Student Bot', to: '#', description: 'AI tutor built for the learner' },
-    { label: 'Tutor Bot', to: '#', description: 'AI copilot built for the teacher' },
+    { label: 'Student Bot', to: 'https://students.bodhan.ai', description: 'AI tutor built for the learner' },
+    { label: 'Tutor Bot', to: 'https://teachers.bodhan.ai/', description: 'AI copilot built for the teacher' },
 ];
 
 const navLinks = [
     { label: 'Vision', to: '/', scrollTo: 'vision-mission' },
     { label: 'Research', to: '/research', children: researchDropdown, match: '/research' },
-    { label: 'Developers', to: '/developers', children: developersDropdown, match: '/developers' },
+    {
+        label: 'Developers',
+        to: '/developers',
+        children: developersDropdown,
+        mega: { apis: developersApis, resources: developersResources },
+        match: '/developers',
+    },
     { label: 'Products', to: '#', children: productsDropdown, match: '/products' },
     { label: 'Team', to: '/', scrollTo: 'team' },
     { label: 'Careers', to: '/careers' },
 ];
+
+const isExternalLink = (to) => typeof to === 'string' && to.startsWith('http');
 
 const Navbar = () => {
     const [isOpen, setIsOpen] = useState(false);
@@ -190,6 +219,69 @@ const Navbar = () => {
         return location.pathname === to || location.pathname.startsWith(`${to}/`);
     };
 
+    const renderNavItem = (child, { active, dataAttr, hideArrow = false }) => {
+        const className = `nav-research-item group ${active ? 'is-active' : ''}`;
+        const style = child.accent ? { '--model-accent': child.accent } : undefined;
+        const onClick = () => handleNavClick(child);
+
+        const ResourceIcon = child.resourceIcon ? RESOURCE_ICONS[child.resourceIcon] : null;
+
+        const body = (
+            <>
+                {child.icon ? (
+                    <span className="nav-model-icon" aria-hidden="true">
+                        <ModelIcon name={child.icon} size={16} />
+                    </span>
+                ) : ResourceIcon ? (
+                    <span className="nav-model-icon" aria-hidden="true">
+                        <ResourceIcon size={16} />
+                    </span>
+                ) : (
+                    <span className="nav-research-item-indicator" aria-hidden="true" />
+                )}
+                <span className="min-w-0 flex-1">
+                    <span className="nav-research-item-label">{child.label}</span>
+                    {child.description && (
+                        <span className="nav-research-item-desc">{child.description}</span>
+                    )}
+                </span>
+                {!hideArrow && (
+                    <ArrowRight size={14} className="nav-research-item-arrow" aria-hidden="true" />
+                )}
+            </>
+        );
+
+        if (isExternalLink(child.to)) {
+            return (
+                <a
+                    key={child.label}
+                    href={child.to}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    {...(dataAttr ? { [dataAttr]: true } : {})}
+                    className={className}
+                    style={style}
+                    onClick={onClick}
+                >
+                    {body}
+                </a>
+            );
+        }
+
+        return (
+            <Link
+                key={child.label}
+                to={child.to}
+                {...(dataAttr ? { [dataAttr]: true } : {})}
+                className={className}
+                style={style}
+                onClick={onClick}
+            >
+                {body}
+            </Link>
+        );
+    };
+
     return (
         <nav
             className={`sticky top-0 z-50 w-full backdrop-blur-sm border-b ${
@@ -256,49 +348,57 @@ const Navbar = () => {
                                             }}
                                             className="absolute left-0 top-full pt-3 invisible opacity-0"
                                         >
-                                            <div
-                                                className={`nav-research-dropdown rounded-2xl overflow-hidden ${
-                                                    link.children.some((child) => child.icon) ? 'w-80' : 'w-72'
-                                                }`}
-                                            >
-                                                <div className="nav-research-dropdown-glow" aria-hidden="true" />
-                                                <div className="relative p-2">
-                                                    {link.children.map((child) => {
-                                                        const active = isChildActive(child.to);
-                                                        return (
+                                            {link.mega ? (
+                                                <div className="nav-research-dropdown nav-mega-dropdown rounded-2xl overflow-hidden">
+                                                    <div className="nav-research-dropdown-glow" aria-hidden="true" />
+                                                    <div className="nav-mega-grid relative">
+                                                        <div className="nav-mega-col">
+                                                            <p className="nav-mega-col-title">APIs</p>
+                                                            {link.mega.apis.map((child) =>
+                                                                renderNavItem(child, {
+                                                                    active: isChildActive(child.to),
+                                                                    dataAttr: 'data-dropdown-item',
+                                                                    hideArrow: true,
+                                                                })
+                                                            )}
                                                             <Link
-                                                                key={child.label}
-                                                                to={child.to}
+                                                                to="/developers"
                                                                 data-dropdown-item
-                                                                onClick={() => handleNavClick(child)}
-                                                                className={`nav-research-item group ${active ? 'is-active' : ''}`}
-                                                                style={child.accent ? { '--model-accent': child.accent } : undefined}
+                                                                onClick={() => handleNavClick({})}
+                                                                className="nav-mega-viewall"
                                                             >
-                                                                {child.icon ? (
-                                                                    <span className="nav-model-icon" aria-hidden="true">
-                                                                        <ModelIcon name={child.icon} size={16} />
-                                                                    </span>
-                                                                ) : (
-                                                                    <span className="nav-research-item-indicator" aria-hidden="true" />
-                                                                )}
-                                                                <span className="min-w-0 flex-1">
-                                                                    <span className="nav-research-item-label">
-                                                                        {child.label}
-                                                                    </span>
-                                                                    <span className="nav-research-item-desc">
-                                                                        {child.description}
-                                                                    </span>
-                                                                </span>
-                                                                <ArrowRight
-                                                                    size={14}
-                                                                    className="nav-research-item-arrow"
-                                                                    aria-hidden="true"
-                                                                />
+                                                                View all models
                                                             </Link>
-                                                        );
-                                                    })}
+                                                        </div>
+                                                        <div className="nav-mega-col nav-mega-col-resources">
+                                                            <p className="nav-mega-col-title">Resources</p>
+                                                            {link.mega.resources.map((child) =>
+                                                                renderNavItem(child, {
+                                                                    active: false,
+                                                                    dataAttr: 'data-dropdown-item',
+                                                                    hideArrow: true,
+                                                                })
+                                                            )}
+                                                        </div>
+                                                    </div>
                                                 </div>
-                                            </div>
+                                            ) : (
+                                                <div
+                                                    className={`nav-research-dropdown rounded-2xl overflow-hidden ${
+                                                        link.children.some((child) => child.icon) ? 'w-80' : 'w-72'
+                                                    }`}
+                                                >
+                                                    <div className="nav-research-dropdown-glow" aria-hidden="true" />
+                                                    <div className="relative p-2">
+                                                        {link.children.map((child) =>
+                                                            renderNavItem(child, {
+                                                                active: isChildActive(child.to),
+                                                                dataAttr: 'data-dropdown-item',
+                                                            })
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
                                 );
@@ -373,21 +473,113 @@ const Navbar = () => {
                                             style={{ height: 0, opacity: 0 }}
                                         >
                                             <div className="ml-3 pl-3 border-l border-[var(--primary-100)] flex flex-col gap-0.5 pb-2">
-                                                {link.children.map((child) => (
-                                                    <Link
-                                                        key={child.label}
-                                                        to={child.to}
-                                                        data-mobile-item
-                                                        onClick={() => handleNavClick(child)}
-                                                        className={`py-2 text-sm transition-colors ${
-                                                            isChildActive(child.to)
-                                                                ? 'text-[var(--text-orange-500)] font-medium'
-                                                                : 'text-[var(--color-10)] hover:text-[var(--text-orange-500)]'
-                                                        }`}
-                                                    >
-                                                        {child.label}
-                                                    </Link>
-                                                ))}
+                                                {link.mega ? (
+                                                    <>
+                                                        <p className="pt-1 text-[11px] font-bold uppercase tracking-wider text-[var(--color-14)]">
+                                                            APIs
+                                                        </p>
+                                                        {link.mega.apis.map((child) => {
+                                                            const className = `py-2 text-sm transition-colors ${
+                                                                isChildActive(child.to)
+                                                                    ? 'text-[var(--text-orange-500)] font-medium'
+                                                                    : 'text-[var(--color-10)] hover:text-[var(--text-orange-500)]'
+                                                            }`;
+                                                            return isExternalLink(child.to) ? (
+                                                                <a
+                                                                    key={child.label}
+                                                                    href={child.to}
+                                                                    target="_blank"
+                                                                    rel="noopener noreferrer"
+                                                                    data-mobile-item
+                                                                    onClick={() => handleNavClick(child)}
+                                                                    className={className}
+                                                                >
+                                                                    {child.label}
+                                                                </a>
+                                                            ) : (
+                                                                <Link
+                                                                    key={child.label}
+                                                                    to={child.to}
+                                                                    data-mobile-item
+                                                                    onClick={() => handleNavClick(child)}
+                                                                    className={className}
+                                                                >
+                                                                    {child.label}
+                                                                </Link>
+                                                            );
+                                                        })}
+                                                        <Link
+                                                            to="/developers"
+                                                            data-mobile-item
+                                                            onClick={() => handleNavClick({})}
+                                                            className="py-2 text-sm text-[var(--color-11)] hover:text-[var(--text-orange-500)]"
+                                                        >
+                                                            View all models
+                                                        </Link>
+                                                        <p className="pt-2 text-[11px] font-bold uppercase tracking-wider text-[var(--color-14)]">
+                                                            Resources
+                                                        </p>
+                                                        {link.mega.resources.map((child) =>
+                                                            isExternalLink(child.to) ? (
+                                                                <a
+                                                                    key={child.label}
+                                                                    href={child.to}
+                                                                    target="_blank"
+                                                                    rel="noopener noreferrer"
+                                                                    data-mobile-item
+                                                                    onClick={() => handleNavClick(child)}
+                                                                    className="py-2 text-sm text-[var(--color-10)] hover:text-[var(--text-orange-500)]"
+                                                                >
+                                                                    {child.label}
+                                                                </a>
+                                                            ) : (
+                                                                <Link
+                                                                    key={child.label}
+                                                                    to={child.to}
+                                                                    data-mobile-item
+                                                                    onClick={() => handleNavClick(child)}
+                                                                    className="py-2 text-sm text-[var(--color-10)] hover:text-[var(--text-orange-500)]"
+                                                                >
+                                                                    {child.label}
+                                                                </Link>
+                                                            )
+                                                        )}
+                                                    </>
+                                                ) : (
+                                                    link.children.map((child) =>
+                                                        isExternalLink(child.to) ? (
+                                                            <a
+                                                                key={child.label}
+                                                                href={child.to}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                data-mobile-item
+                                                                onClick={() => handleNavClick(child)}
+                                                                className={`py-2 text-sm transition-colors ${
+                                                                    isChildActive(child.to)
+                                                                        ? 'text-[var(--text-orange-500)] font-medium'
+                                                                        : 'text-[var(--color-10)] hover:text-[var(--text-orange-500)]'
+                                                                }`}
+                                                            >
+                                                                {child.label}
+                                                            </a>
+                                                        ) : (
+                                                            <Link
+                                                                key={child.label}
+                                                                to={child.to}
+                                                                data-mobile-item
+                                                                onClick={() => handleNavClick(child)}
+                                                                className={`py-2 text-sm transition-colors ${
+                                                                    isChildActive(child.to)
+                                                                        ? 'text-[var(--text-orange-500)] font-medium'
+                                                                        : 'text-[var(--color-10)] hover:text-[var(--text-orange-500)]'
+                                                                }`}
+                                                            >
+                                                                {child.label}
+                                                            </Link>
+                                                        )
+                                                    )
+                                                )}
                                             </div>
                                         </div>
                                     </div>

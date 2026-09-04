@@ -83,23 +83,29 @@ const MiniTranslatePlayground = ({ items, renderPane, onSelect }) => {
 
                 <div className="pg-card">
                     <div className="pg-main">
-                        {active.tabs && (
-                            <div className="dp-view-tabs tl-tabs" role="tablist" aria-label="Document structure">
-                                {active.tabs.map((tab) => (
-                                    <button
-                                        key={tab.id}
-                                        type="button"
-                                        role="tab"
-                                        aria-selected={activeTab === tab.id}
-                                        className={activeTab === tab.id ? 'is-active' : undefined}
-                                        onClick={() => setTabId(tab.id)}
-                                    >
-                                        {tab.icon}
-                                        {tab.label}
-                                    </button>
-                                ))}
-                            </div>
-                        )}
+                        {/* The row is always present, empty for the examples that
+                            carry no sub-tabs — only Document does. Rendering it
+                            conditionally made the card 48px taller whenever
+                            Document was picked and shorter again on the way out. */}
+                        <div className="tl-tabrow">
+                            {active.tabs && (
+                                <div className="dp-view-tabs tl-tabs" role="tablist" aria-label="Document structure">
+                                    {active.tabs.map((tab) => (
+                                        <button
+                                            key={tab.id}
+                                            type="button"
+                                            role="tab"
+                                            aria-selected={activeTab === tab.id}
+                                            className={activeTab === tab.id ? 'is-active' : undefined}
+                                            onClick={() => setTabId(tab.id)}
+                                        >
+                                            {tab.icon}
+                                            {tab.label}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
 
                         <div className="tp-pair">
                             <section className="tp-pane">

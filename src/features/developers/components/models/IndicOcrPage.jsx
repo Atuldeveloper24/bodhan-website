@@ -2,8 +2,9 @@ import Navbar from '../../../home/components/Navbar';
 import Footer from '../../../home/components/Footer';
 import ModelHero from './ModelHero';
 import DocParserExamples from './DocParserExamples';
-import Reveal from '../../../../components/Reveal';
+import DevReveal from '../DevReveal';
 import { getModelById } from '../../data/models';
+import '../../developers.css';
 
 const model = getModelById('indic-ocr');
 
@@ -18,22 +19,32 @@ const STATS = [
 const IndicOcrPage = () => (
     <div className="min-h-screen research-page">
         <Navbar />
-        <main className="model-page-main" style={{ '--model-accent': 'var(--text-orange-500)' }}>
+        <main
+            className="model-page-main"
+            style={{ '--model-accent': model.accent, '--model-gradient': model.gradient }}
+        >
             <ModelHero
                 eyebrow="Developers · Model"
                 title={model.name}
                 intro="scan"
                 tagline="Layout detection with reading order, then block-level OCR — printed or handwritten, with math as LaTeX and tables as HTML."
-                accent="var(--text-orange-500)"
+                accent={model.accent}
+                viz={model.viz}
                 stats={STATS}
                 primaryCta={{ label: 'Hugging Face', href: '#' }}
                 blogCta={model.blog}
                 secondaryCta={{ label: 'Contact', href: '/contact' }}
             />
 
-            <Reveal as="section" className="model-section">
+            <DevReveal as="section" className="model-section">
+                <h2 className="model-section-title">Watch it read a page</h2>
+                <p className="model-section-dek">
+                    The scan on the left, the model's reconstruction on the right — built one block
+                    at a time, in the reading order the layout model chose, with each region
+                    outlined on the page as it is read.
+                </p>
                 <DocParserExamples />
-            </Reveal>
+            </DevReveal>
         </main>
         <Footer />
     </div>

@@ -2756,6 +2756,49 @@ summary:focus-visible,
   color: var(--text-orange-500);
 }
 
+.nav-mega-dropdown {
+  width: 34rem;
+}
+
+.nav-mega-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.25rem;
+  padding: 0.5rem;
+}
+
+.nav-mega-col {
+  display: flex;
+  flex-direction: column;
+  padding: 0 0.5rem;
+}
+
+.nav-mega-col-resources {
+  border-left: 1px solid var(--primary-100);
+}
+
+.nav-mega-col-title {
+  margin: 0 0 0.35rem 0.75rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-14);
+}
+
+.nav-mega-viewall {
+  margin: 0.3rem 0.75rem 0;
+  padding: 0.4rem 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text-orange-500);
+  transition: color 0.2s ease;
+}
+
+.nav-mega-viewall:hover {
+  color: var(--text-hover);
+}
+
 /* ── Nav CTA: straight out to the console ── */
 .nav-dashboard-btn {
   display: inline-flex;

@@ -145,7 +145,7 @@ const BlogContent = ({ sections }) => {
                         ease: 'power3.out',
                     })
                     .from(
-                        header.querySelectorAll('.research-section-num, .research-type-h2'),
+                        header.querySelectorAll('.section-num, .research-type-h2'),
                         { y: 12, opacity: 0, duration: 0.5, stagger: 0.08, ease: 'power2.out' },
                         '-=0.3'
                     );
@@ -196,15 +196,15 @@ const BlogContent = ({ sections }) => {
                             <header className="research-section-header">
                                 <div className="research-section-rule" aria-hidden="true" />
                                 <h2 className="research-type-h2">
-                                    <span className="research-section-num">{number}</span>
+                                    <span className="section-num">{number}</span>
                                     {section.title}
                                 </h2>
                             </header>
                         )}
 
                         {section.draftNote && (
-                            <p className="research-draft-note">
-                                <span className="research-draft-badge">draft copy</span>
+                            <p className="temp-copy">
+                                <span className="temp-badge">temporary copy</span>
                                 {section.draftNote}
                             </p>
                         )}

@@ -1,0 +1,1513 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   Developers section — model index, model pages, and the shared playground.
+
+   Loaded after globals.css, so the rules in here that carry the same
+   selectors as the originals (.dev-card, .model-hero-band, .pg-card…) are
+   deliberate replacements rather than accidental duplicates.
+
+   Every model carries three tokens, set on the element that owns it:
+     --model-accent    the flat colour, for text and hairlines
+     --model-gradient  the two-stop wash, for fills and glows
+     --model-viz-from / --model-viz-to  plain hex, for SVG gradient stops
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Aurora: the drifting gradient wash behind a hero ─────────────────────── */
+
+.aur {
+  position: absolute;
+  inset: -10% -6% auto;
+  height: 34rem;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  mask-image: radial-gradient(ellipse 78% 96% at 50% 12%, black 0%, black 34%, transparent 100%);
+}
+
+.aur-blob {
+  position: absolute;
+  width: 34rem;
+  height: 24rem;
+  border-radius: 50%;
+  filter: blur(72px);
+  opacity: 0.42;
+  will-change: transform;
+}
+
+.aur-blob-1 {
+  top: -8rem;
+  left: -4rem;
+  background: radial-gradient(circle at 50% 50%, var(--aur-from, #C2410C) 0%, transparent 68%);
+}
+
+.aur-blob-2 {
+  top: -6rem;
+  right: -6rem;
+  background: radial-gradient(circle at 50% 50%, var(--aur-to, #B45309) 0%, transparent 68%);
+  opacity: 0.34;
+}
+
+.aur-blob-3 {
+  top: 4rem;
+  left: 32%;
+  width: 26rem;
+  height: 18rem;
+  background: radial-gradient(circle at 50% 50%, var(--bg-orange-100) 0%, transparent 70%);
+  opacity: 0.6;
+}
+
+/* a faint rule grid, so the wash reads as a surface and not a smudge */
+.aur-mesh {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(to right, rgba(46, 50, 56, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(46, 50, 56, 0.05) 1px, transparent 1px);
+  background-size: 3.5rem 3.5rem;
+  mask-image: radial-gradient(ellipse 70% 60% at 50% 20%, black 0%, transparent 72%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .aur-blob {
+    animation: none;
+  }
+}
+
+/* ── Model glyphs: the animated diagram on each card ─────────────────────── */
+
+.mg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.mg-body {
+  --mg-muted: rgba(46, 50, 56, 0.16);
+}
+
+.mg-wave-bar,
+.mg-eq-bar {
+  fill: var(--mg-grad);
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+}
+
+.mg-line {
+  stroke: var(--mg-grad);
+  opacity: 0.85;
+}
+
+.mg-lines-left .mg-line {
+  opacity: 0.7;
+}
+
+.mg-head {
+  stroke: var(--mg-to, currentColor);
+  opacity: 0;
+}
+
+.mg-orb {
+  fill: var(--mg-grad);
+}
+
+.mg-ring {
+  fill: none;
+  stroke: var(--mg-to, currentColor);
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+}
+
+.mg-page {
+  fill: rgba(255, 255, 255, 0.55);
+  stroke: var(--mg-muted);
+}
+
+.mg-block {
+  fill: var(--mg-grad);
+  fill-opacity: 0.85;
+  transform-box: fill-box;
+}
+
+.mg-block-fig {
+  fill-opacity: 0.16;
+  stroke: var(--mg-grad);
+  stroke-width: 1.2;
+}
+
+.mg-focus {
+  fill: none;
+  stroke: var(--mg-to, currentColor);
+  opacity: 0;
+}
+
+.mg-arc {
+  stroke: var(--mg-grad);
+}
+
+.mg-arc-hidden {
+  stroke: none;
+  fill: none;
+}
+
+.mg-dot {
+  fill: var(--mg-to, currentColor);
+  opacity: 0;
+}
+
+.mg-glyph-text {
+  font-family: var(--font-manrope), system-ui, sans-serif;
+  font-size: 17px;
+  font-weight: 700;
+  fill: var(--mg-grad);
+}
+
+.mg-script-right .mg-glyph-text {
+  opacity: 0;
+}
+
+/* ── Model index ─────────────────────────────────────────────────────────── */
+
+main.models-page-main {
+  position: relative;
+  max-width: 74rem;
+  padding-top: 3rem;
+  padding-bottom: 4.5rem;
+}
+
+.dx-hero {
+  position: relative;
+  z-index: 1;
+  padding-bottom: 2.25rem;
+}
+
+.dx-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.32rem 0.8rem 0.32rem 0.6rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--text-orange-500) 22%, transparent);
+  background: linear-gradient(120deg, rgba(255, 247, 236, 0.9), rgba(255, 234, 210, 0.75));
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--text-orange-500);
+}
+
+.dx-chip::before {
+  content: '';
+  width: 0.44rem;
+  height: 0.44rem;
+  border-radius: 999px;
+  background: var(--text-orange-500);
+  box-shadow: 0 0 0 0 color-mix(in srgb, var(--text-orange-500) 55%, transparent);
+  animation: dx-ping 2.4s ease-out infinite;
+}
+
+@keyframes dx-ping {
+  0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--text-orange-500) 50%, transparent); }
+  70% { box-shadow: 0 0 0 0.42rem transparent; }
+  100% { box-shadow: 0 0 0 0 transparent; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dx-chip::before { animation: none; }
+}
+
+.dx-title {
+  margin: 1rem 0 0.7rem;
+  font-family: var(--font-manrope);
+  font-size: clamp(2.4rem, 6vw, 4rem);
+  font-weight: 700;
+  line-height: 1.04;
+  letter-spacing: -0.035em;
+  color: var(--text-primary);
+}
+
+/* the gradient half of the headline — the wrapper carries the fill, and
+   -webkit-text-fill-color is inherited, so the animated span inside it is
+   painted by the same gradient */
+.dx-title .dx-grad {
+  background: linear-gradient(100deg, #E2691F 0%, #C2410C 50%, #A6410A 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+.dx-lede {
+  max-width: 38rem;
+  margin: 0;
+  font-size: 1.0625rem;
+  line-height: 1.6;
+  color: var(--color-10);
+}
+
+.dx-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 2.25rem;
+  margin-top: 1.6rem;
+  padding-top: 1.4rem;
+  border-top: 1px solid var(--primary-100);
+}
+
+.dx-meta-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.dx-meta-value {
+  font-family: var(--font-eb-garamond);
+  font-size: 1.55rem;
+  font-weight: 600;
+  line-height: 1;
+  background: linear-gradient(120deg, var(--text-primary), var(--text-orange-500));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+.dx-meta-label {
+  font-size: 0.72rem;
+  letter-spacing: 0.03em;
+  color: var(--color-11);
+}
+
+/* ── Model cards ─────────────────────────────────────────────────────────── */
+
+.dev-grid {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.1rem;
+  padding-top: 0.5rem;
+}
+
+@media (max-width: 900px) {
+  .dev-grid { grid-template-columns: 1fr; }
+}
+
+.dev-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 0;
+  border-radius: 22px;
+  border: 1px solid var(--dv-border, rgba(46, 50, 56, 0.08));
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.92) 0%, rgba(255, 252, 247, 0.86) 100%);
+  box-shadow: 0 1px 2px rgba(46, 50, 56, 0.04);
+  transition: transform 0.28s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    box-shadow 0.28s ease, border-color 0.28s ease;
+}
+
+/* the gradient hairline: a ring drawn in the model's colours, lit on hover */
+.dev-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border-radius: inherit;
+  padding: 1px;
+  background: var(--model-gradient);
+  opacity: 0;
+  transition: opacity 0.28s ease;
+  -webkit-mask:
+    linear-gradient(black, black) content-box,
+    linear-gradient(black, black);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(black, black) content-box,
+    linear-gradient(black, black);
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+.dev-card:hover {
+  transform: translateY(-4px);
+  border-color: transparent;
+  box-shadow:
+    0 22px 44px -18px color-mix(in srgb, var(--model-accent) 42%, transparent),
+    0 4px 12px rgba(46, 50, 56, 0.06);
+}
+
+.dev-card:hover::before,
+.dev-card:focus-visible::before {
+  opacity: 1;
+}
+
+/* the animated diagram, on a tinted panel so it reads as the model's own area */
+.dev-card-viz {
+  position: relative;
+  display: block;
+  padding: 1.15rem 1.25rem 0.9rem;
+  background:
+    radial-gradient(ellipse 80% 120% at 12% 0%, color-mix(in srgb, var(--model-accent) 13%, transparent) 0%, transparent 62%),
+    radial-gradient(ellipse 70% 110% at 92% 10%, color-mix(in srgb, var(--model-accent) 9%, transparent) 0%, transparent 60%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0));
+  border-bottom: 1px solid color-mix(in srgb, var(--model-accent) 12%, transparent);
+}
+
+.dev-card-viz .mg {
+  max-width: 22rem;
+  margin: 0 auto;
+}
+
+.dev-card-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  padding: 1.15rem 1.25rem 1.25rem;
+}
+
+.dev-card-top {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.dev-card-icon {
+  display: grid;
+  place-items: center;
+  width: 2.4rem;
+  height: 2.4rem;
+  flex: none;
+  border-radius: 13px;
+  background: var(--model-gradient);
+  color: white;
+  box-shadow: 0 6px 16px -6px color-mix(in srgb, var(--model-accent) 65%, transparent);
+}
+
+.dev-card-heading {
+  min-width: 0;
+  flex: 1;
+}
+
+.dev-card-name {
+  display: block;
+  font-family: var(--font-manrope);
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  color: var(--text-primary);
+}
+
+.dev-card-codename {
+  display: block;
+  margin-top: 0.05rem;
+  font-size: 0.75rem;
+  font-weight: 650;
+  letter-spacing: 0.02em;
+  color: var(--model-accent);
+}
+
+.dev-card-arrow {
+  flex: none;
+  color: var(--color-14);
+  transition: color 0.24s ease, transform 0.24s ease;
+}
+
+.dev-card:hover .dev-card-arrow {
+  color: var(--model-accent);
+  transform: translate(3px, -3px);
+}
+
+.dev-card-summary {
+  display: block;
+  margin: 0 0 1.1rem;
+  font-size: 0.86rem;
+  line-height: 1.55;
+  color: var(--color-10);
+}
+
+.dev-card-specs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-top: auto;
+  padding-top: 0.95rem;
+  border-top: 1px solid var(--primary-100);
+}
+
+.dev-card-spec {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
+}
+
+.dev-card-spec b {
+  font-family: var(--font-eb-garamond);
+  font-size: 1.15rem;
+  font-weight: 600;
+  line-height: 1.1;
+  color: var(--text-primary);
+}
+
+.dev-card-spec span {
+  font-size: 0.68rem;
+  letter-spacing: 0.02em;
+  color: var(--color-11);
+}
+
+.dev-card-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.dev-card-price {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.35rem;
+  padding: 0.3rem 0.7rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--model-accent) 10%, transparent);
+  font-size: 0.72rem;
+  color: var(--color-11);
+}
+
+.dev-card-price b {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--model-accent);
+}
+
+.dev-card-go {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.78rem;
+  font-weight: 650;
+  color: var(--model-accent);
+}
+
+/* ── Pipeline diagram ────────────────────────────────────────────────────── */
+
+.dx-flow {
+  position: relative;
+  z-index: 1;
+  margin-top: 3.5rem;
+  padding: 1.9rem 1.5rem 1.6rem;
+  border-radius: 26px;
+  border: 1px solid var(--primary-100);
+  background:
+    radial-gradient(ellipse 70% 90% at 8% 0%, rgba(148, 170, 226, 0.14) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 80% at 95% 100%, rgba(226, 176, 152, 0.18) 0%, transparent 62%),
+    rgba(255, 255, 255, 0.62);
+  backdrop-filter: blur(6px);
+}
+
+.dx-flow-head {
+  max-width: 34rem;
+  margin: 0 auto 1.9rem;
+  text-align: center;
+}
+
+.dx-flow-head h2 {
+  margin: 0 0 0.4rem;
+  font-family: var(--font-manrope);
+  font-size: clamp(1.3rem, 2.4vw, 1.65rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+}
+
+.dx-flow-head p {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.55;
+  color: var(--color-10);
+}
+
+.dflow {
+  position: relative;
+}
+
+.dflow-wires {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 0;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.dflow-packet {
+  opacity: 0;
+  filter: drop-shadow(0 0 5px currentColor);
+}
+
+.dflow-grid {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns:
+    minmax(0, 0.85fr) minmax(0, 1.05fr) minmax(0, 1.05fr)
+    minmax(0, 1.05fr) minmax(0, 0.9fr);
+  column-gap: clamp(1rem, 2.6vw, 2.1rem);
+  row-gap: 1.5rem;
+  align-items: center;
+}
+
+.dflow-node {
+  align-self: center;
+}
+
+.dflow-port {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  justify-self: center;
+  padding: 0.42rem 0.8rem;
+  border-radius: 999px;
+  border: 1px dashed color-mix(in srgb, var(--text-primary) 22%, transparent);
+  background: rgba(255, 255, 255, 0.7);
+  font-size: 0.72rem;
+  font-weight: 650;
+  line-height: 1.2;
+  text-align: center;
+  color: var(--color-11);
+}
+
+.dflow-model {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 0.8rem 0.85rem 0.85rem;
+  border-radius: 16px;
+  border: 1px solid color-mix(in srgb, var(--model-accent) 20%, transparent);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(255, 252, 247, 0.9));
+  box-shadow: 0 8px 20px -14px color-mix(in srgb, var(--model-accent) 60%, transparent);
+  transition: transform 0.24s ease, box-shadow 0.24s ease, border-color 0.24s ease;
+}
+
+.dflow-model:hover {
+  transform: translateY(-3px);
+  border-color: color-mix(in srgb, var(--model-accent) 55%, transparent);
+  box-shadow: 0 16px 30px -16px color-mix(in srgb, var(--model-accent) 70%, transparent);
+}
+
+.dflow-step {
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--model-accent) 78%, var(--color-11));
+}
+
+.dflow-model-head {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-width: 0;
+}
+
+.dflow-model-icon {
+  display: grid;
+  place-items: center;
+  width: 1.65rem;
+  height: 1.65rem;
+  flex: none;
+  border-radius: 9px;
+  background: var(--model-gradient);
+  color: white;
+}
+
+.dflow-model-name {
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dflow-model-note {
+  font-size: 0.68rem;
+  color: var(--color-11);
+}
+
+/* stacked: one column, with a gradient rail running down the middle */
+.dflow-grid.is-stacked {
+  grid-template-columns: 1fr;
+  row-gap: 0.85rem;
+  padding-left: 1.6rem;
+}
+
+.dflow-grid.is-stacked::before {
+  content: '';
+  position: absolute;
+  top: 0.5rem;
+  bottom: 0.5rem;
+  left: 0.35rem;
+  width: 2px;
+  border-radius: 2px;
+  background: linear-gradient(180deg, #E2691F, #C2410C 50%, #A6410A);
+  opacity: 0.4;
+}
+
+.dflow-grid.is-stacked .dflow-port {
+  justify-self: start;
+}
+
+/* ── Model page shell ────────────────────────────────────────────────────── */
+
+.model-page-main {
+  position: relative;
+  max-width: 58rem;
+}
+
+.model-hero {
+  position: relative;
+  padding-top: 0.5rem;
+  padding-bottom: 3rem;
+  border-bottom: none;
+}
+
+.model-hero > *:not(.aur) {
+  position: relative;
+  z-index: 1;
+}
+
+/* the hero's footing: a gradient hairline rather than a grey rule */
+.model-hero::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 12%;
+  right: 12%;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--model-accent) 45%, transparent) 50%,
+    transparent
+  );
+}
+
+.model-back-link {
+  padding: 0.32rem 0.75rem 0.32rem 0.6rem;
+  border-radius: 999px;
+  border: 1px solid var(--primary-100);
+  background: rgba(255, 255, 255, 0.7);
+  transition: border-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.model-back-link:hover {
+  border-color: color-mix(in srgb, var(--model-accent, var(--text-orange-500)) 45%, transparent);
+  color: var(--model-accent, var(--text-orange-500));
+  transform: translateX(-2px);
+}
+
+.model-hero .model-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 1.75rem 0 0.9rem;
+  padding: 0.3rem 0.8rem 0.3rem 0.62rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--model-accent) 25%, transparent);
+  background: color-mix(in srgb, var(--model-accent) 7%, rgba(255, 255, 255, 0.75));
+  color: color-mix(in srgb, var(--model-accent) 88%, black);
+}
+
+.model-hero .model-eyebrow::before {
+  content: '';
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 999px;
+  background: var(--model-gradient, var(--model-accent));
+}
+
+.model-title {
+  font-size: clamp(2.25rem, 5.2vw, 3.5rem);
+}
+
+/* a gradient underscore that grows out from under the name */
+.model-hero .model-title::after {
+  content: '';
+  display: block;
+  width: 3.5rem;
+  height: 3px;
+  margin: 0.9rem auto 0;
+  border-radius: 3px;
+  background: var(--model-gradient, var(--model-accent));
+  animation: model-rule-in 0.7s 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+}
+
+@keyframes model-rule-in {
+  from { transform: scaleX(0); opacity: 0; }
+  to { transform: scaleX(1); opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .model-hero .model-title::after { animation: none; }
+}
+
+.model-tagline {
+  max-width: 40rem;
+  margin-top: 1.1rem;
+  font-size: 1.0625rem;
+}
+
+/* primary CTA: the model's gradient, with a highlight that sweeps on hover */
+.model-cta-primary {
+  position: relative;
+  overflow: hidden;
+  padding: 0.68rem 1.3rem;
+  background: var(--model-gradient, var(--text-primary));
+  box-shadow: 0 10px 24px -12px color-mix(in srgb, var(--model-accent, var(--text-primary)) 70%, transparent);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.model-cta-primary::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, transparent 30%, rgba(255, 255, 255, 0.35) 50%, transparent 70%);
+  transform: translateX(-120%);
+  transition: transform 0.65s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.model-cta-primary:hover {
+  background: var(--model-gradient, black);
+  transform: translateY(-2px);
+  box-shadow: 0 16px 32px -12px color-mix(in srgb, var(--model-accent, var(--text-primary)) 80%, transparent);
+}
+
+.model-cta-primary:hover::after {
+  transform: translateX(120%);
+}
+
+.model-cta-primary > * {
+  position: relative;
+  z-index: 1;
+}
+
+.model-cta-secondary {
+  background: rgba(255, 255, 255, 0.65);
+  transition: border-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.model-cta-secondary:hover {
+  border-color: color-mix(in srgb, var(--model-accent, var(--text-orange-500)) 50%, transparent);
+  color: var(--model-accent, var(--text-orange-500));
+  transform: translateY(-2px);
+}
+
+/* ── Hero numbers band ───────────────────────────────────────────────────── */
+
+.model-hero-band {
+  gap: 0.4rem;
+  padding: 0.5rem;
+  border-radius: 22px;
+  border: 1px solid var(--primary-100);
+  background: linear-gradient(120deg, rgba(255, 255, 255, 0.9), rgba(255, 247, 236, 0.85));
+  box-shadow: 0 16px 36px -22px rgba(46, 50, 56, 0.35);
+  animation: none;
+}
+
+.model-hero-band .stat-band-item {
+  position: relative;
+  padding: 0.85rem 0.6rem;
+  border-radius: 16px;
+  transition: background-color 0.24s ease;
+}
+
+.model-hero-band .stat-band-item:not(.is-price):hover {
+  background: color-mix(in srgb, var(--model-accent) 7%, transparent);
+}
+
+/* hairline dividers, drawn as a pseudo-element so the price cell can drop
+   its own without fighting a box-shadow that also carries its glow */
+.model-hero-band .stat-band-item + .stat-band-item {
+  box-shadow: none;
+}
+
+.model-hero-band .stat-band-item + .stat-band-item:not(.is-price)::before {
+  content: '';
+  position: absolute;
+  top: 22%;
+  bottom: 22%;
+  left: 0;
+  width: 1px;
+  background: linear-gradient(
+    180deg,
+    transparent,
+    color-mix(in srgb, var(--model-accent) 28%, transparent),
+    transparent
+  );
+}
+
+.model-hero-band .stat-band-value {
+  font-size: clamp(1.35rem, 2.6vw, 1.85rem);
+  letter-spacing: -0.01em;
+}
+
+.model-hero-band .stat-band-item.is-price {
+  margin: 0;
+  padding: 0.85rem 0.7rem;
+  background: var(--model-gradient, var(--model-accent));
+  box-shadow: 0 12px 26px -12px color-mix(in srgb, var(--model-accent) 75%, transparent);
+}
+
+/* the price cell keeps a slow shine so the eye lands on it */
+.model-hero-band .stat-band-item.is-price::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(105deg, transparent 34%, rgba(255, 255, 255, 0.22) 50%, transparent 66%);
+  background-size: 300% 100%;
+  animation: price-shine 5.5s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes price-shine {
+  0%, 62% { background-position: 130% 50%; }
+  100% { background-position: -30% 50%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .model-hero-band .stat-band-item.is-price::after { animation: none; }
+}
+
+.model-hero-band .is-price .stat-band-value,
+.model-hero-band .is-price .stat-band-label {
+  position: relative;
+  z-index: 1;
+}
+
+/* ── Variants ────────────────────────────────────────────────────────────── */
+
+.model-variants {
+  margin-top: 2rem;
+}
+
+.model-variants-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-11);
+}
+
+.model-variant {
+  padding: 0.34rem 0.85rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--model-accent) 28%, transparent);
+  background: color-mix(in srgb, var(--model-accent) 8%, rgba(255, 255, 255, 0.7));
+  font-size: 0.78rem;
+  font-weight: 650;
+  color: color-mix(in srgb, var(--model-accent) 85%, black);
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.model-variant:hover {
+  background: color-mix(in srgb, var(--model-accent) 16%, white);
+  transform: translateY(-1px);
+}
+
+/* ── Section headings ────────────────────────────────────────────────────── */
+
+.model-section {
+  position: relative;
+  padding-top: 3.5rem;
+}
+
+.model-section-title {
+  font-size: clamp(1.5rem, 3vw, 2.05rem);
+}
+
+.model-section-title::after {
+  content: '';
+  display: block;
+  width: 2.5rem;
+  height: 2px;
+  margin: 0.75rem auto 0;
+  border-radius: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--model-accent, var(--text-orange-500)),
+    transparent
+  );
+}
+
+.model-section-dek {
+  margin-bottom: 2rem;
+}
+
+/* ── Playground shell ────────────────────────────────────────────────────── */
+
+.pg-glow {
+  background:
+    radial-gradient(ellipse 60% 70% at 12% 0%, color-mix(in srgb, var(--model-accent, #C2410C) 30%, transparent) 0%, transparent 62%),
+    radial-gradient(ellipse 55% 65% at 88% 8%, rgba(226, 176, 152, 0.4) 0%, transparent 60%),
+    radial-gradient(ellipse 70% 60% at 50% 100%, color-mix(in srgb, var(--model-accent, #C2410C) 20%, transparent) 0%, transparent 65%);
+}
+
+/* The playground shell reaches for the same --ed-* palette that .model-panel
+   declares, but it is not inside a .model-panel and never inherited it — so
+   every rule using those tokens (the audio player's fill and border, the
+   waveform bars, the pane labels, the tab strips, the transcript panel) was
+   resolving to nothing: a transparent player with a currentColor border and an
+   invisible meter. The values are tuned a shade lighter than .model-panel's,
+   because this card is white rather than kraft. */
+.pg-card {
+  --ed-outer: #F3EEE5;
+  --ed-inner: #FDFAF5;
+  --ed-inner-2: #F5F1EA;
+  --ed-text: #2C241C;
+  --ed-text-2: #5C534A;
+  --ed-border: rgba(46, 50, 56, 0.1);
+  --ed-orange: var(--model-accent, #C2410C);
+  --ed-emerald: var(--model-emerald);
+  --ed-brown: #72533D;
+  position: relative;
+  border-color: transparent;
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.94), rgba(255, 255, 255, 0.94)) padding-box,
+    var(--model-gradient, linear-gradient(135deg, #E2691F, #A6410A)) border-box;
+  border: 1px solid transparent;
+  box-shadow: 0 28px 64px -28px color-mix(in srgb, var(--model-accent, #2E3238) 45%, transparent);
+}
+
+.pg-example.is-active {
+  border-color: color-mix(in srgb, var(--model-accent, var(--text-orange-500)) 38%, transparent);
+  background: color-mix(in srgb, var(--model-accent, var(--text-orange-500)) 8%, white);
+}
+
+.pg-example.is-active .pg-example-name {
+  color: color-mix(in srgb, var(--model-accent, var(--text-orange-500)) 88%, black);
+}
+
+.pg-example {
+  transition: background-color 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
+}
+
+.pg-example:hover {
+  transform: translateX(2px);
+}
+
+.pg-rail-foot .model-cta-primary {
+  width: 100%;
+  justify-content: center;
+}
+
+/* the tab rows and rail badges pick up the page's model colour */
+.dp-view-tabs button.is-active {
+  background: color-mix(in srgb, var(--model-accent, var(--ed-orange)) 12%, white);
+  color: color-mix(in srgb, var(--model-accent, var(--ed-orange)) 88%, black);
+}
+
+.tl-badge,
+.tx-badge {
+  background: color-mix(in srgb, var(--model-accent) 12%, white);
+  color: var(--model-accent);
+}
+
+/* ── Audio player ────────────────────────────────────────────────────────── */
+
+.audio-play {
+  background: var(--model-gradient, var(--model-emerald));
+  box-shadow: 0 8px 18px -8px color-mix(in srgb, var(--model-accent, var(--model-emerald)) 75%, transparent);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.audio-play:hover {
+  transform: scale(1.07);
+  box-shadow: 0 12px 24px -8px color-mix(in srgb, var(--model-accent, var(--model-emerald)) 85%, transparent);
+}
+
+.audio-wave span.is-played {
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--model-accent, var(--model-emerald)) 70%, white),
+    var(--model-accent, var(--model-emerald))
+  );
+}
+
+.sx-chip {
+  border-color: color-mix(in srgb, var(--model-accent) 22%, transparent);
+  background: color-mix(in srgb, var(--model-accent) 8%, white);
+  color: color-mix(in srgb, var(--model-accent) 85%, black);
+}
+
+/* ── Narrow screens ─────────────────────────────────────────────────────── */
+
+@media (max-width: 620px) {
+  .model-hero-band .stat-band-item + .stat-band-item:not(.is-price)::before {
+    content: none;
+  }
+
+  .dx-meta {
+    gap: 0.9rem 1.5rem;
+  }
+
+  .dev-card-viz {
+    padding: 0.9rem 1rem 0.7rem;
+  }
+
+  .dx-flow {
+    padding: 1.5rem 1rem 1.25rem;
+  }
+}
+
+/* ── Title intros ────────────────────────────────────────────────────────── */
+
+/* Everything a title timeline moves starts hidden here rather than in the
+   markup, so a title that never animates renders as plain type with none of
+   the machinery showing: no caret parked at the left margin, no dashed scan
+   box around the name, no handwriting sitting on top of it. */
+.mti-edge,
+.mti-wave,
+.mti-eq,
+.mti-scan-box,
+.mti-hand {
+  opacity: 0;
+}
+
+.mti-edge-line {
+  background: var(--model-gradient, var(--model-accent, currentColor));
+}
+
+.mti-wave-bar,
+.mti-eq span {
+  background: var(--model-gradient, var(--model-accent, currentColor));
+}
+
+/* the three languages the word passes through, stacked over the final name */
+.mti-cycle-layer {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+}
+
+.mti-cycle-word {
+  position: absolute;
+  white-space: nowrap;
+  color: var(--model-accent, currentColor);
+  opacity: 0;
+}
+
+.mti-scan {
+  position: relative;
+}
+
+/* ── Source / output panes ───────────────────────────────────────────────── */
+
+.tp-pane {
+  position: relative;
+  overflow: hidden;
+  border-color: rgba(46, 50, 56, 0.07);
+  background: linear-gradient(180deg, #FFFFFF, #FDFBF8);
+}
+
+/* a hairline along the top edge: neutral on the input, the model's colours on
+   what the model produced */
+.tp-pane::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(46, 50, 56, 0.16), transparent);
+}
+
+.tp-pane.is-output {
+  border-color: color-mix(in srgb, var(--model-accent) 20%, transparent);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--model-accent) 5%, white),
+    color-mix(in srgb, var(--model-accent) 2%, white)
+  );
+}
+
+.tp-pane.is-output::before {
+  background: var(--model-gradient, var(--model-accent));
+}
+
+.tp-pane-label::before {
+  content: '';
+  width: 0.35rem;
+  height: 0.35rem;
+  flex: none;
+  border-radius: 999px;
+  background: rgba(46, 50, 56, 0.28);
+}
+
+.tp-pane.is-output .tp-pane-label {
+  color: color-mix(in srgb, var(--model-accent) 82%, black);
+}
+
+.tp-pane.is-output .tp-pane-label::before {
+  background: var(--model-gradient, var(--model-accent));
+}
+
+/* the direction of travel, sat in the gap between the two panes: a badge with
+   an arrow, and a ring leaving it on the beat */
+.tp-pair {
+  position: relative;
+  column-gap: 2.4rem;
+}
+
+.tp-pair::before,
+.tp-pair::after {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.tp-pair::before {
+  content: '';
+  width: 1.7rem;
+  height: 1.7rem;
+  z-index: 1;
+  border-radius: 999px;
+  background: var(--model-gradient, var(--model-accent));
+  box-shadow:
+    0 0 0 4px rgba(255, 253, 250, 0.95),
+    0 6px 16px -6px color-mix(in srgb, var(--model-accent) 75%, transparent);
+  animation: tp-arrow-pulse 2.8s ease-in-out infinite;
+}
+
+.tp-pair::after {
+  content: '→';
+  z-index: 2;
+  font-size: 0.85rem;
+  font-weight: 700;
+  line-height: 1;
+  color: white;
+}
+
+/* a ring leaves the badge and fades, keeping the badge's own drop shadow */
+@keyframes tp-arrow-pulse {
+  0% {
+    box-shadow:
+      0 0 0 4px rgba(255, 253, 250, 0.95),
+      0 6px 16px -6px color-mix(in srgb, var(--model-accent) 75%, transparent),
+      0 0 0 0 color-mix(in srgb, var(--model-accent) 38%, transparent);
+  }
+  70%, 100% {
+    box-shadow:
+      0 0 0 4px rgba(255, 253, 250, 0.95),
+      0 6px 16px -6px color-mix(in srgb, var(--model-accent) 75%, transparent),
+      0 0 0 0.8rem color-mix(in srgb, var(--model-accent) 0%, transparent);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tp-pair::before { animation: none; }
+}
+
+/* stacked panes: the flow runs downwards, so the arrow turns with it */
+@media (max-width: 720px) {
+  .tp-pair {
+    row-gap: 2.4rem;
+  }
+
+  .tp-pair::after {
+    transform: translate(-50%, -50%) rotate(90deg);
+  }
+}
+
+/* ── Rail ────────────────────────────────────────────────────────────────── */
+
+.pg-rail {
+  border-left-color: color-mix(in srgb, var(--model-accent) 14%, var(--light-94));
+}
+
+.pg-rail-foot {
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--light-94);
+  margin-top: auto;
+}
+
+.pg-rail-foot p {
+  font-weight: 600;
+  color: var(--color-11);
+}
+
+@media (max-width: 900px) {
+  .pg-rail {
+    border-top-color: color-mix(in srgb, var(--model-accent) 16%, var(--light-94));
+  }
+}
+
+/* ── OCR stage ───────────────────────────────────────────────────────────── */
+
+/* The scan column was sized `min(100%, …)` inside an `auto` grid column, which
+   is circular: the column asks the content how wide it is, the content asks
+   the column. It resolved to about 32px, so the page being read rendered as a
+   thumbnail. Giving the column a definite width breaks the loop. */
+.ocr-stage {
+  grid-template-columns: minmax(0, 19.5rem) minmax(0, 1fr);
+  gap: 1.35rem;
+}
+
+.ocr-scan {
+  width: 100%;
+}
+
+@media (max-width: 820px) {
+  .ocr-stage {
+    grid-template-columns: 1fr;
+  }
+
+  .ocr-scan {
+    width: min(100%, 19.5rem);
+    margin-inline: auto;
+  }
+}
+
+.ocr-scan-crop {
+  border-color: color-mix(in srgb, var(--model-accent) 16%, var(--light-94));
+  box-shadow:
+    0 10px 28px -12px color-mix(in srgb, var(--model-accent) 45%, transparent),
+    0 2px 6px rgba(46, 50, 56, 0.06);
+}
+
+/* a light band running down the page while the layout model is working
+   through it — on only while it is actually reading */
+.ocr-stage.is-reading .ocr-scan-crop::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    transparent 42%,
+    color-mix(in srgb, var(--model-accent) 26%, transparent) 50%,
+    transparent 58%
+  );
+  animation: ocr-sweep 2.6s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes ocr-sweep {
+  from { transform: translateY(-100%); }
+  to { transform: translateY(100%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ocr-stage.is-reading .ocr-scan-crop::after { animation: none; opacity: 0; }
+}
+
+.ocr-side-label {
+  color: color-mix(in srgb, var(--model-accent) 70%, var(--ed-text-2));
+}
+
+.ocr-reading {
+  color: var(--model-accent, var(--text-orange-500));
+}
+
+/* ── Waveform ────────────────────────────────────────────────────────────── */
+
+/* Tinted rather than grey at rest, so an unplayed meter still belongs to the
+   model whose page it is on. */
+.audio-wave span {
+  background: color-mix(in srgb, var(--model-accent, var(--ed-text-2)) 22%, transparent);
+}
+
+/* Narrow bars with the slack distributed between them read as a waveform;
+   full-width bars with a 2px gap read as a barcode. */
+.audio-wave {
+  gap: 0;
+  justify-content: space-between;
+}
+
+.audio-wave span {
+  flex: 0 1 3px;
+  max-width: 3px;
+  border-radius: 999px;
+  transform: scaleY(0.7);
+}
+
+/* the rail is taller than the shortest main pane, and its list fades out at
+   the bottom edge so a long one reads as scrollable */
+.pg-rail {
+  min-height: 16rem;
+}
+
+.pg-rail-scroll {
+  mask-image: linear-gradient(to bottom, black 0, black calc(100% - 1.6rem), transparent 100%);
+}
+
+/* ── Headline words ─────────────────────────────────────────────────────── */
+
+.dh-word {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: bottom;
+}
+
+.dh-word > span {
+  display: inline-block;
+}
+
+/* a word that starts its own line */
+.dh-break {
+  display: block;
+}
+
+/* ── Card spec rows ─────────────────────────────────────────────────────── */
+
+/* The three cells share the card's rows, so a value that wraps to two lines
+   pushes every label down with it instead of only its own. */
+.dev-card-specs {
+  grid-template-rows: auto auto;
+}
+
+.dev-card-spec {
+  grid-row: span 2;
+  grid-template-rows: subgrid;
+  display: grid;
+  align-content: start;
+}
+
+/* The pulse that runs the length of a wire when the diagram first arrives.
+   Hidden by default: if its tween never runs the flat wire underneath is
+   still there, which is the whole reason it is a second path. */
+.dflow-trace {
+  opacity: 0;
+  filter: drop-shadow(0 0 4px currentColor);
+}
+
+/* ── Transcript: words arriving with the audio ───────────────────────────── */
+
+/* Each word carries its index; the paragraph carries the read head as a
+   fraction of a word, updated every frame from the audio clock. A word fades
+   up as the head crosses it, which is smooth in a way that toggling a class
+   on the browser's four-a-second timeupdate events can never be.
+
+   No transition on the opacity: the value itself is already continuous, and a
+   transition on top of it only adds lag. */
+.audio-transcript.is-live .tx-word {
+  color: inherit;
+  opacity: clamp(0, calc(var(--read, 0) - var(--i)), 1);
+  transition: none;
+}
+
+/* the word the audio is on right now */
+.audio-transcript.is-live .tx-word.is-cursor::before {
+  background: var(--model-gradient, color-mix(in srgb, var(--model-accent) 60%, transparent));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .audio-transcript.is-live .tx-word {
+    opacity: 1;
+  }
+}
+
+/* ── Stable panel heights ───────────────────────────────────────────────── */
+
+/* Every example in a playground is a different length — 6 words of Sanskrit
+   next to 53 of a song lyric, a sentence next to a whole document, pages of
+   different proportions. Left to size themselves, the card jumped every time
+   the example changed and the rail (which takes its height from the main
+   pane) jumped with it. So each panel gets a fixed height and scrolls its own
+   overflow. */
+.transcribe-caption {
+  height: 9rem;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.sx-text,
+.sx-text.is-long {
+  height: 9rem;
+  max-height: none;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.pg-breakout-compact .tp-pane {
+  height: 19rem;
+}
+
+.pg-breakout-compact .tp-text,
+.pg-breakout-compact .tp-scroll-compact {
+  height: 15.25rem;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+/* the alternative reading under a translation sits inside the fixed pane */
+.pg-breakout-compact .tp-pane.is-output:has(.tp-alt) .tp-text {
+  height: 11rem;
+}
+
+/* ── OCR stage: one box for every example ────────────────────────────────── */
+
+/* The examples are pages of very different proportions — a portrait Kashmiri
+   manuscript at 0.61, a landscape bank passbook at 1.83 — and the scan was
+   sized by width alone, so each one came out a different height and the whole
+   card resized when the example changed. Instead the scan gets a fixed box and
+   the page is fitted inside it, centred: portrait pages fill the height,
+   landscape pages fill the width, and the card never moves. */
+.ocr-stage {
+  --scan-h: 27rem;
+  /* the box left for the page once the "Scan" caption has had its row */
+  --scan-box: calc(var(--scan-h) - 1.6rem);
+}
+
+.ocr-scan {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: var(--scan-h);
+}
+
+.ocr-scan-crop {
+  width: calc(var(--scan-box) * var(--page-aspect, 0.65));
+  max-width: 100%;
+  aspect-ratio: var(--page-aspect, 0.65);
+  margin: auto;
+}
+
+/* the reconstruction column matches the same box, so the two sides stay level
+   and the rail beside them keeps one height */
+.ocr-blocks {
+  height: var(--scan-box);
+  max-height: none;
+}
+
+.ocr-missing {
+  margin: auto;
+}
+
+@media (max-width: 820px) {
+  .ocr-stage {
+    --scan-h: 23rem;
+  }
+}
+
+/* the reserved row for a playground's sub-tabs, kept whether or not the
+   current example has any */
+.tl-tabrow {
+  display: flex;
+  align-items: center;
+  min-height: 2.25rem;
+  margin-bottom: 0.75rem;
+}
+
+.tl-tabrow .tl-tabs {
+  margin-bottom: 0;
+}

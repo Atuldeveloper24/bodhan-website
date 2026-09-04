@@ -5,7 +5,6 @@ import {
     useMemo,
     useRef,
     useState,
-    useSyncExternalStore,
 } from 'react';
 import {
     canAnimate,
@@ -90,33 +89,10 @@ const layout = () => {
     return spots;
 };
 
-/**
- * Below this width the ring collapses to a wrapped grid: 22 named markers cannot
- * be spread around an ellipse in a phone-width column without colliding, and a
- * grid of the same buttons reads better than an unreadable orbit.
- */
-const COMPACT_QUERY = '(max-width: 700px)';
-
-const compactQuery = () => window.matchMedia(COMPACT_QUERY);
-
-const subscribeToWidth = (onChange) => {
-    const query = compactQuery();
-    query.addEventListener('change', onChange);
-    return () => query.removeEventListener('change', onChange);
-};
-
-const useCompactLayout = () =>
-    useSyncExternalStore(
-        subscribeToWidth,
-        () => compactQuery().matches,
-        () => false
-    );
-
 const LanguageConstellation = () => {
     const [data, setData] = useState(null);
     const [active, setActive] = useState('Hindi');
     const [hover, setHover] = useState(null);
-    const compact = useCompactLayout();
     const panelId = useId();
     const narrationId = useId();
     const spots = useMemo(layout, []);
@@ -145,7 +121,7 @@ const LanguageConstellation = () => {
     // glyphs blooming outward from it in ring order.
     useGsapAnimation(
         (root) => {
-            gsap.from('.itb-orbit-centre', {
+            gsap.from('.constellation-centre', {
                 scale: 0.72,
                 opacity: 0,
                 duration: 0.7,
@@ -153,7 +129,7 @@ const LanguageConstellation = () => {
                 scrollTrigger: { trigger: root, start: 'top 82%', once: true },
             });
 
-            gsap.from('.itb-glyph', {
+            gsap.from('.constellation-glyph', {
                 scale: 0.4,
                 opacity: 0,
                 duration: 0.62,
@@ -190,45 +166,32 @@ const LanguageConstellation = () => {
     const item = entry?.sentence?.[0];
 
     return (
-        <div className="itb-constellation" ref={rootRef}>
+        <div className="constellation-wrap" ref={rootRef}>
             <p id={narrationId} className="sr-only">
                 All 22 languages of the Eighth Schedule, across 12 scripts. Select a language to
                 read one of its translations.
             </p>
 
             <div
-                className={`itb-orbit-field${compact ? ' is-compact' : ''}`}
+                className="research-featured-gradient research-language-constellation constellation-field"
                 aria-labelledby={narrationId}
             >
-                {!compact && (
-                    <div className="itb-orbit-rings" aria-hidden="true">
-                        <span className="itb-orbit-ring is-outer" />
-                        <span className="itb-orbit-ring is-inner" />
-                    </div>
-                )}
-
-                <p className="itb-orbit-centre" aria-hidden="true">
-                    <span className="itb-orbit-count">22</span>
-                    <span className="itb-orbit-count-label">languages · 12 scripts</span>
+                <p className="constellation-centre" aria-hidden="true">
+                    <span className="constellation-count">22</span>
+                    <span className="constellation-count-label">languages · 12 scripts</span>
                 </p>
 
-                <div className="itb-orbit">
-                    {spots.map(({ lang, left, top, ring }, i) => (
+                <div className="research-indic-orbit constellation-orbit">
+                    {spots.map(({ lang, left, top }) => (
                         <button
                             key={lang}
                             type="button"
-                            className={`itb-glyph${lang === active ? ' is-active' : ''}${
+                            className={`constellation-glyph${lang === active ? ' is-active' : ''}${
                                 lang === highlight ? ' is-highlight' : ''
                             }`}
-                            style={
-                                compact
-                                    ? undefined
-                                    : {
-                                          left: `${left}%`,
-                                          top: `${top}%`,
-                                          animationDelay: `${(i % 7) * 0.42 + ring * 0.2}s`,
-                                      }
-                            }
+                            // Ignored under 760px, where the pill turns static and
+                            // the field becomes a wrapped cloud.
+                            style={{ left: `${left}%`, top: `${top}%` }}
                             aria-pressed={lang === active}
                             aria-describedby={panelId}
                             aria-label={`${lang}, ${LANG_ABBR[lang]}`}
@@ -238,39 +201,37 @@ const LanguageConstellation = () => {
                             onMouseEnter={() => setHover(lang)}
                             onMouseLeave={() => setHover(null)}
                         >
-                            <span className="itb-glyph-mark" lang={LANG_CODE[lang]} aria-hidden="true">
+                            <span className="constellation-glyph-mark" lang={LANG_CODE[lang]} aria-hidden="true">
                                 {GLYPH[lang]}
                             </span>
-                            <span className="itb-glyph-name">{lang}</span>
+                            <span className="constellation-glyph-name">{lang}</span>
                         </button>
                     ))}
                 </div>
             </div>
 
-            <div id={panelId} className="itb-detail" tabIndex={-1}>
-                <div className="itb-detail-head">
-                    <p className="itb-detail-kicker">Selected language</p>
-                    <p className="itb-detail-title">
-                        {active}
-                        {entry && <span className="itb-detail-script">{entry.script}</span>}
-                    </p>
-                </div>
+            <div id={panelId} className="constellation-detail" tabIndex={-1}>
+                <p className="constellation-detail-kicker">Selected language</p>
+                <p className="constellation-detail-title">
+                    {active}
+                    {entry && <span className="constellation-detail-script">{entry.script}</span>}
+                </p>
 
                 {item ? (
-                    <div className="itb-detail-lines" ref={linesRef}>
-                        <div className="itb-line">
-                            <span className="itb-line-tag">EN</span>
+                    <div ref={linesRef}>
+                        <div className="ex-line">
+                            <span className="ex-line-tag">EN</span>
                             <p lang="en">{item.en}</p>
                         </div>
-                        <div className="itb-line is-out">
-                            <span className="itb-line-tag">{LANG_ABBR[active]}</span>
+                        <div className="ex-line ex-out">
+                            <span className="ex-line-tag">{LANG_ABBR[active]}</span>
                             <p lang={LANG_CODE[active]} dir={entry.rtl ? 'rtl' : undefined}>
                                 {item.out}
                             </p>
                         </div>
                     </div>
                 ) : (
-                    <p className="itb-detail-loading">Loading recorded examples…</p>
+                    <p className="ex-note">Loading recorded examples…</p>
                 )}
             </div>
 

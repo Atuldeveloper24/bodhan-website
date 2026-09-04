@@ -3,9 +3,10 @@ import Navbar from '../../../home/components/Navbar';
 import Footer from '../../../home/components/Footer';
 import ModelHero from './ModelHero';
 import MiniTranslatePlayground from './MiniTranslatePlayground';
-import Reveal from '../../../../components/Reveal';
+import DevReveal from '../DevReveal';
 import SHOWCASE from '../../data/translateShowcase.json';
 import { getModelById } from '../../data/models';
+import '../../developers.css';
 
 const model = getModelById('indic-translate');
 
@@ -76,27 +77,31 @@ const renderPane = (item, tabId) => {
 const IndicTranslatePage = () => (
     <div className="min-h-screen research-page">
         <Navbar />
-        <main className="model-page-main" style={{ '--model-accent': 'var(--model-violet)' }}>
+        <main
+            className="model-page-main"
+            style={{ '--model-accent': model.accent, '--model-gradient': model.gradient }}
+        >
             <ModelHero
                 eyebrow="Developers · Model"
                 title={model.name}
                 intro="translate"
                 tagline="English and all 22 Eighth Schedule languages, in both directions — with Markdown, LaTeX, code and tables coming out the way they went in."
-                accent="var(--model-violet)"
+                accent={model.accent}
+                viz={model.viz}
                 stats={STATS}
                 primaryCta={{ label: 'Hugging Face', href: '#' }}
                 blogCta={model.blog}
                 secondaryCta={{ label: 'Contact', href: '/contact' }}
             />
 
-            <Reveal as="section" className="model-section">
+            <DevReveal as="section" className="model-section">
                 <h2 className="model-section-title">Every kind of translation</h2>
                 <p className="model-section-dek">
                     Every form the model handles, each shown in a different language — sentences and
                     whole documents, native script and Roman.
                 </p>
                 <MiniTranslatePlayground items={items} renderPane={renderPane} />
-            </Reveal>
+            </DevReveal>
         </main>
         <Footer />
     </div>

@@ -27,13 +27,13 @@ const TryItBlock = ({ section }) => {
 
     useGsapAnimation(
         () => {
-            gsap.from('.itb-cap-card', {
+            gsap.from('.cap-card', {
                 y: 26,
                 opacity: 0,
                 duration: 0.6,
                 ease: 'power3.out',
                 stagger: 0.07,
-                scrollTrigger: { trigger: '.itb-cap-grid', start: 'top 86%', once: true },
+                scrollTrigger: { trigger: '.research-feature-grid', start: 'top 86%', once: true },
             });
 
             // The model page animates its own `.itr-reveal` surfaces from a
@@ -59,20 +59,22 @@ const TryItBlock = ({ section }) => {
     };
 
     return (
-        <div className="itb-tryit" ref={rootRef}>
-            <div className="itb-cap-grid">
+        <div className="tryit-block" ref={rootRef}>
+            <div className="research-feature-grid">
                 {cards.map((card) => (
                     <button
                         key={card.title}
                         type="button"
-                        className={`itb-cap-card${mode === card.mode ? ' is-active' : ''}`}
+                        className={`research-feature-card cap-card${
+                            mode === card.mode ? ' is-active' : ''
+                        }`}
                         aria-pressed={mode === card.mode}
                         onClick={() => pick(card.mode)}
                     >
-                        <span className="itb-cap-tag">{card.tag}</span>
-                        <span className="itb-cap-title">{card.title}</span>
-                        <span className="itb-cap-body">{formatBlogText(card.content)}</span>
-                        <span className="itb-cap-cue" aria-hidden="true">
+                        <span className="research-feature-index">{card.tag}</span>
+                        <span className="research-feature-title">{card.title}</span>
+                        <span className="research-feature-body">{formatBlogText(card.content)}</span>
+                        <span className="cap-card-cue" aria-hidden="true">
                             Run it ↓
                         </span>
                     </button>

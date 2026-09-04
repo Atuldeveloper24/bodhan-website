@@ -1,26 +1,44 @@
 /* ===================================================================
-   Indic-Translate post — the four widgets the article dispatches to,
-   plus the article chrome they share.
+   Indic-Translate post styling.
 
-   Everything is prefixed `itb-` (Indic-Translate blog) so nothing here
-   can collide with the model page's `itr-` scope, which this post also
-   embeds. Colours come from the site tokens in globals.css; no new
-   palette is introduced.
+   Ported from the translation team's standalone blog
+   (`blog mt/mt-blog/src/styles.css`), keeping their class names so the
+   two stay easy to diff. Everything their file carries for a standalone
+   page is dropped here instead — the body reset, hero, table of
+   contents, footer, ecosystem banner and language picker are all things
+   this site already owns.
+
+   The token bridge is scoped to `.research-prose` rather than `:root`,
+   so these names cannot reach the rest of the site. `--border-strong`
+   in particular has a different value in globals.css.
    =================================================================== */
 
 .research-prose {
-  --itb-line: rgba(92, 64, 51, 0.14);
-  --itb-line-soft: rgba(92, 64, 51, 0.08);
-  --itb-surface: var(--white);
-  --itb-surface-2: var(--bg-cream-100);
-  --itb-shadow: 0 1px 2px rgba(46, 50, 56, 0.04), 0 10px 30px rgba(46, 50, 56, 0.05);
+  /* ── Token bridge ──────────────────────────────────────────────────
+   * The ported markup refers to these names; each is defined in terms
+   * of the Bodhan palette, so several hundred ported declarations adopt
+   * the house colours without being touched individually.
+   * ---------------------------------------------------------------- */
+  --surface-1: var(--white);
+  --surface-2: var(--bg-cream-100);
+  --text-secondary: var(--color-10);
+  --text-muted: var(--color-11);
+  --border: rgba(92, 64, 51, 0.12);
+  --border-strong: rgba(92, 64, 51, 0.22);
+  --accent: var(--text-orange-500);
+  --accent-soft: var(--primary-100);
+  --gridline: #e4d8c8;
+  --baseline: #d2c9ba;
+
+  --font-display: 'EB Garamond', Georgia, serif;
+  --font-body: 'Manrope', 'Noto Sans Devanagari', 'Noto Sans Bengali', system-ui, sans-serif;
+  --font-mono: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
 }
 
-/* ── Article rhythm ─────────────────────────────────────────────────
-   The old fixed `mb-14` left a chart card touching the next heading.
-   Sections now breathe on their own scale, and any widget or figure a
-   section carries gets its own gutter rather than borrowing the
-   paragraph's.
+/* ── Article rhythm ──────────────────────────────────────────────────
+   A fixed `mb-14` left a chart card touching the next heading. Sections
+   breathe on their own scale instead, and any widget or figure a section
+   carries gets its own gutter rather than borrowing the paragraph's.
    ------------------------------------------------------------------ */
 
 .research-article-section {
@@ -41,55 +59,40 @@
   }
 }
 
-.research-section-num {
-  display: inline-block;
-  margin-right: 0.6rem;
-  font-family: var(--font-manrope);
-  font-size: 0.72em;
+/* ── Section chrome ── */
+.section-num {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
   font-weight: 700;
-  letter-spacing: 0.06em;
-  color: var(--text-orange-500);
-  vertical-align: 0.08em;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+  margin-right: 0.55rem;
 }
 
-.research-draft-note {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.6rem;
-  margin: 0 0 1.5rem;
-  padding: 0.7rem 0.95rem;
-  border: 1px dashed var(--itb-line);
-  border-radius: 0.75rem;
-  background: var(--bg-cream-50);
-  font-size: 0.82rem;
-  line-height: 1.5;
+.cap-subnote {
+  margin-top: 18px;
+  font-size: 0.9rem;
+  line-height: 1.7;
   color: var(--color-11);
 }
 
-.research-draft-badge {
-  padding: 0.15rem 0.5rem;
-  border-radius: 999px;
-  background: var(--primary-100);
-  font-size: 0.66rem;
-  font-weight: 700;
-  letter-spacing: 0.09em;
-  text-transform: uppercase;
-  color: var(--text-orange-500);
+.cap-subnote strong {
+  color: var(--text-primary);
+  font-weight: 600;
 }
 
 .research-inline-code {
   padding: 0.1em 0.38em;
-  border: 1px solid var(--itb-line-soft);
+  border: 1px solid var(--border);
   border-radius: 0.35rem;
-  background: var(--bg-cream-100);
-  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  background: var(--surface-2);
+  font-family: var(--font-mono);
   font-size: 0.87em;
   color: var(--text-orange-400);
 }
 
 .research-prose-link {
-  color: var(--text-orange-500);
+  color: var(--accent);
   text-decoration: underline;
   text-underline-offset: 0.18em;
   text-decoration-thickness: 1px;
@@ -99,361 +102,359 @@
   color: var(--text-hover);
 }
 
-/* ── Coverage: the language constellation ──────────────────────────── */
-
-.itb-constellation {
-  margin: 2rem 0 0;
-}
-
-.itb-orbit-field {
-  position: relative;
-  /* Width must be definite, or the min-height below resolves through the aspect
-     ratio into a width wider than the column and the page scrolls sideways. */
-  width: 100%;
-  max-width: 100%;
-  aspect-ratio: 1 / 0.82;
-  min-height: 380px;
-  border: 1px solid var(--itb-line-soft);
-  border-radius: 1.5rem;
-  padding: 1.5rem;
-  overflow: hidden;
-  background:
-    radial-gradient(ellipse 62% 52% at 50% 50%, rgba(255, 244, 230, 0.95), transparent 72%),
-    linear-gradient(158deg, var(--bg-cream-50) 0%, var(--white) 100%);
-  box-shadow: var(--itb-shadow);
-}
-
-.itb-orbit-rings,
-.itb-orbit {
-  position: absolute;
-  inset: 1.5rem;
-}
-
-.itb-orbit-ring {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  border: 1px dashed rgba(194, 65, 12, 0.16);
-  border-radius: 50%;
-}
-
-.itb-orbit-ring.is-outer {
-  width: 78%;
-  height: 80%;
-}
-
-.itb-orbit-ring.is-inner {
-  width: 39%;
-  height: 39%;
-}
-
-.itb-glyph {
-  position: absolute;
-  transform: translate(-50%, -50%);
+/* ── Temporary copy marker ───────────────────────────────────────────
+   The opening is the only prose on the page not carried over from the
+   previous version. Marked so it is obvious it still needs a pass.
+   ------------------------------------------------------------------ */
+.temp-copy {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.15rem;
-  padding: 0.4rem 0.6rem;
-  border: 1px solid transparent;
-  border-radius: 0.7rem;
-  background: transparent;
-  cursor: pointer;
-  color: var(--color-11);
-  transition:
-    background 0.22s ease,
-    border-color 0.22s ease,
-    color 0.22s ease,
-    box-shadow 0.22s ease,
-    transform 0.22s ease;
-  /* The float is decorative and per-glyph; the arrival stagger is GSAP's. */
-  animation: itb-float 7s ease-in-out infinite;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 14px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px dashed rgba(180, 83, 9, 0.5);
+  background: rgba(255, 234, 210, 0.55);
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  color: var(--text-secondary);
 }
 
-.itb-glyph-mark {
-  font-size: 1.28rem;
+.temp-badge {
+  flex: none;
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #fff;
+  background: var(--text-orange-400);
+  border-radius: 4px;
+  padding: 2px 6px;
+}
+
+/* ── Linguistic coverage: the language constellation ─────────────────
+ * .research-featured-gradient / .research-language-constellation /
+ * .research-indic-orbit come from globals.css. The site positions nine
+ * glyphs with hand-written -1..-9 rules; these 22 are placed from
+ * computed percentages instead, so only the sizing and the selection
+ * states are needed here.
+ * ------------------------------------------------------------------ */
+.constellation-wrap {
+  margin-top: 20px;
+}
+
+.constellation-field {
+  position: relative;
+  aspect-ratio: 16 / 10;
+  min-height: 340px;
+  border-radius: 1rem;
+  border: 1px solid rgba(255, 234, 210, 0.95);
+  overflow: hidden;
+}
+
+.constellation-orbit {
+  pointer-events: auto;
+}
+
+.constellation-glyph {
+  /* A named pill, not a bare glyph bubble: 22 unfamiliar scripts with no labels
+     is a guessing game. The pill is absolutely positioned and centred on its
+     computed coordinate. */
+  position: absolute;
+  transform: translate(-50%, -50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px 4px 4px;
+  border: 1px solid rgba(49, 70, 133, 0.22);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 4px 14px rgba(49, 70, 133, 0.08);
+  backdrop-filter: blur(5px);
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+
+.constellation-glyph:hover {
+  transform: translate(-50%, -50%) scale(1.06);
+  z-index: 3;
+}
+
+.constellation-glyph-mark {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 1.55rem;
+  height: 1.55rem;
+  border-radius: 50%;
+  background: var(--bg-cream-100);
+  /* No font-family here: the mark carries its language's `lang`, and the
+     [lang="..."] script rules are what give it a face with the right glyphs. */
+  font-size: 0.8rem;
+  line-height: 1;
+  color: var(--brand-blue);
+}
+
+.constellation-glyph[data-len='2'] .constellation-glyph-mark {
+  font-size: 0.7rem;
+}
+
+.constellation-glyph[data-len='3'] .constellation-glyph-mark {
+  font-size: 0.58rem;
+}
+
+.constellation-glyph-name {
+  font-family: var(--font-body);
+  font-size: 0.76rem;
   font-weight: 600;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+}
+
+.constellation-glyph.is-highlight {
+  border-color: var(--accent);
+  z-index: 2;
+}
+
+.constellation-glyph.is-active {
+  background: var(--accent);
+  border-color: var(--accent);
+  box-shadow: 0 6px 18px rgba(194, 65, 12, 0.3);
+  z-index: 4;
+}
+
+.constellation-glyph.is-active .constellation-glyph-name {
+  color: #fff;
+}
+
+.constellation-glyph.is-active .constellation-glyph-mark {
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--accent);
+}
+
+.constellation-glyph:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.constellation-centre {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  margin: 0;
+  pointer-events: none;
+}
+
+.constellation-count {
+  font-family: var(--font-display);
+  font-size: clamp(2.25rem, 6vw, 3.25rem);
+  font-weight: 500;
   line-height: 1;
   color: var(--text-primary);
 }
 
-.itb-glyph[data-len='2'] .itb-glyph-mark,
-.itb-glyph[data-len='3'] .itb-glyph-mark {
-  font-size: 1.06rem;
-}
-
-.itb-glyph-name {
-  font-size: 0.66rem;
+.constellation-count-label {
+  font-family: var(--font-body);
+  font-size: 0.7rem;
   font-weight: 600;
-  letter-spacing: 0.01em;
-  white-space: nowrap;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--color-11);
 }
 
-.itb-glyph:hover,
-.itb-glyph.is-highlight {
-  border-color: rgba(194, 65, 12, 0.32);
-  background: var(--white);
+.constellation-detail {
+  margin-top: 14px;
+  padding: 16px 18px;
+  border-radius: 14px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+}
+
+.constellation-detail:focus {
+  outline: none;
+}
+
+.constellation-detail-kicker {
+  margin: 0 0 4px;
+  font-family: var(--font-body);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.constellation-detail-title {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 0 0 12px;
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  font-weight: 500;
   color: var(--text-primary);
-  box-shadow: 0 4px 16px rgba(194, 65, 12, 0.14);
-  transform: translate(-50%, -50%) scale(1.06);
-  animation-play-state: paused;
 }
 
-.itb-glyph.is-active {
-  border-color: var(--text-orange-500);
-  background: var(--white);
-  color: var(--text-orange-500);
-  box-shadow: 0 6px 20px rgba(194, 65, 12, 0.2);
-  animation-play-state: paused;
+.constellation-detail-script {
+  font-family: var(--font-body);
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--accent);
+  background: var(--accent-soft);
+  border-radius: 999px;
+  padding: 3px 9px;
 }
 
-.itb-glyph.is-active .itb-glyph-mark {
-  color: var(--text-orange-500);
-}
-
-@keyframes itb-float {
-  0%,
-  100% {
-    translate: 0 0;
+/* A ring of 22 named pills cannot fit a phone, so below this width the
+   constellation becomes a wrapped cloud of the same pills. Same markup, same
+   behaviour, no ellipse — the computed left/top simply stop applying once the
+   pill is static. */
+@media (max-width: 760px) {
+  .constellation-field {
+    aspect-ratio: auto;
+    min-height: 0;
+    display: grid;
+    gap: 14px;
+    justify-items: center;
+    padding: 18px 14px 20px;
   }
-  50% {
-    translate: 0 -5px;
+
+  .constellation-orbit {
+    position: static;
+    inset: auto;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .constellation-glyph {
+    position: static;
+    transform: none;
+  }
+
+  .constellation-glyph:hover {
+    transform: none;
+  }
+
+  .constellation-centre {
+    position: static;
+    transform: none;
+    order: -1;
+  }
+
+  .constellation-count {
+    font-size: 2rem;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .itb-glyph {
-    animation: none;
+  .constellation-glyph:hover {
+    transform: translate(-50%, -50%);
   }
 }
 
-.itb-orbit-centre {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+/* ── Example lines, shared by the coverage panel ── */
+.ex-line {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  min-width: 0;
+}
+
+.ex-line + .ex-line {
+  margin-top: 7px;
+}
+
+.ex-line-tag {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  background: var(--surface-2);
+  border-radius: 4px;
+  padding: 2px 6px;
+  flex: none;
+  margin-top: 2px;
+}
+
+.ex-line p {
+  font-size: 0.92rem;
+  line-height: 1.5;
+  color: var(--text-secondary);
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+
+.ex-line.ex-out .ex-line-tag {
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.ex-line.ex-out p {
+  color: var(--text-primary);
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.ex-note {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-top: 12px;
+}
+
+/* ── Key capabilities: cards that drive the demo under them ──────────
+   The cards are the site's own feature cards, made interactive: picking
+   one selects that capability in the embedded demo.
+   ------------------------------------------------------------------ */
+
+/* The grid is two columns from 640px, so an odd number of cards leaves the last
+   one alone on its row, stranded against the left edge. Span both columns and
+   take one column's width, centred. Targets the grid's direct children because
+   each card is wrapped in a reveal element. */
+@media (min-width: 640px) {
+  .research-feature-grid > *:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+    /* One column: half the row, minus half the 1rem gap. */
+    width: calc(50% - 0.5rem);
+    margin-inline: auto;
+  }
+
+  /* Grid rows size independently by default, so cards on different rows ended up
+     different heights. `grid-auto-rows: 1fr` ties every row to the tallest, and
+     the card then fills its row so the set reads as one. Only from 640px:
+     stacked on a phone this would just add dead space. */
+  .research-feature-grid {
+    grid-auto-rows: 1fr;
+  }
+
+  .research-feature-grid > * {
+    height: 100%;
+  }
+}
+
+.research-feature-card.cap-card {
+  height: 100%;
+  width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.15rem;
-  margin: 0;
-  text-align: center;
-}
-
-.itb-orbit-count {
-  font-size: 2.5rem;
-  font-weight: 800;
-  line-height: 1;
-  letter-spacing: -0.03em;
-  color: var(--text-orange-500);
-}
-
-.itb-orbit-count-label {
-  font-size: 0.63rem;
-  font-weight: 700;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--color-11);
-}
-
-.itb-detail {
-  margin-top: 1.15rem;
-  padding: 1.35rem 1.5rem 1.5rem;
-  border: 1px solid var(--itb-line-soft);
-  border-radius: 1.15rem;
-  background: var(--itb-surface);
-  box-shadow: var(--itb-shadow);
-}
-
-.itb-detail:focus {
-  outline: none;
-}
-
-.itb-detail-head {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 0.75rem;
-  padding-bottom: 0.9rem;
-  margin-bottom: 1rem;
-  border-bottom: 1px solid var(--itb-line-soft);
-}
-
-.itb-detail-kicker {
-  margin: 0;
-  font-size: 0.63rem;
-  font-weight: 700;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--color-11);
-}
-
-.itb-detail-title {
-  margin: 0;
-  font-size: 1.15rem;
-  font-weight: 700;
-  letter-spacing: -0.015em;
-  color: var(--text-primary);
-}
-
-.itb-detail-script {
-  margin-left: 0.6rem;
-  padding: 0.15rem 0.5rem;
-  border-radius: 999px;
-  background: var(--bg-cream-100);
-  font-size: 0.62rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--color-11);
-}
-
-.itb-detail-loading {
-  margin: 0;
-  font-size: 0.9rem;
-  color: var(--color-11);
-}
-
-.itb-detail-lines {
-  display: grid;
-  gap: 0.85rem;
-}
-
-.itb-line {
-  display: grid;
-  grid-template-columns: 2.6rem 1fr;
-  gap: 0.85rem;
-  align-items: start;
-  padding: 0.85rem 1rem;
-  border: 1px solid var(--itb-line-soft);
-  border-radius: 0.8rem;
-  background: var(--bg-cream-50);
-}
-
-.itb-line.is-out {
-  border-color: rgba(194, 65, 12, 0.22);
-  background: linear-gradient(180deg, rgba(255, 244, 230, 0.7), var(--white));
-}
-
-.itb-line-tag {
-  padding: 0.18rem 0;
-  border-radius: 0.4rem;
-  background: var(--primary-100);
-  font-size: 0.6rem;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  text-align: center;
-  text-transform: uppercase;
-  color: var(--color-11);
-}
-
-.itb-line.is-out .itb-line-tag {
-  background: var(--text-orange-500);
-  color: var(--white);
-}
-
-.itb-line p {
-  margin: 0;
-  font-size: 0.94rem;
-  line-height: 1.68;
-  color: var(--text-primary);
-}
-
-/* ── Compact layout ────────────────────────────────────────────────
-   Under 700px the ellipse cannot hold 22 named markers apart, so the
-   component drops the inline ring coordinates and the field becomes an
-   ordinary wrapped grid with the count as its header.
-   ------------------------------------------------------------------ */
-
-.itb-orbit-field.is-compact {
-  aspect-ratio: auto;
-  min-height: 0;
-  padding: 1.15rem 1rem 1.25rem;
-}
-
-.itb-orbit-field.is-compact .itb-orbit {
-  position: static;
-  inset: auto;
-  display: flex;
-  flex-wrap: wrap;
   justify-content: center;
-  gap: 0.4rem;
-}
-
-.itb-orbit-field.is-compact .itb-glyph {
-  position: static;
-  transform: none;
-  flex-direction: row;
-  gap: 0.35rem;
-  padding: 0.35rem 0.6rem;
-  border-color: var(--itb-line-soft);
-  background: var(--white);
-  animation: none;
-}
-
-.itb-orbit-field.is-compact .itb-glyph:hover,
-.itb-orbit-field.is-compact .itb-glyph.is-highlight,
-.itb-orbit-field.is-compact .itb-glyph.is-active {
-  transform: none;
-}
-
-.itb-orbit-field.is-compact .itb-glyph-mark {
-  font-size: 0.95rem;
-}
-
-.itb-orbit-field.is-compact .itb-orbit-centre {
-  position: static;
-  transform: none;
-  flex-direction: row;
-  align-items: baseline;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
-}
-
-.itb-orbit-field.is-compact .itb-orbit-count {
-  font-size: 1.6rem;
-}
-
-@media (max-width: 640px) {
-  .itb-detail {
-    padding: 1.1rem 1.1rem 1.2rem;
-  }
-
-  .itb-line {
-    grid-template-columns: 1fr;
-    gap: 0.4rem;
-  }
-
-  .itb-line-tag {
-    width: 2.6rem;
-  }
-}
-
-/* ── Capabilities: cards that drive the demo under them ─────────────── */
-
-.itb-tryit {
-  margin-top: 1.75rem;
-}
-
-.itb-cap-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(15.5rem, 1fr));
-  gap: 0.85rem;
-}
-
-.itb-cap-card {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0.45rem;
-  height: 100%;
-  padding: 1.15rem 1.25rem 1.05rem;
-  border: 1px solid var(--itb-line-soft);
-  border-radius: 1rem;
-  background: var(--itb-surface);
-  box-shadow: 0 1px 2px rgba(46, 50, 56, 0.03);
-  text-align: left;
+  text-align: center;
   cursor: pointer;
   transition:
     border-color 0.2s ease,
@@ -461,65 +462,38 @@
     transform 0.2s ease;
 }
 
-.itb-cap-card:hover {
-  border-color: rgba(194, 65, 12, 0.3);
+.research-feature-card.cap-card:hover {
+  border-color: var(--accent);
   box-shadow: 0 8px 24px rgba(46, 50, 56, 0.08);
   transform: translateY(-2px);
 }
 
-.itb-cap-card.is-active {
-  border-color: var(--text-orange-500);
+.research-feature-card.cap-card.is-active {
+  border-color: var(--accent);
   box-shadow: 0 8px 26px rgba(194, 65, 12, 0.16);
 }
 
-.itb-cap-tag {
-  padding: 0.16rem 0.5rem;
-  border-radius: 999px;
-  background: var(--bg-cream-100);
+.cap-card-cue {
+  margin-top: 10px;
+  font-family: var(--font-mono);
   font-size: 0.62rem;
   font-weight: 700;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--text-orange-500);
-}
-
-.itb-cap-title {
-  font-size: 1rem;
-  font-weight: 700;
-  letter-spacing: -0.015em;
-  color: var(--text-primary);
-}
-
-.itb-cap-body {
-  font-size: 0.87rem;
-  line-height: 1.6;
-  color: var(--color-11);
-}
-
-.itb-cap-cue {
-  margin-top: auto;
-  padding-top: 0.5rem;
-  font-size: 0.7rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--text-orange-500);
+  color: var(--accent);
   opacity: 0;
-  transform: translateY(3px);
-  transition: opacity 0.2s ease, transform 0.2s ease;
+  transition: opacity 0.2s ease;
 }
 
-.itb-cap-card:hover .itb-cap-cue,
-.itb-cap-card.is-active .itb-cap-cue {
+.research-feature-card.cap-card:hover .cap-card-cue,
+.research-feature-card.cap-card.is-active .cap-card-cue {
   opacity: 1;
-  transform: translateY(0);
 }
 
-/* ── Embedding the model page's demo surfaces ───────────────────────
+/* ── Embedding the model page's demo surfaces ────────────────────────
    Both are written for a standalone page: a full-height ground, 88px
    section padding, a centred hero header, and a 1220px container. In an
-   article column they need none of that, so the `itb-embed` scope strips
-   it and lets the surface sit flush in the column.
+   article column they need none of that.
    ------------------------------------------------------------------ */
 
 .itr-page.itb-embed {
@@ -537,8 +511,8 @@
   width: 100%;
 }
 
-/* The article's own heading already introduces the surface; the demo's
-   centred hero header underneath it would say the same thing twice. */
+/* The article's own heading already introduces the surface; the demo's centred
+   hero header underneath it would say the same thing twice. */
 .itr-page.itb-embed .itr-head {
   display: none;
 }
@@ -561,282 +535,353 @@
   }
 }
 
-/* ── Evaluation: the four-tile results hub ──────────────────────────── */
-
-.itb-results {
-  margin-top: 1.75rem;
-}
-
-.itb-tiles {
+/* ── Results tiles ── */
+.tile-toggle {
   position: relative;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 0.4rem;
-  padding: 0.4rem;
-  border: 1px solid var(--itb-line-soft);
-  border-radius: 1rem;
-  background: var(--itb-surface-2);
-  margin-bottom: 1.75rem;
+  gap: 8px;
+  background: var(--surface-2);
+  border-radius: 14px;
+  padding: 6px;
+  margin-bottom: 24px;
 }
 
-/* The pill is positioned by GSAP from the active tab's box, so it slides
-   between tabs instead of blinking. It starts hidden until first measured. */
-.itb-tile-pill {
+/* Positioned by GSAP from the active tab's box, so it slides between tabs
+   instead of blinking. Hidden until first measured. */
+.tile-pill {
   position: absolute;
   top: 0;
   left: 0;
-  border-radius: 0.75rem;
-  background: var(--white);
-  box-shadow: 0 2px 10px rgba(46, 50, 56, 0.1);
+  border-radius: 10px;
+  background: var(--surface-1);
+  box-shadow: 0 2px 8px rgba(92, 64, 51, 0.12);
   visibility: hidden;
   pointer-events: none;
 }
 
-.itb-tile {
+.tile-btn {
   position: relative;
   z-index: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.2rem;
-  padding: 0.8rem 0.6rem;
+  gap: 3px;
   border: none;
-  border-radius: 0.75rem;
   background: none;
   cursor: pointer;
-  color: var(--color-11);
-  transition: color 0.18s ease;
+  border-radius: 10px;
+  padding: 12px 8px;
+  font-family: var(--font-body);
+  color: var(--text-secondary);
+  transition: color 0.15s ease;
 }
 
-.itb-tile:hover {
+.tile-btn-title {
+  font-weight: 600;
+  font-size: 0.88rem;
+}
+
+.tile-btn-sub {
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.tile-btn.is-active .tile-btn-title {
+  color: var(--accent);
+}
+
+.tile-btn:hover:not(.is-active) {
   color: var(--text-primary);
 }
 
-.itb-tile-title {
-  font-size: 0.88rem;
-  font-weight: 650;
-}
-
-.itb-tile-sub {
-  font-size: 0.63rem;
-  font-weight: 600;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  color: var(--color-14);
-}
-
-.itb-tile.is-active .itb-tile-title {
-  color: var(--text-orange-500);
-}
-
 @media (max-width: 720px) {
-  .itb-tiles {
+  .tile-toggle {
     grid-template-columns: repeat(2, 1fr);
   }
 }
 
-.itb-tile-intro {
-  margin-bottom: 1.5rem;
+.tile-intro {
+  margin-bottom: 18px;
 }
 
-.itb-tile-intro h3 {
-  margin: 0 0 0.6rem;
-  font-size: 1.2rem;
-  font-weight: 700;
-  letter-spacing: -0.02em;
+.tile-intro h3 {
+  font-size: 1.15rem;
+  font-family: var(--font-display);
+  margin-bottom: 8px;
+}
+
+.tile-intro p + p {
+  margin-top: 10px;
+}
+
+/* Collapsible secondary charts. The wrapper is deliberately not a card: the
+   chart inside brings its own, and nesting the two doubles every border and
+   inset. */
+.chart-collapse {
+  margin-top: 16px;
+}
+
+.chart-collapse > summary {
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--bg-cream-100);
+  font-family: var(--font-display);
+  font-size: 1.05rem;
   color: var(--text-primary);
 }
 
-.itb-tile-intro p + p {
-  margin-top: 0.7rem;
+.chart-collapse > summary:hover {
+  border-color: var(--accent);
+}
+
+.chart-collapse > summary::-webkit-details-marker {
+  display: none;
+}
+
+.chart-collapse > summary::after {
+  content: '▸';
+  margin-left: auto;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  transition: transform 0.15s ease;
+}
+
+.chart-collapse[open] > summary::after {
+  transform: rotate(90deg);
+}
+
+.chart-collapse[open] > summary {
+  margin-bottom: 4px;
+}
+
+.chart-note {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  font-size: 0.78rem;
+  line-height: 1.6;
+  color: var(--text-muted);
+}
+
+.chart-note .dot {
+  flex: none;
+  width: 7px;
+  height: 7px;
+  margin-top: 6px;
+  border-radius: 50%;
+  background: var(--text-orange-400);
+}
+
+.prev-tag {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  background: var(--surface-2);
+  border-radius: 4px;
+  padding: 2px 6px;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+
+.human-eval {
+  margin-top: 28px;
+}
+
+.human-eval-heading {
+  margin-bottom: 10px;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.ex-view-toggle {
+  display: inline-flex;
+  gap: 2px;
+  background: var(--surface-2);
+  border-radius: 999px;
+  padding: 2px;
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.ex-view-btn {
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  font-weight: 700;
+  padding: 4px 11px;
+  border-radius: 999px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.ex-view-btn.is-active {
+  background: var(--surface-1);
+  color: var(--accent);
+  box-shadow: 0 1px 3px rgba(92, 64, 51, 0.14);
+}
+
+.ex-view-btn:hover:not(.is-active) {
+  color: var(--text-secondary);
 }
 
 /* Each chart card gets its own gutter so a run of four does not read as one
    striped block. */
-.itb-tile-panel .chart-card,
-.itb-results .chart-card {
+.tile-panel .chart-card {
   margin-top: 1.35rem;
   margin-bottom: 1.35rem;
 }
 
-.itb-human {
-  margin-top: 2.25rem;
-  padding-top: 1.75rem;
-  border-top: 1px solid var(--itb-line-soft);
+/* ── Cite this work ── */
+.cite-block {
+  margin-top: 8px;
+  padding: 20px 22px 22px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
 }
 
-.itb-human-heading {
+.cite-head {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.6rem;
-  margin: 0 0 0.75rem;
-  font-size: 1.05rem;
-  font-weight: 700;
-  letter-spacing: -0.015em;
-  color: var(--text-primary);
-}
-
-.itb-prev-tag {
-  padding: 0.15rem 0.5rem;
-  border-radius: 999px;
-  background: var(--bg-cream-100);
-  font-size: 0.62rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--color-11);
-}
-
-.itb-subview {
-  display: inline-flex;
-  gap: 0.25rem;
-  padding: 0.25rem;
-  border: 1px solid var(--itb-line-soft);
-  border-radius: 999px;
-  background: var(--itb-surface-2);
-}
-
-.itb-subview-btn {
-  padding: 0.4rem 1rem;
-  border: none;
-  border-radius: 999px;
-  background: none;
-  cursor: pointer;
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: var(--color-11);
-  transition: background 0.18s ease, color 0.18s ease;
-}
-
-.itb-subview-btn.is-active {
-  background: var(--white);
-  color: var(--text-orange-500);
-  box-shadow: 0 1px 4px rgba(46, 50, 56, 0.1);
-}
-
-.itb-subview-btn:hover:not(.is-active) {
-  color: var(--text-primary);
-}
-
-.itb-note {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.6rem;
-  margin: 1rem 0 0;
-  font-size: 0.84rem;
-  line-height: 1.65;
-  color: var(--color-11);
-}
-
-.itb-note-dot {
-  flex: none;
-  width: 0.4rem;
-  height: 0.4rem;
-  margin-top: 0.5rem;
-  border-radius: 50%;
-  background: var(--text-orange-500);
-}
-
-/* The wrapper is deliberately not a card: the chart inside brings its own, and
-   nesting the two doubles every border and inset. */
-.itb-collapse {
-  margin-top: 1rem;
-}
-
-.itb-collapse > summary {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1rem;
-  border: 1px solid var(--itb-line-soft);
-  border-radius: 0.75rem;
-  background: var(--bg-cream-100);
-  cursor: pointer;
-  list-style: none;
-  font-size: 0.92rem;
-  font-weight: 600;
-  color: var(--text-primary);
-  transition: border-color 0.18s ease;
-}
-
-.itb-collapse > summary:hover {
-  border-color: var(--text-orange-500);
-}
-
-.itb-collapse > summary::-webkit-details-marker {
-  display: none;
-}
-
-.itb-collapse > summary::after {
-  content: '▸';
-  margin-left: auto;
-  font-size: 0.8rem;
-  color: var(--color-14);
-  transition: transform 0.18s ease;
-}
-
-.itb-collapse[open] > summary::after {
-  transform: rotate(90deg);
-}
-
-/* ── Cite this work ─────────────────────────────────────────────────── */
-
-.bt-cite {
-  margin-top: 2.5rem;
-  padding: 1.35rem 1.5rem 1.5rem;
-  border: 1px solid var(--itb-line-soft);
-  border-radius: 1.15rem;
-  background: var(--bg-cream-50);
-}
-
-.bt-cite-head {
-  display: flex;
-  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 0.75rem;
-  margin-bottom: 0.9rem;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
 }
 
-.bt-cite-title {
+.cite-title {
   margin: 0;
-  font-size: 1.05rem;
-  font-weight: 700;
-  letter-spacing: -0.015em;
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 500;
   color: var(--text-primary);
 }
 
-.bt-cite-copy {
+.cite-copy {
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
-  padding: 0.4rem 0.85rem;
-  border: 1px solid var(--primary-100);
-  border-radius: 999px;
+  gap: 6px;
+  border: 1px solid var(--border);
   background: var(--white);
+  border-radius: 999px;
+  padding: 6px 14px;
   cursor: pointer;
+  font-family: var(--font-body);
   font-size: 0.78rem;
   font-weight: 600;
   color: var(--text-primary);
-  transition: border-color 0.18s ease, color 0.18s ease, transform 0.18s ease;
+  transition: border-color 0.18s ease, color 0.18s ease;
 }
 
-.bt-cite-copy:hover {
-  border-color: var(--text-orange-500);
-  color: var(--text-orange-500);
-  transform: translateY(-1px);
+.cite-copy:hover {
+  border-color: var(--accent);
+  color: var(--accent);
 }
 
-.bt-cite-body {
+.cite-bibtex {
   margin: 0;
-  padding: 1rem 1.1rem;
-  border: 1px solid var(--itb-line-soft);
-  border-radius: 0.8rem;
+  padding: 14px 16px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
   background: var(--white);
-  overflow-x: auto;
-  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-family: var(--font-mono);
   font-size: 0.78rem;
-  line-height: 1.7;
-  color: var(--text-primary);
+  line-height: 1.6;
+  color: var(--text-secondary);
+  overflow-x: auto;
+  white-space: pre;
+}
+
+/* ── Script fonts ────────────────────────────────────────────────────
+ * Native-script text needs its script's own bundled face: system-font
+ * fallback silently renders tofu for scripts the viewer's OS does not
+ * ship.
+ *
+ * Attribute selectors rather than `p[lang=...]`, so a lang set on a
+ * container reaches everything inside it. That matters for the rendered
+ * document examples, whose translated text lands in headings, list items
+ * and table cells, not only in paragraphs.
+ * ------------------------------------------------------------------ */
+[lang='hi'],
+[lang='mr'],
+[lang='ne'],
+[lang='sa'],
+[lang='sd'],
+[lang='mai'],
+[lang='doi'],
+[lang='brx'],
+[lang='kok'] {
+  font-family: 'Noto Sans Devanagari', var(--font-body);
+}
+
+[lang='bn'],
+[lang='as'] {
+  font-family: 'Noto Sans Bengali', var(--font-body);
+}
+
+[lang='ta'] {
+  font-family: 'Noto Sans Tamil', var(--font-body);
+}
+
+[lang='gu'] {
+  font-family: 'Noto Sans Gujarati', var(--font-body);
+}
+
+[lang='kn'] {
+  font-family: 'Noto Sans Kannada', var(--font-body);
+}
+
+[lang='ks'],
+[lang='ur'] {
+  font-family: 'Noto Nastaliq Urdu', 'Noto Sans Arabic', var(--font-body);
+}
+
+[lang='mni'] {
+  font-family: 'Noto Sans Meetei Mayek', var(--font-body);
+}
+
+[lang='ml'] {
+  font-family: 'Noto Sans Malayalam', var(--font-body);
+}
+
+[lang='or'] {
+  font-family: 'Noto Sans Oriya', var(--font-body);
+}
+
+[lang='pa'] {
+  font-family: 'Noto Sans Gurmukhi', var(--font-body);
+}
+
+[lang='sat'] {
+  font-family: 'Noto Sans Ol Chiki', var(--font-body);
+}
+
+[lang='te'] {
+  font-family: 'Noto Sans Telugu', var(--font-body);
+}
+
+/* Code and monospace keep their own face regardless of the surrounding lang. */
+[lang] code,
+[lang] pre,
+[lang] .ex-line-tag,
+[lang].mono {
+  font-family: var(--font-mono);
 }

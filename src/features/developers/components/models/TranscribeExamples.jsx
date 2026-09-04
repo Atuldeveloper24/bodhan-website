@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ArrowUpRight, Pause, Play } from 'lucide-react';
 import { AUDIO_EXAMPLES, MODE_LABELS } from '../../data/transcribeExamples';
 import { assetUrl } from '../../data/assetUrl';
@@ -6,11 +6,15 @@ import { CONSOLE_URL } from '../../../../config/links';
 
 const BARS = Array.from({ length: 64 }, (_, i) => 20 + ((i * 37) % 64));
 
-// A transcript trails the speech: nothing for the first moment, then words
-// landing well behind what was said. EASE > 1 holds the early words back so
-// the line builds slowly instead of dumping; it still finishes with the audio.
-const LAG = 0.14;
-const EASE = 2.2;
+// How far behind the audio the transcript runs, as a fraction of the clip.
+// Small and constant: a word should land just after it is said. There is no
+// per-word timing in the data, so the read head moves linearly — anything
+// fancier drifts away from the audio rather than towards it. (It used to
+// advance as ratio ** 2.2, which meant a fifth of the words had appeared by
+// the halfway mark and the rest arrived in a rush at the end.)
+const TRAIL = 0.05;
+
+const clamp01 = (n) => Math.min(1, Math.max(0, n));
 
 const formatTime = (seconds) => {
     if (!Number.isFinite(seconds)) return '0:00';
@@ -21,12 +25,20 @@ const formatTime = (seconds) => {
 
 const TranscribeExamples = () => {
     const audioRef = useRef(null);
+    const captionRef = useRef(null);
+    const frameRef = useRef(0);
+
     const [activeId, setActiveId] = useState(AUDIO_EXAMPLES[0].id);
     const [mode, setMode] = useState('native');
     const [playing, setPlaying] = useState(false);
-    const [progress, setProgress] = useState(0);
     const [elapsed, setElapsed] = useState(0);
     const [duration, setDuration] = useState(0);
+
+    // Which bar the meter has reached, and which word the caret sits on. Both
+    // are whole numbers, so following the audio only re-renders when one of
+    // them actually changes — roughly once per bar rather than once per frame.
+    const [bar, setBar] = useState(0);
+    const [head, setHead] = useState(0);
 
     // The panel starts blank: the transcript is written as the audio runs, so
     // there is nothing to show until someone presses play.
@@ -35,18 +47,53 @@ const TranscribeExamples = () => {
     const example = AUDIO_EXAMPLES.find((e) => e.id === activeId) ?? AUDIO_EXAMPLES[0];
     const words = useMemo(() => example.modes[mode].split(' '), [example, mode]);
 
-    const ratio = Math.min(1, Math.max(0, (progress - LAG) / (1 - LAG)));
-    const heard = started ? Math.round(ratio ** EASE * words.length) : 0;
-    const done = started && heard >= words.length;
+    const done = started && head >= words.length;
+
+    // The read head is a fraction of a word, written straight to the DOM as a
+    // custom property: CSS fades each word in as the head crosses it, which is
+    // what makes the line arrive smoothly instead of a word at a time on the
+    // four-or-so timeupdate events a second the browser sends.
+    const writeHead = useCallback(
+        (played, count) => {
+            const at = clamp01((played - TRAIL) / (1 - TRAIL)) * count;
+            captionRef.current?.style.setProperty('--read', String(at));
+            setHead(Math.min(count, Math.floor(at)));
+        },
+        [],
+    );
+
+    // Follow the audio every frame while it plays.
+    useEffect(() => {
+        if (!playing) return undefined;
+
+        const step = () => {
+            const audio = audioRef.current;
+            if (audio && Number.isFinite(audio.duration) && audio.duration > 0) {
+                const played = clamp01(audio.currentTime / audio.duration);
+                setBar(Math.round(played * BARS.length));
+                writeHead(played, words.length);
+            }
+            frameRef.current = requestAnimationFrame(step);
+        };
+
+        frameRef.current = requestAnimationFrame(step);
+        return () => cancelAnimationFrame(frameRef.current);
+    }, [playing, words.length, writeHead]);
+
+    const reset = useCallback(() => {
+        setPlaying(false);
+        setElapsed(0);
+        setBar(0);
+        setHead(0);
+        setStarted(false);
+        captionRef.current?.style.setProperty('--read', '0');
+    }, []);
 
     const select = (id) => {
         audioRef.current?.pause();
         setActiveId(id);
-        setPlaying(false);
-        setProgress(0);
-        setElapsed(0);
         setDuration(0);
-        setStarted(false);
+        reset();
     };
 
     const toggle = () => {
@@ -56,20 +103,23 @@ const TranscribeExamples = () => {
         else audio.pause();
     };
 
+    // The clock only needs to tick; the meter and the transcript are driven by
+    // the frame loop above.
     const onTimeUpdate = () => {
         const audio = audioRef.current;
-        if (!audio || !Number.isFinite(audio.duration) || audio.duration === 0) return;
-        setElapsed(audio.currentTime);
-        setProgress(audio.currentTime / audio.duration);
+        if (audio) setElapsed(audio.currentTime);
     };
 
     const seek = (event) => {
         const audio = audioRef.current;
         if (!audio || !Number.isFinite(audio.duration)) return;
         const rect = event.currentTarget.getBoundingClientRect();
-        const ratio = Math.min(1, Math.max(0, (event.clientX - rect.left) / rect.width));
-        audio.currentTime = ratio * audio.duration;
-        setProgress(ratio);
+        const at = clamp01((event.clientX - rect.left) / rect.width);
+        audio.currentTime = at * audio.duration;
+        setElapsed(audio.currentTime);
+        setBar(Math.round(at * BARS.length));
+        setStarted(true);
+        writeHead(at, words.length);
     };
 
     return (
@@ -103,7 +153,7 @@ const TranscribeExamples = () => {
                                     {BARS.map((h, i) => (
                                         <span
                                             key={i}
-                                            className={i / BARS.length <= progress ? 'is-played' : undefined}
+                                            className={i <= bar ? 'is-played' : undefined}
                                             style={{ height: `${h}%`, animationDelay: `${(i % 9) * 60}ms` }}
                                         />
                                     ))}
@@ -124,7 +174,13 @@ const TranscribeExamples = () => {
                                     setStarted(true);
                                 }}
                                 onPause={() => setPlaying(false)}
-                                onEnded={() => setPlaying(false)}
+                                onEnded={() => {
+                                    setPlaying(false);
+                                    // land on the last word rather than a frame short of it
+                                    setBar(BARS.length);
+                                    setHead(words.length);
+                                    captionRef.current?.style.setProperty('--read', String(words.length));
+                                }}
                                 onTimeUpdate={onTimeUpdate}
                                 onLoadedMetadata={() => setDuration(audioRef.current?.duration ?? 0)}
                                 preload="metadata"
@@ -147,6 +203,7 @@ const TranscribeExamples = () => {
                         </div>
 
                         <p
+                            ref={captionRef}
                             key={`${example.id}-${mode}`}
                             className={`transcribe-caption audio-transcript${done ? '' : ' is-live'}`}
                             lang={mode === 'romanized' ? 'en' : example.lang}
@@ -155,7 +212,8 @@ const TranscribeExamples = () => {
                             {words.map((word, i) => (
                                 <span
                                     key={i}
-                                    className={`tx-word${i < heard ? ' is-heard' : ''}${i === heard ? ' is-cursor' : ''}`}
+                                    className={`tx-word${i === head ? ' is-cursor' : ''}`}
+                                    style={{ '--i': i }}
                                 >
                                     {word}{' '}
                                 </span>

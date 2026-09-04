@@ -25,15 +25,15 @@ const CiteThisWork = ({ heading = 'Cite this work', bibtex }) => {
     };
 
     return (
-        <section className="bt-cite" aria-label={heading}>
-            <div className="bt-cite-head">
-                <h3 className="bt-cite-title">{heading}</h3>
-                <button type="button" className="bt-cite-copy" onClick={copy}>
+        <section className="cite-block" aria-label={heading}>
+            <div className="cite-head">
+                <h3 className="cite-title">{heading}</h3>
+                <button type="button" className="cite-copy" onClick={copy}>
                     {copied ? <Check size={13} aria-hidden="true" /> : <Copy size={13} aria-hidden="true" />}
                     {copied ? 'Copied' : 'Copy BibTeX'}
                 </button>
             </div>
-            <pre className="bt-cite-body">
+            <pre className="cite-bibtex">
                 <code>{bibtex}</code>
             </pre>
         </section>
