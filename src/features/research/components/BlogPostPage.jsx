@@ -1,6 +1,5 @@
 import { useEffect, useLayoutEffect, useRef } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
 import { gsap, useGsapAnimation } from '../../../utils/motion';
 import Navbar from '../../home/components/Navbar';
 import Footer from '../../home/components/Footer';
@@ -102,7 +101,7 @@ const BlogPostPage = () => {
                         Publication not found
                     </h1>
                     <Link
-                        to="/research"
+                        to="/research/blog"
                         className="text-[var(--text-orange-500)] hover:text-[var(--text-hover)] underline text-sm"
                     >
                         Back to Research
@@ -210,15 +209,6 @@ const BlogPostPage = () => {
 
             <div className="relative pb-16 md:pb-24">
                 <div className="research-article-column mx-auto px-5">
-                    <Link
-                        to="/research"
-                        data-article-intro
-                        className="inline-flex items-center gap-2 research-type-caption hover:text-[var(--text-orange-500)] mb-7 transition-colors"
-                    >
-                        <ArrowLeft size={14} />
-                        All publications
-                    </Link>
-
                     {post.heroSummary && (
                         <p data-article-intro className="research-type-dek mb-10 border-l-2 border-[var(--text-orange-500)]/40 pl-4 md:pl-5">
                             {post.heroSummary}

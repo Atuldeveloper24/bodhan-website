@@ -369,7 +369,6 @@ export const indicTranslatePost = {
             links: [
                 { label: 'Try the model', href: '/developers/indic-translate' },
                 { label: 'Hugging Face', href: 'https://huggingface.co/bodhan-ai/indic-translate' },
-                { label: 'All publications', href: '/research' },
             ],
         },
     ],

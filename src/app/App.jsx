@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom"
+import { Routes, Route, Navigate } from "react-router-dom"
 import HomePage from '../features/home/components/HomePage'
 import AI4BPage from '../features/ai4b/components/AI4BPage'
 import AdvisoryCouncilPage from '../features/advisory/components/AdvisoryCouncilPage'
@@ -28,7 +28,8 @@ function App() {
   return (
     <Routes>
       <Route path="/" element={<HomePage />} />
-      <Route path="/research" element={<ResearchPage />} />
+      {/* The research overview page is gone; /research forwards to the blog listing. */}
+      <Route path="/research" element={<Navigate to="/research/blog" replace />} />
       <Route path="/research/blog" element={<ResearchPage />} />
       <Route path="/research/publications" element={<ResearchPage />} />
       <Route path="/developers" element={<DevelopersPage />} />

@@ -1,10 +1,11 @@
-// ⚠️ TEMPORARY BLOG URLS — these are Cloudflare quick-tunnel addresses for the
-// posts as they stand today. They die when the tunnel does; swap each for its
-// permanent home (or an on-site /research/<slug>) once published.
+// Each model's blog button goes to that model's own post on this site. These
+// are the `slug` values in src/features/research/data/, served by the
+// /research/:slug route — the Cloudflare quick tunnels these replaced are gone.
 const BLOGS = {
-    speak: 'https://commented-millions-gave-association.trycloudflare.com/indic-speak.html',
-    ocr: 'https://dow-dual-chem-tutorial.trycloudflare.com/',
-    translate: 'https://amended-comfort-recognized-hearts.trycloudflare.com/',
+    transcribe: '/research/bodhan-asr',
+    speak: '/research/indic-speak',
+    ocr: '/research/indic-ocr',
+    translate: '/research/indic-translate',
 };
 
 // One palette for the whole developer section: the site's primary warm
@@ -73,7 +74,7 @@ export const models = [
             { label: 'Output modes', value: '3' },
         ],
         variants: TRANSCRIBE_VARIANTS,
-        blog: { label: 'Read the ASR post', href: '/research/bodhan-asr' },
+        blog: { label: 'Read the blog', href: BLOGS.transcribe },
         href: '/developers/indic-transcribe',
     },
     {
