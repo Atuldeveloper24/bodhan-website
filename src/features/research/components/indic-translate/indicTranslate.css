@@ -1,0 +1,842 @@
+/* ===================================================================
+   Indic-Translate post — the four widgets the article dispatches to,
+   plus the article chrome they share.
+
+   Everything is prefixed `itb-` (Indic-Translate blog) so nothing here
+   can collide with the model page's `itr-` scope, which this post also
+   embeds. Colours come from the site tokens in globals.css; no new
+   palette is introduced.
+   =================================================================== */
+
+.research-prose {
+  --itb-line: rgba(92, 64, 51, 0.14);
+  --itb-line-soft: rgba(92, 64, 51, 0.08);
+  --itb-surface: var(--white);
+  --itb-surface-2: var(--bg-cream-100);
+  --itb-shadow: 0 1px 2px rgba(46, 50, 56, 0.04), 0 10px 30px rgba(46, 50, 56, 0.05);
+}
+
+/* ── Article rhythm ─────────────────────────────────────────────────
+   The old fixed `mb-14` left a chart card touching the next heading.
+   Sections now breathe on their own scale, and any widget or figure a
+   section carries gets its own gutter rather than borrowing the
+   paragraph's.
+   ------------------------------------------------------------------ */
+
+.research-article-section {
+  margin-bottom: 4.5rem;
+  padding-bottom: 0.25rem;
+}
+
+/* Each section is the only child of its own reveal wrapper, so `:last-child` on
+   the section itself would match every one of them. The last wrapper in the prose
+   is the one that should not carry a trailing gap. */
+.research-prose > .research-gsap-reveal:last-child .research-article-section {
+  margin-bottom: 0;
+}
+
+@media (min-width: 768px) {
+  .research-article-section {
+    margin-bottom: 5.5rem;
+  }
+}
+
+.research-section-num {
+  display: inline-block;
+  margin-right: 0.6rem;
+  font-family: var(--font-manrope);
+  font-size: 0.72em;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--text-orange-500);
+  vertical-align: 0.08em;
+}
+
+.research-draft-note {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+  margin: 0 0 1.5rem;
+  padding: 0.7rem 0.95rem;
+  border: 1px dashed var(--itb-line);
+  border-radius: 0.75rem;
+  background: var(--bg-cream-50);
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: var(--color-11);
+}
+
+.research-draft-badge {
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  background: var(--primary-100);
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--text-orange-500);
+}
+
+.research-inline-code {
+  padding: 0.1em 0.38em;
+  border: 1px solid var(--itb-line-soft);
+  border-radius: 0.35rem;
+  background: var(--bg-cream-100);
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 0.87em;
+  color: var(--text-orange-400);
+}
+
+.research-prose-link {
+  color: var(--text-orange-500);
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+  text-decoration-thickness: 1px;
+}
+
+.research-prose-link:hover {
+  color: var(--text-hover);
+}
+
+/* ── Coverage: the language constellation ──────────────────────────── */
+
+.itb-constellation {
+  margin: 2rem 0 0;
+}
+
+.itb-orbit-field {
+  position: relative;
+  /* Width must be definite, or the min-height below resolves through the aspect
+     ratio into a width wider than the column and the page scrolls sideways. */
+  width: 100%;
+  max-width: 100%;
+  aspect-ratio: 1 / 0.82;
+  min-height: 380px;
+  border: 1px solid var(--itb-line-soft);
+  border-radius: 1.5rem;
+  padding: 1.5rem;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse 62% 52% at 50% 50%, rgba(255, 244, 230, 0.95), transparent 72%),
+    linear-gradient(158deg, var(--bg-cream-50) 0%, var(--white) 100%);
+  box-shadow: var(--itb-shadow);
+}
+
+.itb-orbit-rings,
+.itb-orbit {
+  position: absolute;
+  inset: 1.5rem;
+}
+
+.itb-orbit-ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border: 1px dashed rgba(194, 65, 12, 0.16);
+  border-radius: 50%;
+}
+
+.itb-orbit-ring.is-outer {
+  width: 78%;
+  height: 80%;
+}
+
+.itb-orbit-ring.is-inner {
+  width: 39%;
+  height: 39%;
+}
+
+.itb-glyph {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  padding: 0.4rem 0.6rem;
+  border: 1px solid transparent;
+  border-radius: 0.7rem;
+  background: transparent;
+  cursor: pointer;
+  color: var(--color-11);
+  transition:
+    background 0.22s ease,
+    border-color 0.22s ease,
+    color 0.22s ease,
+    box-shadow 0.22s ease,
+    transform 0.22s ease;
+  /* The float is decorative and per-glyph; the arrival stagger is GSAP's. */
+  animation: itb-float 7s ease-in-out infinite;
+}
+
+.itb-glyph-mark {
+  font-size: 1.28rem;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--text-primary);
+}
+
+.itb-glyph[data-len='2'] .itb-glyph-mark,
+.itb-glyph[data-len='3'] .itb-glyph-mark {
+  font-size: 1.06rem;
+}
+
+.itb-glyph-name {
+  font-size: 0.66rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+
+.itb-glyph:hover,
+.itb-glyph.is-highlight {
+  border-color: rgba(194, 65, 12, 0.32);
+  background: var(--white);
+  color: var(--text-primary);
+  box-shadow: 0 4px 16px rgba(194, 65, 12, 0.14);
+  transform: translate(-50%, -50%) scale(1.06);
+  animation-play-state: paused;
+}
+
+.itb-glyph.is-active {
+  border-color: var(--text-orange-500);
+  background: var(--white);
+  color: var(--text-orange-500);
+  box-shadow: 0 6px 20px rgba(194, 65, 12, 0.2);
+  animation-play-state: paused;
+}
+
+.itb-glyph.is-active .itb-glyph-mark {
+  color: var(--text-orange-500);
+}
+
+@keyframes itb-float {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  50% {
+    translate: 0 -5px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .itb-glyph {
+    animation: none;
+  }
+}
+
+.itb-orbit-centre {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  margin: 0;
+  text-align: center;
+}
+
+.itb-orbit-count {
+  font-size: 2.5rem;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  color: var(--text-orange-500);
+}
+
+.itb-orbit-count-label {
+  font-size: 0.63rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-11);
+}
+
+.itb-detail {
+  margin-top: 1.15rem;
+  padding: 1.35rem 1.5rem 1.5rem;
+  border: 1px solid var(--itb-line-soft);
+  border-radius: 1.15rem;
+  background: var(--itb-surface);
+  box-shadow: var(--itb-shadow);
+}
+
+.itb-detail:focus {
+  outline: none;
+}
+
+.itb-detail-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.75rem;
+  padding-bottom: 0.9rem;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid var(--itb-line-soft);
+}
+
+.itb-detail-kicker {
+  margin: 0;
+  font-size: 0.63rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-11);
+}
+
+.itb-detail-title {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  color: var(--text-primary);
+}
+
+.itb-detail-script {
+  margin-left: 0.6rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  background: var(--bg-cream-100);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-11);
+}
+
+.itb-detail-loading {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--color-11);
+}
+
+.itb-detail-lines {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.itb-line {
+  display: grid;
+  grid-template-columns: 2.6rem 1fr;
+  gap: 0.85rem;
+  align-items: start;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--itb-line-soft);
+  border-radius: 0.8rem;
+  background: var(--bg-cream-50);
+}
+
+.itb-line.is-out {
+  border-color: rgba(194, 65, 12, 0.22);
+  background: linear-gradient(180deg, rgba(255, 244, 230, 0.7), var(--white));
+}
+
+.itb-line-tag {
+  padding: 0.18rem 0;
+  border-radius: 0.4rem;
+  background: var(--primary-100);
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-align: center;
+  text-transform: uppercase;
+  color: var(--color-11);
+}
+
+.itb-line.is-out .itb-line-tag {
+  background: var(--text-orange-500);
+  color: var(--white);
+}
+
+.itb-line p {
+  margin: 0;
+  font-size: 0.94rem;
+  line-height: 1.68;
+  color: var(--text-primary);
+}
+
+/* ── Compact layout ────────────────────────────────────────────────
+   Under 700px the ellipse cannot hold 22 named markers apart, so the
+   component drops the inline ring coordinates and the field becomes an
+   ordinary wrapped grid with the count as its header.
+   ------------------------------------------------------------------ */
+
+.itb-orbit-field.is-compact {
+  aspect-ratio: auto;
+  min-height: 0;
+  padding: 1.15rem 1rem 1.25rem;
+}
+
+.itb-orbit-field.is-compact .itb-orbit {
+  position: static;
+  inset: auto;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.4rem;
+}
+
+.itb-orbit-field.is-compact .itb-glyph {
+  position: static;
+  transform: none;
+  flex-direction: row;
+  gap: 0.35rem;
+  padding: 0.35rem 0.6rem;
+  border-color: var(--itb-line-soft);
+  background: var(--white);
+  animation: none;
+}
+
+.itb-orbit-field.is-compact .itb-glyph:hover,
+.itb-orbit-field.is-compact .itb-glyph.is-highlight,
+.itb-orbit-field.is-compact .itb-glyph.is-active {
+  transform: none;
+}
+
+.itb-orbit-field.is-compact .itb-glyph-mark {
+  font-size: 0.95rem;
+}
+
+.itb-orbit-field.is-compact .itb-orbit-centre {
+  position: static;
+  transform: none;
+  flex-direction: row;
+  align-items: baseline;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.itb-orbit-field.is-compact .itb-orbit-count {
+  font-size: 1.6rem;
+}
+
+@media (max-width: 640px) {
+  .itb-detail {
+    padding: 1.1rem 1.1rem 1.2rem;
+  }
+
+  .itb-line {
+    grid-template-columns: 1fr;
+    gap: 0.4rem;
+  }
+
+  .itb-line-tag {
+    width: 2.6rem;
+  }
+}
+
+/* ── Capabilities: cards that drive the demo under them ─────────────── */
+
+.itb-tryit {
+  margin-top: 1.75rem;
+}
+
+.itb-cap-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15.5rem, 1fr));
+  gap: 0.85rem;
+}
+
+.itb-cap-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.45rem;
+  height: 100%;
+  padding: 1.15rem 1.25rem 1.05rem;
+  border: 1px solid var(--itb-line-soft);
+  border-radius: 1rem;
+  background: var(--itb-surface);
+  box-shadow: 0 1px 2px rgba(46, 50, 56, 0.03);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+
+.itb-cap-card:hover {
+  border-color: rgba(194, 65, 12, 0.3);
+  box-shadow: 0 8px 24px rgba(46, 50, 56, 0.08);
+  transform: translateY(-2px);
+}
+
+.itb-cap-card.is-active {
+  border-color: var(--text-orange-500);
+  box-shadow: 0 8px 26px rgba(194, 65, 12, 0.16);
+}
+
+.itb-cap-tag {
+  padding: 0.16rem 0.5rem;
+  border-radius: 999px;
+  background: var(--bg-cream-100);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-orange-500);
+}
+
+.itb-cap-title {
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  color: var(--text-primary);
+}
+
+.itb-cap-body {
+  font-size: 0.87rem;
+  line-height: 1.6;
+  color: var(--color-11);
+}
+
+.itb-cap-cue {
+  margin-top: auto;
+  padding-top: 0.5rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-orange-500);
+  opacity: 0;
+  transform: translateY(3px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.itb-cap-card:hover .itb-cap-cue,
+.itb-cap-card.is-active .itb-cap-cue {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ── Embedding the model page's demo surfaces ───────────────────────
+   Both are written for a standalone page: a full-height ground, 88px
+   section padding, a centred hero header, and a 1220px container. In an
+   article column they need none of that, so the `itb-embed` scope strips
+   it and lets the surface sit flush in the column.
+   ------------------------------------------------------------------ */
+
+.itr-page.itb-embed {
+  min-height: 0;
+  margin-top: 1.5rem;
+  background: transparent;
+  overflow-x: visible;
+}
+
+.itr-page.itb-embed .itr-section {
+  padding: 0;
+}
+
+.itr-page.itb-embed .itr-container {
+  width: 100%;
+}
+
+/* The article's own heading already introduces the surface; the demo's
+   centred hero header underneath it would say the same thing twice. */
+.itr-page.itb-embed .itr-head {
+  display: none;
+}
+
+/* The demo's segmented controls are sized for a full-width page; in a narrow
+   column they scroll inside their own row rather than widening the article. */
+.itr-page.itb-embed .itr-seg,
+.itr-page.itb-embed .itr-mode-tabs {
+  max-width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+}
+
+/* Charts and document pairs want more room than 56rem of prose. Widen the
+   specimen sheet out of the column on screens that have the width. */
+@media (min-width: 1120px) {
+  .itr-page.itb-embed-wide {
+    width: calc(100% + 8rem);
+    margin-left: -4rem;
+  }
+}
+
+/* ── Evaluation: the four-tile results hub ──────────────────────────── */
+
+.itb-results {
+  margin-top: 1.75rem;
+}
+
+.itb-tiles {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.4rem;
+  padding: 0.4rem;
+  border: 1px solid var(--itb-line-soft);
+  border-radius: 1rem;
+  background: var(--itb-surface-2);
+  margin-bottom: 1.75rem;
+}
+
+/* The pill is positioned by GSAP from the active tab's box, so it slides
+   between tabs instead of blinking. It starts hidden until first measured. */
+.itb-tile-pill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  border-radius: 0.75rem;
+  background: var(--white);
+  box-shadow: 0 2px 10px rgba(46, 50, 56, 0.1);
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.itb-tile {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  padding: 0.8rem 0.6rem;
+  border: none;
+  border-radius: 0.75rem;
+  background: none;
+  cursor: pointer;
+  color: var(--color-11);
+  transition: color 0.18s ease;
+}
+
+.itb-tile:hover {
+  color: var(--text-primary);
+}
+
+.itb-tile-title {
+  font-size: 0.88rem;
+  font-weight: 650;
+}
+
+.itb-tile-sub {
+  font-size: 0.63rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--color-14);
+}
+
+.itb-tile.is-active .itb-tile-title {
+  color: var(--text-orange-500);
+}
+
+@media (max-width: 720px) {
+  .itb-tiles {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.itb-tile-intro {
+  margin-bottom: 1.5rem;
+}
+
+.itb-tile-intro h3 {
+  margin: 0 0 0.6rem;
+  font-size: 1.2rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+}
+
+.itb-tile-intro p + p {
+  margin-top: 0.7rem;
+}
+
+/* Each chart card gets its own gutter so a run of four does not read as one
+   striped block. */
+.itb-tile-panel .chart-card,
+.itb-results .chart-card {
+  margin-top: 1.35rem;
+  margin-bottom: 1.35rem;
+}
+
+.itb-human {
+  margin-top: 2.25rem;
+  padding-top: 1.75rem;
+  border-top: 1px solid var(--itb-line-soft);
+}
+
+.itb-human-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+  margin: 0 0 0.75rem;
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  color: var(--text-primary);
+}
+
+.itb-prev-tag {
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  background: var(--bg-cream-100);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-11);
+}
+
+.itb-subview {
+  display: inline-flex;
+  gap: 0.25rem;
+  padding: 0.25rem;
+  border: 1px solid var(--itb-line-soft);
+  border-radius: 999px;
+  background: var(--itb-surface-2);
+}
+
+.itb-subview-btn {
+  padding: 0.4rem 1rem;
+  border: none;
+  border-radius: 999px;
+  background: none;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-11);
+  transition: background 0.18s ease, color 0.18s ease;
+}
+
+.itb-subview-btn.is-active {
+  background: var(--white);
+  color: var(--text-orange-500);
+  box-shadow: 0 1px 4px rgba(46, 50, 56, 0.1);
+}
+
+.itb-subview-btn:hover:not(.is-active) {
+  color: var(--text-primary);
+}
+
+.itb-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  margin: 1rem 0 0;
+  font-size: 0.84rem;
+  line-height: 1.65;
+  color: var(--color-11);
+}
+
+.itb-note-dot {
+  flex: none;
+  width: 0.4rem;
+  height: 0.4rem;
+  margin-top: 0.5rem;
+  border-radius: 50%;
+  background: var(--text-orange-500);
+}
+
+/* The wrapper is deliberately not a card: the chart inside brings its own, and
+   nesting the two doubles every border and inset. */
+.itb-collapse {
+  margin-top: 1rem;
+}
+
+.itb-collapse > summary {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--itb-line-soft);
+  border-radius: 0.75rem;
+  background: var(--bg-cream-100);
+  cursor: pointer;
+  list-style: none;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  transition: border-color 0.18s ease;
+}
+
+.itb-collapse > summary:hover {
+  border-color: var(--text-orange-500);
+}
+
+.itb-collapse > summary::-webkit-details-marker {
+  display: none;
+}
+
+.itb-collapse > summary::after {
+  content: '▸';
+  margin-left: auto;
+  font-size: 0.8rem;
+  color: var(--color-14);
+  transition: transform 0.18s ease;
+}
+
+.itb-collapse[open] > summary::after {
+  transform: rotate(90deg);
+}
+
+/* ── Cite this work ─────────────────────────────────────────────────── */
+
+.bt-cite {
+  margin-top: 2.5rem;
+  padding: 1.35rem 1.5rem 1.5rem;
+  border: 1px solid var(--itb-line-soft);
+  border-radius: 1.15rem;
+  background: var(--bg-cream-50);
+}
+
+.bt-cite-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.9rem;
+}
+
+.bt-cite-title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  color: var(--text-primary);
+}
+
+.bt-cite-copy {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.85rem;
+  border: 1px solid var(--primary-100);
+  border-radius: 999px;
+  background: var(--white);
+  cursor: pointer;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  transition: border-color 0.18s ease, color 0.18s ease, transform 0.18s ease;
+}
+
+.bt-cite-copy:hover {
+  border-color: var(--text-orange-500);
+  color: var(--text-orange-500);
+  transform: translateY(-1px);
+}
+
+.bt-cite-body {
+  margin: 0;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--itb-line-soft);
+  border-radius: 0.8rem;
+  background: var(--white);
+  overflow-x: auto;
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 0.78rem;
+  line-height: 1.7;
+  color: var(--text-primary);
+}

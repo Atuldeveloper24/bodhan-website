@@ -13,6 +13,8 @@ export default defineConfig({
     tailwindcss(),
   ],
   server: {
+    // Honour an assigned port so several dev servers can run side by side.
+    port: process.env.PORT ? Number(process.env.PORT) : 5173,
     host: true,
     open: true,
     allowedHosts: true,

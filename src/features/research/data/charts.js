@@ -1,3 +1,7 @@
+import { indicSpeakChartRegistry } from './indic-speak/charts';
+import { indicTranslateChartRegistry } from './indic-translate/charts';
+import { indicOcrChartRegistry } from './indic-ocr/charts';
+
 /**
  * Chart configs for blog posts.
  *
@@ -78,6 +82,8 @@ export const overallPerformanceChart = {
     description:
         'Horizontal bar chart ranking six systems by average word error rate. Bodhan Scribe is lowest at 4.2 percent.',
     yLabel: 'WER (%)',
+    seriesName: 'WER',
+    valueSuffix: '%',
     highlightKey: 'bodhan',
     data: [
         { name: 'Bodhan Scribe', key: 'bodhan', score: 4.2, highlight: true },
@@ -98,6 +104,7 @@ export const trainingDataDonut = {
         'Composition bar showing 1.30 million weak or synthetic hours, 40 thousand zero-shot TTS hours, and 11 thousand human-labeled hours.',
     totalLabel: 'Total hours',
     totalValue: '1.35M',
+    tableHeaders: ['Source', 'Hours', 'Share'],
     segments: [
         {
             label: 'Weak / synthetic',
@@ -125,6 +132,15 @@ export const chartRegistry = {
     'speaker-consistency': speakerConsistencyChart,
     'overall-wer': overallPerformanceChart,
     'training-breakdown': trainingDataDonut,
+    // The Indic-Translate post keeps its twenty configs in their own module so the
+    // evaluation numbers stay next to the tables they were generated from.
+    ...indicTranslateChartRegistry,
+    // Likewise for IndicOCR: the benchmark tables it charts live beside it in
+    // indic-ocr/evals.js.
+    ...indicOcrChartRegistry,
+    // And for Indic-Speak, whose one config is derived from indic-speak/speakEvals.js
+    // rather than typed out.
+    ...indicSpeakChartRegistry,
 };
 
 export function resolveChart(chartRef) {

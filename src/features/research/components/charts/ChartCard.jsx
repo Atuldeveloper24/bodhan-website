@@ -1,4 +1,5 @@
 import { useEffect, useId, useRef, useState } from 'react';
+import './chartSvg.css';
 
 export const useContainerSize = () => {
     const ref = useRef(null);
@@ -123,13 +124,19 @@ const ChartCard = ({
     const descId = useId();
 
     return (
-        <figure className="chart-card" aria-labelledby={titleId} aria-describedby={description ? descId : undefined}>
-            <figcaption className="chart-card-header">
-                <h3 id={titleId} className="chart-card-title">
-                    {title}
-                </h3>
-                {subtitle && <p className="chart-card-subtitle">{subtitle}</p>}
-            </figcaption>
+        <figure className="chart-card" aria-labelledby={title ? titleId : undefined} aria-describedby={description ? descId : undefined}>
+            {/* A chart nested inside a <details> whose summary already names it drops
+                its own heading, so the title is optional rather than required. */}
+            {(title || subtitle) && (
+                <figcaption className="chart-card-header">
+                    {title && (
+                        <h3 id={titleId} className="chart-card-title">
+                            {title}
+                        </h3>
+                    )}
+                    {subtitle && <p className="chart-card-subtitle">{subtitle}</p>}
+                </figcaption>
+            )}
 
             {description && (
                 <p id={descId} className="sr-only">

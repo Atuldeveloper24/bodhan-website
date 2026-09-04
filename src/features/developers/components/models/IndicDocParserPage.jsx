@@ -1,34 +1,32 @@
+import { useRef } from 'react';
 import Navbar from '../../../home/components/Navbar';
 import Footer from '../../../home/components/Footer';
-import ModelHero from './ModelHero';
-import DocParserExamples from './DocParserExamples';
+import './indic-doc-parser/docparser.css';
+import useDocParserAnimations from './indic-doc-parser/useDocParserAnimations';
+import DocParserHero from './indic-doc-parser/DocParserHero';
+import DocParserOverview from './indic-doc-parser/DocParserOverview';
+import DocParserLiveDemo from './indic-doc-parser/DocParserLiveDemo';
+import DocParserExamplesGallery from './indic-doc-parser/DocParserExamplesGallery';
+import DocParserClosing from './indic-doc-parser/DocParserClosing';
 
-const IndicDocParserPage = () => (
-    <div className="min-h-screen research-page">
-        <Navbar />
-        <main className="model-page-main">
-            <ModelHero
-                eyebrow="Developers · Model"
-                title="IndicDocParser"
-                tagline="A page image in — reading-ordered Markdown out, math as LaTeX, tables as HTML."
-                accent="var(--text-orange-500)"
-                specs={[
-                    { label: 'Languages', value: '22 + English' },
-                    { label: 'Layout labels', value: '37' },
-                    { label: 'Parameters', value: '33M + 0.8B' },
-                ]}
-                primaryCta={{ label: 'Hugging Face', href: '#' }}
-                secondaryCta={{ label: 'Contact', href: '/contact' }}
-            />
+const IndicDocParserPage = () => {
+    const pageRef = useRef(null);
+    useDocParserAnimations(pageRef);
 
-            <section className="model-section">
-                <p className="model-section-label">Examples</p>
-                <DocParserExamples />
-                <p className="model-caption">Unedited model predictions on real pages.</p>
-            </section>
-        </main>
-        <Footer />
-    </div>
-);
+    return (
+        <div className="min-h-screen idp-page" ref={pageRef}>
+            <div className="idp-grid-layer" aria-hidden="true" />
+            <Navbar />
+            <main id="top">
+                <DocParserHero />
+                <DocParserOverview />
+                <DocParserLiveDemo />
+                <DocParserExamplesGallery />
+                <DocParserClosing />
+            </main>
+            <Footer />
+        </div>
+    );
+};
 
 export default IndicDocParserPage;

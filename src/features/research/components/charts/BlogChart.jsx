@@ -14,7 +14,11 @@ import ChartCard, {
     ChartTooltipCard,
     useContainerSize,
 } from './ChartCard';
-import { CHART, axisTick, prefersReducedMotion, resolveSeries } from './chartTheme';
+import { CHART, axisTick, axisTicks, prefersReducedMotion, resolveSeries } from './chartTheme';
+import Heatmap from './Heatmap';
+import DivergingBar from './DivergingBar';
+import GroupedBars from './GroupedBars';
+import CiBar from './CiBar';
 
 const formatValue = (value, digits = 1, suffix = '') => {
     if (typeof value !== 'number') return value;
@@ -103,7 +107,7 @@ const DotPlot = ({ chart, series }) => {
     const innerHeight = Math.max(0, plotHeight - margin.top - margin.bottom);
     const x = (value) => margin.left + (value / max) * innerWidth;
     const y = (index) => margin.top + (index + 0.5) * (innerHeight / chart.data.length);
-    const ticks = [0, Math.round(max / 2), Math.round(max)];
+    const ticks = axisTicks(0, max, chart.tickDigits);
 
     const activeRow = active != null ? chart.data[active] : null;
 
@@ -128,25 +132,25 @@ const DotPlot = ({ chart, series }) => {
                         />
                     ))}
 
-                    {ticks.map((tick) => (
-                        <g key={tick}>
+                    {ticks.map(({ value, label }) => (
+                        <g key={label}>
                             <line
-                                x1={x(tick)}
-                                x2={x(tick)}
+                                x1={x(value)}
+                                x2={x(value)}
                                 y1={margin.top}
                                 y2={plotHeight - margin.bottom + 4}
-                                stroke={tick === 0 ? CHART.axis : 'transparent'}
+                                stroke={value === 0 ? CHART.axis : 'transparent'}
                                 strokeWidth={1}
                             />
                             <text
-                                x={x(tick)}
+                                x={x(value)}
                                 y={plotHeight - 8}
                                 textAnchor="middle"
                                 fill={CHART.text.secondary}
                                 fontSize="12"
                                 fontFamily="Manrope, sans-serif"
                             >
-                                {tick}
+                                {label}
                             </text>
                         </g>
                     ))}
@@ -235,7 +239,7 @@ const DumbbellPlot = ({ chart, series }) => {
     const innerHeight = Math.max(0, plotHeight - margin.top - margin.bottom);
     const x = (value) => margin.left + ((value - domainMin) / (domainMax - domainMin)) * innerWidth;
     const y = (index) => margin.top + (index + 0.5) * (innerHeight / chart.data.length);
-    const ticks = [min, (min + max) / 2, max].map((tick) => Number(tick.toFixed(2)));
+    const ticks = axisTicks(domainMin, domainMax, chart.tickDigits);
     const activeRow = active != null ? chart.data[active] : null;
 
     return (
@@ -254,17 +258,17 @@ const DumbbellPlot = ({ chart, series }) => {
                         />
                     ))}
 
-                    {ticks.map((tick) => (
+                    {ticks.map(({ value, label }) => (
                         <text
-                            key={tick}
-                            x={x(tick)}
+                            key={label}
+                            x={x(value)}
                             y={plotHeight - 8}
                             textAnchor="middle"
                             fill={CHART.text.secondary}
                             fontSize="12"
                             fontFamily="Manrope, sans-serif"
                         >
-                            {tick.toFixed(2)}
+                            {label}
                         </text>
                     ))}
 
@@ -345,10 +349,11 @@ const GroupedDotChart = ({ chart }) => {
             description={chart.description}
             legend={<ChartLegend series={series} />}
             table={{
-                headers: ['Language', ...series.map((item) => item.label)],
+                headers: [chart.categoryHeader ?? 'Language', ...series.map((item) => item.label)],
                 rows: chart.data.map((row) => [
                     row.category,
-                    ...series.map((item) => formatValue(row[item.key], 1, chart.valueSuffix)),
+                    ...series.map((item) =>
+                        formatValue(row[item.key], chart.digits ?? 1, chart.valueSuffix)),
                 ]),
             }}
         >
@@ -368,10 +373,10 @@ const DumbbellChart = ({ chart }) => {
             description={chart.description}
             legend={<ChartLegend series={series} />}
             table={{
-                headers: ['Speaker', ...series.map((item) => item.label)],
+                headers: [chart.categoryHeader ?? 'Category', ...series.map((item) => item.label)],
                 rows: chart.data.map((row) => [
                     row.category,
-                    ...series.map((item) => row[item.key].toFixed(3)),
+                    ...series.map((item) => row[item.key].toFixed(chart.digits ?? 2)),
                 ]),
             }}
         >
@@ -382,6 +387,9 @@ const DumbbellChart = ({ chart }) => {
 
 const RankedBarPlot = ({ chart }) => {
     const reduceMotion = prefersReducedMotion();
+    // Hovering one bar fades the others; the highlighted bar (ours) never fades, since it
+    // is the reference every other bar is read against.
+    const [hovered, setHovered] = useState(null);
     const highlightKey = chart.highlightKey ?? 'bodhan';
     const plotHeight = Math.max(200, chart.data.length * 42 + 36);
 
@@ -393,7 +401,7 @@ const RankedBarPlot = ({ chart }) => {
             description={chart.description}
             plotHeight={plotHeight}
             table={{
-                headers: ['System', 'WER (%)'],
+                headers: ['System', chart.valueHeader ?? chart.yLabel ?? 'Value'],
                 rows: chart.data.map((row) => [row.name, `${row.score}`]),
             }}
         >
@@ -421,26 +429,35 @@ const RankedBarPlot = ({ chart }) => {
                         tickLine={false}
                     />
                     <Tooltip
-                        content={<CompactRechartsTooltip valueSuffix="%" digits={1} />}
+                        content={
+                            <CompactRechartsTooltip
+                                valueSuffix={chart.valueSuffix ?? ''}
+                                digits={chart.digits ?? 1}
+                            />
+                        }
                         cursor={{ fill: 'rgba(92, 83, 74, 0.06)' }}
                     />
                     <Bar
                         dataKey="score"
-                        name="WER"
+                        name={chart.seriesName ?? chart.yLabel ?? 'Value'}
                         radius={[0, 5, 5, 0]}
                         maxBarSize={22}
                         isAnimationActive={!reduceMotion}
+                        onMouseEnter={(_, index) => setHovered(index)}
+                        onMouseLeave={() => setHovered(null)}
                     >
-                        {chart.data.map((entry) => (
-                            <Cell
-                                key={entry.name}
-                                fill={
-                                    entry.highlight || entry.key === highlightKey
-                                        ? CHART.series.primary
-                                        : CHART.series.muted
-                                }
-                            />
-                        ))}
+                        {chart.data.map((entry, index) => {
+                            const isOurs = entry.highlight || entry.key === highlightKey;
+                            return (
+                                <Cell
+                                    key={entry.name}
+                                    fill={isOurs ? CHART.series.primary : CHART.series.muted}
+                                    fillOpacity={
+                                        hovered === null || isOurs || hovered === index ? 1 : 0.28
+                                    }
+                                />
+                            );
+                        })}
                         <LabelList
                             dataKey="score"
                             position="right"
@@ -458,7 +475,8 @@ const RankedBarPlot = ({ chart }) => {
                                         fontFamily="Manrope, sans-serif"
                                         fontWeight="650"
                                     >
-                                        {value}%
+                                        {value}
+                                        {chart.valueSuffix ?? ''}
                                     </text>
                                 );
                             }}
@@ -472,14 +490,31 @@ const RankedBarPlot = ({ chart }) => {
 
 const CompositionChart = ({ chart }) => {
     const [active, setActive] = useState(null);
+    // The template supplied exactly three colours and three markers. This post has a
+    // four-segment composition (the human-evaluation verdict split), so the ramps are
+    // extended and indexed modulo their length.
+    const SEG_COLORS = [
+        CHART.series.primary,
+        CHART.series.secondary,
+        CHART.series.tertiary,
+        CHART.series.muted,
+    ];
+    const SEG_MARKERS = ['circle', 'square', 'diamond', 'circle'];
     const series = chart.segments.map((segment, index) => ({
         key: segment.label,
         label: segment.label,
-        color: [CHART.series.tertiary, CHART.series.primary, CHART.series.secondary][index],
-        marker: ['diamond', 'circle', 'square'][index],
+        color: segment.color ?? SEG_COLORS[index % SEG_COLORS.length],
+        marker: SEG_MARKERS[index % SEG_MARKERS.length],
         display: segment.display,
         value: segment.value,
     }));
+
+    // Left edge of each slice as a percentage, so the readout can sit over its middle.
+    const offsets = series.reduce(
+        (acc, item) => [...acc, acc[acc.length - 1] + item.value],
+        [0]
+    );
+    const activeItem = active === null ? null : series[active];
 
     return (
         <ChartCard
@@ -490,7 +525,7 @@ const CompositionChart = ({ chart }) => {
             legend={<ChartLegend series={series} />}
             plotHeight={88}
             table={{
-                headers: ['Source', 'Hours', 'Share'],
+                headers: chart.tableHeaders ?? ['Source', 'Amount', 'Share'],
                 rows: chart.segments.map((segment) => [
                     segment.label,
                     segment.display,
@@ -499,6 +534,28 @@ const CompositionChart = ({ chart }) => {
             }}
         >
             <div className="chart-composition">
+                {activeItem && (
+                    <div
+                        className="chart-tooltip chart-tooltip-static composition-readout"
+                        role="status"
+                        style={{
+                            // Centre on the slice, then clamp so the readout stays in the card.
+                            left: `${Math.min(88, Math.max(12, offsets[active] + activeItem.value / 2))}%`,
+                        }}
+                    >
+                        <p className="chart-tooltip-title">{activeItem.label}</p>
+                        <div className="chart-tooltip-row">
+                            <span className="chart-tooltip-label">
+                                {chart.tableHeaders?.[1] ?? 'Amount'}
+                            </span>
+                            <span className="chart-tooltip-value">{activeItem.display}</span>
+                        </div>
+                        <div className="chart-tooltip-row">
+                            <span className="chart-tooltip-label">Share</span>
+                            <span className="chart-tooltip-value">{activeItem.value}%</span>
+                        </div>
+                    </div>
+                )}
                 <div
                     className="chart-composition-bar"
                     role="img"
@@ -523,10 +580,12 @@ const CompositionChart = ({ chart }) => {
                     ))}
                 </div>
                 <ul className="chart-composition-stats">
-                    {series.map((item) => (
-                        <li key={item.key}>
+                    {series.map((item, index) => (
+                        <li key={item.key} className={active === index ? 'is-active' : undefined}>
                             <strong>{item.display}</strong>
-                            <span>{item.label}</span>
+                            <span>
+                                {item.label} · {item.value}%
+                            </span>
                         </li>
                     ))}
                 </ul>
@@ -542,6 +601,15 @@ const CHART_REGISTRY = {
     rankedBar: RankedBarPlot,
     donut: CompositionChart,
     composition: CompositionChart,
+    // Added for this post: a sortable value matrix, signed bars about a zero line, and
+    // real grouped bars (the template's `groupedBar` is an alias for its dot plot, which
+    // reads poorly for two categories whose values are far apart).
+    heatmap: Heatmap,
+    divergingBar: DivergingBar,
+    bar: GroupedBars,
+    // Added for the Indic-Speak post: a zoomed axis carrying each bar's
+    // confidence interval, for a finding that is about ten values agreeing.
+    ciBar: CiBar,
 };
 
 const BlogChart = ({ chart }) => {

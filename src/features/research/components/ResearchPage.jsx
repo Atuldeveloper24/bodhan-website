@@ -4,7 +4,7 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Navbar from '../../home/components/Navbar';
 import Footer from '../../home/components/Footer';
-import { posts, researchAreas, getFeaturedPost, formatDate } from '../data/posts';
+import { visiblePosts, researchAreas, getFeaturedPost, formatDate } from '../data/posts';
 
 const FILTERS = ['All', 'Publication', 'Release', 'Milestone'];
 const INDIC_GLYPHS = ['अ', 'আ', 'ਅ', 'અ', 'ଅ', 'அ', 'అ', 'ಅ', 'മ'];
@@ -174,13 +174,13 @@ const ResearchPage = () => {
 
     const filteredPosts = useMemo(() => {
         if (view === 'publications') {
-            return posts.filter((post) => post.category === 'Publication');
+            return visiblePosts.filter((post) => post.category === 'Publication');
         }
         if (view === 'blog') {
-            return posts;
+            return visiblePosts;
         }
-        if (activeFilter === 'All') return posts;
-        return posts.filter((post) => post.category === activeFilter);
+        if (activeFilter === 'All') return visiblePosts;
+        return visiblePosts.filter((post) => post.category === activeFilter);
     }, [view, activeFilter]);
 
     return (
@@ -246,17 +246,21 @@ const ResearchPage = () => {
                                                 </span>
                                             ))}
                                         </div>
-                                        <div className="research-asr-wave" aria-hidden="true">
-                                            {Array.from({ length: 19 }, (_, index) => (
-                                                <span key={index} data-wave-bar />
-                                            ))}
-                                        </div>
+                                        {/* The waveform belongs to a speech post; a translation
+                                            post gets the script glyphs alone. */}
+                                        {featured.posterMotif === 'speech' && (
+                                            <div className="research-asr-wave" aria-hidden="true">
+                                                {Array.from({ length: 19 }, (_, index) => (
+                                                    <span key={index} data-wave-bar />
+                                                ))}
+                                            </div>
+                                        )}
                                         <div className="text-center px-8 relative z-10">
                                             <p className="text-xs uppercase tracking-wider text-[var(--text-orange-500)] mb-2 font-medium">
                                                 Featured
                                             </p>
                                             <p className="text-2xl md:text-3xl font-semibold text-[var(--text-primary)] leading-snug">
-                                                Accurate speech recognition for 25 Indian languages
+                                                {featured.tagline ?? featured.summary}
                                             </p>
                                         </div>
                                     </div>
@@ -273,7 +277,7 @@ const ResearchPage = () => {
                                 <p className="text-xs uppercase tracking-wider text-[var(--color-11)] mb-6">
                                     Recent updates
                                 </p>
-                                {posts.slice(0, 3).map((post, i) => (
+                                {visiblePosts.slice(0, 3).map((post, i) => (
                                     <Link
                                         key={post.slug}
                                         to={`/research/${post.slug}`}

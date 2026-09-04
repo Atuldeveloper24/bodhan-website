@@ -61,6 +61,36 @@ const MOTIFS = {
             <path d="M0 24 L8 16 L16 24 L24 16 L32 24" fill="none" stroke="currentColor" strokeWidth="1.1" />
         </>
     ),
+    // Warli stick figures
+    warli: (
+        <>
+            <circle cx="8" cy="7" r="2" fill="none" stroke="currentColor" strokeWidth="0.9" />
+            <path d="M8 9 L4 17 M8 9 L12 17 M4 11.5 L12 11.5" fill="none" stroke="currentColor" strokeWidth="0.9" />
+            <path d="M20 24 L24 15 L28 24 Z" fill="none" stroke="currentColor" strokeWidth="0.9" />
+        </>
+    ),
+    // Alpona scallop and dots
+    alpona: (
+        <>
+            <path d="M0 16 Q8 8 16 16 Q24 24 32 16" fill="none" stroke="currentColor" strokeWidth="1" />
+            <circle cx="8" cy="5" r="1.2" fill="currentColor" />
+            <circle cx="24" cy="27" r="1.2" fill="currentColor" />
+        </>
+    ),
+    // Jaali lattice
+    jaali: (
+        <>
+            <path d="M16 2 L26 12 L16 22 L6 12 Z" fill="none" stroke="currentColor" strokeWidth="0.8" />
+            <path d="M0 28 L6 22 M26 22 L32 28" fill="none" stroke="currentColor" strokeWidth="0.8" />
+        </>
+    ),
+    // Phulkari darning-stitch diamonds
+    phulkari: (
+        <>
+            <path d="M16 4 L24 16 L16 28 L8 16 Z" fill="none" stroke="currentColor" strokeWidth="0.8" />
+            <path d="M16 11 L20 16 L16 21 L12 16 Z" fill="none" stroke="currentColor" strokeWidth="0.6" />
+        </>
+    ),
     // Neutral grid
     grid: (
         <>

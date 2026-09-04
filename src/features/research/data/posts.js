@@ -1,3 +1,8 @@
+import { TEMPLATE_POST } from './postTemplate';
+import { indicTranslatePost } from './indicTranslatePost';
+import { indicOcrPost } from './indicOcrPost';
+import { indicSpeakPost } from './indicSpeakPost';
+
 export const researchAreas = [
     {
         title: 'Speech & Audio',
@@ -21,8 +26,18 @@ export const researchAreas = [
     },
 ];
 
+/*
+ * Every model-release post follows the eight-section structure documented in
+ * postTemplate.js. Start from that template rather than from this post.
+ */
 export const posts = [
+    // Newest release first: the listing and the featured card both read this
+    // order rather than sorting by date.
+    indicOcrPost,
+    indicSpeakPost,
+    indicTranslatePost,
     {
+        // ── 1. Hero ──────────────────────────────────────────────────────
         slug: 'bodhan-asr',
         title: "Bodhan ASR: Accurate Speech Recognition for India's Languages and Dialects",
         category: 'Publication',
@@ -30,49 +45,69 @@ export const posts = [
         summary:
             'Introducing Bodhan Scribe — a 1.2B-parameter multilingual ASR model trained on 1.35M hours of speech, supporting 25 Indian languages with native-script, code-mixed, and romanized transcription.',
         featured: true,
+        posterMotif: 'speech',
+        tagline:
+            'One model for 25 Indian languages — native script, code-mixed, or romanized, streaming or offline.',
         heroSummary:
             "Today we're releasing Bodhan Scribe, a 1.2B-parameter multilingual automatic speech recognition model trained on over 1.35 million hours of speech that supports 25 Indian languages, multiple transcription formats, and production-ready streaming and offline inference.",
         heroLinks: [
-            { label: 'Hugging Face', href: 'https://huggingface.co/bodhan-ai/models' },
-            { label: 'GitHub', href: '#' },
+            { label: '🤗 Hugging Face', href: 'https://huggingface.co/bodhan-ai/models' },
+            { label: '◉ GitHub', href: '#' },
+            { label: '▶ Demo', href: 'https://value-candidates-oakland-capitol.trycloudflare.com' },
+            { label: '📖 Documentation', href: '#' },
             { label: 'Paper', href: '#' },
-            { label: 'Demo', href: 'https://value-candidates-oakland-capitol.trycloudflare.com' },
             { label: 'Model Card', href: '#' },
-            { label: 'Documentation', href: '#' },
         ],
         specs: [
             { label: 'Languages', value: '25' },
-            { label: 'Training Hours', value: '1.35M' },
             { label: 'Parameters', value: '1.2B' },
+            { label: 'Training', value: '1.35M hrs' },
             { label: 'Architecture', value: 'NVIDIA Canary' },
-            { label: 'Native Script', value: '✓' },
-            { label: 'Code Mixed', value: '✓' },
-            { label: 'Romanized', value: '✓' },
-            { label: 'Streaming', value: '✓' },
-            { label: 'Offline', value: '✓' },
+            { label: 'Output', value: 'Native · Mixed · Roman' },
+            { label: 'Inference', value: 'Streaming + offline' },
         ],
+
         sections: [
+            // ── 2. Motivation, opened without a heading ──────────────────
             {
-                id: 'why-asr',
-                title: 'Why Another ASR Model?',
+                id: 'motivation',
+                title: 'Introduction',
+                tocTitle: 'Introduction',
+                hideHeading: true,
                 content: [
-                    'India has many languages. Existing ASR systems perform well only on **high-resource languages**. Dialects remain underserved. *Code-mixed speech* is common. Production systems need **low latency**.',
-                    'Bodhan ASR was built to address these challenges in a **single multilingual model**.',
-                ],
-                bullets: [
-                    'India has many languages with significant dialectal variation.',
-                    'Existing ASR systems perform well only on high-resource languages.',
-                    'Dialects and low-resource languages remain underserved.',
-                    'Code-mixed speech is common in everyday conversation.',
-                    'Production systems need low latency and reliable streaming.',
+                    'India has many languages, and each of them has significant dialectal variation. A speaker in one district and a speaker two hundred kilometres away may share a language on paper and sound very little alike in practice.',
+                    'Speech recognition has not kept up with that. Existing ASR systems perform well only on **high-resource languages**; dialects and low-resource languages remain underserved. *Code-mixed speech* — the ordinary way most people in India actually talk — is treated as an edge case rather than the norm. And systems that do work often cannot meet the latency a production deployment needs.',
+                    '**Bodhan Scribe** was built to address these gaps in a *single multilingual model* rather than a fleet of per-language ones. It supports 22 constitutional languages alongside Indian English, Bhojpuri, and Bhili, and learns a unified multilingual representation instead of memorising each language separately.',
+                    'This post covers what the model supports, how it behaves on the speech patterns people actually produce, how it was built and trained, where it performs well, and where it still does not. It is written for teams deciding whether to build on it.',
                 ],
             },
+
+            // ── 3. Languages across India ────────────────────────────────
             {
-                id: 'meet-bodhan-asr',
-                title: 'Meet Bodhan ASR',
+                id: 'languages',
+                title: 'Languages Across India',
                 content: [
-                    'Bodhan Scribe is a single multilingual model that supports **22 constitutional languages**, Indian English, Bhojpuri, and Bhili.',
-                    'Instead of training separate models per language, Bodhan Scribe learns a *unified multilingual representation* — enabling consistent quality across India\'s linguistic diversity.',
+                    'Bodhan Scribe covers 25 languages in one model. Rather than list them in a table, pick a language below to hear a clip and see what the model returns.',
+                ],
+                languages: [
+                    {
+                        region: 'Hindi belt',
+                        language: 'Hindi',
+                        themeKey: 'hindi',
+                        langCode: 'hi',
+                        input: 'Kal meeting hai at 5 PM',
+                        output: 'कल मीटिंग है एट 5 पीएम',
+                        romanized: 'Kal meeting hai at 5 PM',
+                        note: 'A Hindi–English utterance, returned here in native script.',
+                    },
+                    { region: 'Karnataka', language: 'Kannada', themeKey: 'kannada', langCode: 'kn' },
+                    { region: 'Tamil Nadu', language: 'Tamil', themeKey: 'tamil', langCode: 'ta' },
+                    { region: 'Maharashtra', language: 'Marathi', themeKey: 'marathi', langCode: 'mr' },
+                    { region: 'West Bengal', language: 'Bengali', themeKey: 'bengali', langCode: 'bn' },
+                    { region: 'Kerala', language: 'Malayalam', themeKey: 'malayalam', langCode: 'ml' },
+                    { region: 'Andhra & Telangana', language: 'Telugu', themeKey: 'telugu', langCode: 'te' },
+                    { region: 'Bhojpuri region', language: 'Bhojpuri', themeKey: 'bhojpuri', langCode: 'bho' },
+                    { region: 'Bhil belt', language: 'Bhili', themeKey: 'bhili', langCode: 'bhb' },
                 ],
                 bullets: [
                     '22 constitutional languages',
@@ -80,55 +115,113 @@ export const posts = [
                     'Bhojpuri',
                     'Bhili',
                 ],
-            },
-            {
-                id: 'key-features',
-                title: 'Key Features',
+                slots: [
+                    {
+                        kind: 'audio',
+                        label: 'One clip and transcription per language',
+                        hint: 'Drop WAV files into public/examples/audio/, then fill `audio`, `input`, and `output` on each language entry in posts.js.',
+                    },
+                ],
                 subsections: [
                     {
-                        title: 'Supports 25 Indian Languages',
-                        content:
-                            'Broad coverage across constitutional languages and underserved dialects, designed for *real-world Indian speech patterns*.',
-                    },
-                    {
+                        // Rendered by OutputModesDemo — see BlogContent.
                         title: 'Three Output Modes',
-                        content: 'The same audio can be transcribed in three formats:',
-                        examples: [
-                            {
-                                label: 'Audio',
-                                text: '"Kal meeting hai at 5 PM"',
-                            },
-                            {
-                                label: 'Native',
-                                text: 'कल मीटिंग है एट 5 पीएम',
-                            },
-                            {
-                                label: 'Code Mixed',
-                                text: 'कल meeting hai at 5 PM',
-                            },
-                            {
-                                label: 'Romanized',
-                                text: 'Kal meeting hai at 5 PM',
-                            },
-                        ],
-                    },
-                    {
-                        title: 'Low Resource Language Support',
-                        content:
-                            'Bhili receives **dedicated support** despite limited public datasets — a critical gap in existing ASR systems for India.',
-                    },
-                    {
-                        title: 'Production Ready',
-                        content: 'Built for deployment from day one.',
-                        bullets: ['Offline inference', 'Streaming', 'TensorRT acceleration', 'Batched inference'],
                     },
                 ],
             },
+
+            // ── 4. Key features ──────────────────────────────────────────
+            {
+                id: 'key-features',
+                title: 'Key Features',
+                content: [
+                    'Each capability below is stated with the example that demonstrates it, rather than as a claim on its own.',
+                ],
+                features: [
+                    {
+                        title: 'Code-switching, in three formats',
+                        description:
+                            'Most Indian speech moves between languages mid-sentence. Bodhan Scribe transcribes the switch instead of forcing the whole utterance into one language, and can return the same audio in three different formats.',
+                        variants: [
+                            {
+                                label: 'Native script',
+                                input: 'Kal meeting hai at 5 PM',
+                                output: 'कल मीटिंग है एट 5 पीएम',
+                                script: 'native',
+                                themeKey: 'hindi',
+                                audioCaption: 'Hindi–English sample',
+                            },
+                            {
+                                label: 'Code-mixed',
+                                input: 'Kal meeting hai at 5 PM',
+                                output: 'कल meeting hai at 5 PM',
+                                script: 'native',
+                                themeKey: 'hindi',
+                                audioCaption: 'Hindi–English sample',
+                            },
+                            {
+                                label: 'Romanized',
+                                input: 'Kal meeting hai at 5 PM',
+                                output: 'Kal meeting hai at 5 PM',
+                                themeKey: 'hindi',
+                                audioCaption: 'Hindi–English sample',
+                            },
+                        ],
+                        matters:
+                            'A search index wants romanized text, a subtitle track wants native script, and a chat log wants the mix as spoken. One transcription pass can serve all three.',
+                    },
+                    {
+                        title: 'Accents across Indian English',
+                        description:
+                            'Indian English is not one accent. The Svarah benchmark covers 19 mother-tongue accents, and the live demo further down transcribes speakers from across India in a single pass.',
+                        matters:
+                            'A voice interface that only understands one accent quietly excludes most of the country from using it.',
+                    },
+                    {
+                        title: 'Twenty-five Indian languages in one model',
+                        description:
+                            'Broad coverage across constitutional languages and underserved dialects, designed for *real-world Indian speech patterns* rather than read-aloud studio corpora.',
+                        matters:
+                            'One model means one deployment, one latency profile, and no language-detection step in front of it.',
+                    },
+                    {
+                        title: 'Low-resource language support',
+                        description:
+                            'Bhili receives **dedicated support** despite limited public datasets — a gap that existing ASR systems for India leave open.',
+                        matters:
+                            'Speakers of low-resource languages are exactly the people least served by existing tools, and most helped by a working one.',
+                    },
+                    {
+                        title: 'Production-ready inference',
+                        description:
+                            'Built for deployment from day one: offline inference, streaming, TensorRT acceleration, and batched inference.',
+                        matters:
+                            'A model that is only accurate in a notebook does not reach anyone.',
+                    },
+                ],
+                demo: {
+                    title: 'One Model. Every Mother Tongue.',
+                    description:
+                        "A live tour of speakers from the Svarah benchmark — watch Bodhan ASR transcribe Indian English across 19 accents as each speaker's home region lights up on the map.",
+                    url: 'https://value-candidates-oakland-capitol.trycloudflare.com',
+                    height: 680,
+                },
+                slots: [
+                    {
+                        kind: 'audio',
+                        label: 'Dialect and noisy-speech examples',
+                        hint: 'Reserved for paired clips: the same content across dialects, and across metro, street, office, and phone-call conditions. Add them as `variants` on the matching feature.',
+                    },
+                ],
+            },
+
+            // ── 5. Under the hood + training data ────────────────────────
             {
                 id: 'under-the-hood',
                 title: 'Under the Hood',
                 content: [
-                    'Bodhan Scribe is built on the NVIDIA Canary architecture with a 600M-parameter encoder and 600M-parameter decoder.',
+                    'Bodhan Scribe is built on the NVIDIA Canary architecture, split evenly between a 600M-parameter encoder and a 600M-parameter decoder.',
+                    'The encoder is a 32-layer Conformer, the decoder a 24-layer Transformer, over a 6K vocabulary sized for multilingual coverage without exploding the output layer.',
                 ],
                 bullets: [
                     '32-layer Conformer encoder',
@@ -136,21 +229,49 @@ export const posts = [
                     '6K vocabulary',
                     'NVIDIA Canary architecture',
                 ],
-            },
-            {
-                id: 'training-data',
-                title: 'Training Data',
-                content: [
-                    'Bodhan Scribe was trained on 1.35 million hours of speech data — one of the largest multilingual ASR training corpora for Indian languages.',
-                    'Instead of memorizing frequent words, synthetic speech exposes the model to much larger vocabulary and pronunciation diversity.',
+                table: {
+                    headers: ['Specification', 'Value'],
+                    rows: [
+                        ['Languages', '25'],
+                        ['Training Hours', '1.35M'],
+                        ['Parameters', '1.2B'],
+                        ['Architecture', 'NVIDIA Canary'],
+                        ['Native Script', '✓'],
+                        ['Code Mixed', '✓'],
+                        ['Romanized', '✓'],
+                        ['Streaming', '✓'],
+                        ['Offline', '✓'],
+                    ],
+                },
+                tableVariant: 'architecture',
+                subsections: [
+                    {
+                        title: 'Training Data',
+                        content:
+                            'The architecture is only one part of the story. Building a model that works across India\'s linguistic diversity required 1.35 million hours of speech — one of the largest multilingual ASR training corpora assembled for Indian languages. Instead of letting the model memorise frequent words, synthetic speech exposes it to far more vocabulary and pronunciation variety than human-labelled data alone could cover.',
+                        bullets: [
+                            '1.30M hours weak / synthetic',
+                            '40K hours zero-shot TTS synthetic',
+                            '11K hours human labelled',
+                        ],
+                        charts: ['training-breakdown'],
+                    },
+                    {
+                        title: 'Inference and Deployment',
+                        content:
+                            'The same weights serve batch and real-time workloads. Offline inference is a straight audio-to-transcript pass; streaming consumes chunks and emits partial transcripts before assembling the final one; TensorRT and batching are there for throughput.',
+                        bullets: [
+                            'Offline inference',
+                            'Streaming with partial transcripts',
+                            'TensorRT acceleration',
+                            'Batched inference',
+                        ],
+                        experiment: 'streaming-timeline',
+                    },
                 ],
-                stats: [
-                    { label: 'Weak / synthetic', value: '1.30M hours' },
-                    { label: 'Zero-shot TTS synthetic', value: '40K hours' },
-                    { label: 'Human labeled', value: '11K hours' },
-                ],
-                charts: ['training-breakdown'],
             },
+
+            // ── 6. Evaluation ────────────────────────────────────────────
             {
                 id: 'evaluation',
                 title: 'Evaluation',
@@ -171,7 +292,8 @@ export const posts = [
                 subsections: [
                     {
                         title: 'Voice of India',
-                        content: 'Evaluated across WER metrics with competitive scores on multilingual Indian speech.',
+                        content:
+                            'Evaluated across WER metrics with competitive scores on multilingual Indian speech.',
                         charts: ['overall-wer'],
                     },
                     {
@@ -182,7 +304,8 @@ export const posts = [
                     },
                     {
                         title: 'Cross Benchmark Generalization',
-                        content: 'Strong performance across Svarah, Lahaja, Sruti, and LibriSpeech demonstrates robust generalization.',
+                        content:
+                            'Strong performance across Svarah, Lahaja, Sruti, and LibriSpeech demonstrates robust generalization.',
                         charts: ['speaker-consistency'],
                     },
                     {
@@ -192,93 +315,43 @@ export const posts = [
                     },
                 ],
             },
+
+            // ── 7. Future work ───────────────────────────────────────────
             {
-                id: 'real-examples',
-                title: 'Real Examples',
+                id: 'future-work',
+                title: 'Future Work',
                 content: [
-                    'Hard examples from YouTube sets, benchmark sets, and challenging real-world audio demonstrate Bodhan Scribe\'s practical performance on the speech patterns users actually encounter.',
-                    'Try the interactive demo below — Bodhan ASR transcribing Indian English across 19 mother-tongue accents from the Svarah benchmark, spoken by real people from across India.',
+                    'Transparent limitations build trust and set appropriate expectations, so it is worth being direct about what this release does not yet do well.',
                 ],
-                demo: {
-                    title: 'One Model. Every Mother Tongue.',
-                    description:
-                        'A live tour of speakers from the Svarah benchmark — watch Bodhan ASR transcribe Indian English across 19 accents as each speaker\'s home region lights up on the map.',
-                    url: 'https://value-candidates-oakland-capitol.trycloudflare.com',
-                    height: 680,
-                },
-            },
-            {
-                id: 'inference-performance',
-                title: 'Inference Performance',
-                content: ['Bodhan Scribe is optimized for both research experimentation and production deployment.'],
-                experiment: 'streaming-timeline',
-                subsectionLayout: 'cards',
                 subsections: [
                     {
-                        title: 'Offline Inference',
-                        content: 'Audio → Model → Transcript. Simple, reliable batch processing for recorded speech.',
+                        title: 'Known limitations today',
+                        bullets: [
+                            'Extremely noisy environments remain challenging.',
+                            'Rare dialects continue to improve with more data.',
+                            'Domain-specific vocabulary may require adaptation.',
+                            'Long recordings benefit from chunked inference.',
+                        ],
                     },
+                ],
+                slots: [
                     {
-                        title: 'Batched TensorRT',
-                        content: 'Optimized throughput with configurable batch sizes for high-volume deployment scenarios.',
-                    },
-                    {
-                        title: 'Streaming',
-                        content:
-                            'Audio chunks arrive incrementally, producing partial transcripts in real time before the final transcript is assembled.',
-                    },
-                    {
-                        title: 'Latency',
-                        content:
-                            'Performance trade-offs between latency, batch size, sequence length, and accuracy are documented for deployment planning.',
+                        kind: 'text',
+                        label: 'Roadmap',
+                        hint: 'Reserved for what is next: additional languages and dialects, noise robustness, smaller distilled variants, and what will be released openly. Separate what is already in training from what is only planned.',
                     },
                 ],
             },
+
+            // ── 8. Deployment / ecosystem ────────────────────────────────
             {
-                id: 'model-card',
-                title: 'Model Card',
-                content: ['Technical specifications and usage details for Bodhan Scribe.'],
-                table: {
-                    headers: ['Specification', 'Value'],
-                    rows: [
-                        ['Languages', '25'],
-                        ['Training Hours', '1.35M'],
-                        ['Parameters', '1.2B'],
-                        ['Architecture', 'NVIDIA Canary'],
-                        ['Native Script', '✓'],
-                        ['Code Mixed', '✓'],
-                        ['Romanized', '✓'],
-                        ['Streaming', '✓'],
-                        ['Offline', '✓'],
-                    ],
-                },
-                bullets: [
-                    'Architecture: NVIDIA Canary (600M encoder + 600M decoder)',
-                    'Languages: 25 Indian languages',
-                    'Parameters: 1.2B',
-                    'Supported modes: Native script, code-mixed, romanized',
-                    'Inference: Offline, streaming, TensorRT, batched',
+                id: 'ecosystem',
+                title: 'Where You Can Use It',
+                content: [
+                    'Reach your first transcription within 30 seconds.',
+                    "Bodhan ASR brings multilingual speech recognition to 25 Indian languages, including underserved languages such as Bhili, while supporting native-script, code-mixed, and romanized transcription. With large-scale multilingual training, production-ready inference, and strong performance across public benchmarks, it provides a practical foundation for building speech applications across India's linguistic diversity.",
                 ],
-            },
-            {
-                id: 'limitations',
-                title: 'Limitations',
-                content: ['Transparent limitations build trust and set appropriate expectations.'],
-                bullets: [
-                    'Extremely noisy environments remain challenging.',
-                    'Rare dialects continue to improve with more data.',
-                    'Domain-specific vocabulary may require adaptation.',
-                    'Long recordings benefit from chunked inference.',
-                ],
-            },
-            {
-                id: 'getting-started',
-                title: 'Getting Started',
-                content: ['Reach your first transcription within 30 seconds.'],
-                code: [
-                    'pip install bodhan',
-                    'from bodhan import Scribe',
-                ],
+                code: ['pip install bodhan', 'from bodhan import Scribe'],
                 bullets: [
                     'Streaming inference',
                     'Batch inference',
@@ -287,27 +360,36 @@ export const posts = [
                     'Language forcing',
                     'Chunking for long audio',
                 ],
-            },
-            {
-                id: 'closing',
-                title: 'Closing',
-                content: [
-                    'Bodhan ASR brings multilingual speech recognition to 25 Indian languages, including underserved languages such as Bhili, while supporting native-script, code-mixed, and romanized transcription. With large-scale multilingual training, production-ready inference, and strong performance across public benchmarks, it provides a practical foundation for building speech applications across India\'s linguistic diversity.',
-                ],
-                links: [
-                    { label: 'Contact', href: '/contact' },
-                ],
+                ecosystem: {
+                    title: "Available across India's AI ecosystem",
+                    description:
+                        'Weights, code, and hosted endpoints — use whichever route fits your deployment.',
+                    platforms: [
+                        { name: 'Hugging Face', href: 'https://huggingface.co/bodhan-ai/models', note: 'Weights and inference' },
+                        { name: 'GitHub', href: '#', note: 'Code and recipes' },
+                        { name: 'Bhashini', href: '#', note: 'National language mission' },
+                        { name: 'AIKosh', href: '#', note: 'Government AI repository' },
+                    ],
+                },
+                links: [{ label: 'Contact', href: '/contact' }],
             },
         ],
     },
+
+    // Reference implementation of the structure above. Hidden from the public
+    // listing; reachable at /research/template-model-post for authors.
+    TEMPLATE_POST,
 ];
+
+/** Posts shown in the public listing — excludes authoring templates. */
+export const visiblePosts = posts.filter((post) => !post.hidden);
 
 export function getPostBySlug(slug) {
     return posts.find((post) => post.slug === slug);
 }
 
 export function getFeaturedPost() {
-    return posts.find((post) => post.featured) ?? posts[0];
+    return visiblePosts.find((post) => post.featured) ?? visiblePosts[0];
 }
 
 export function formatDate(dateStr) {

@@ -1,17 +1,16 @@
 import { useEffect, useLayoutEffect, useRef } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
-import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { gsap, useGsapAnimation } from '../../../utils/motion';
 import Navbar from '../../home/components/Navbar';
 import Footer from '../../home/components/Footer';
 import TableOfContents from './TableOfContents';
 import BlogContent from './BlogContent';
 import ShareButton from './ShareButton';
 import MosaicCanvas from './MosaicCanvas';
+import SpecBubbles from './blocks/SpecBubbles';
 import { getPostBySlug, formatDate } from '../data/posts';
-
-gsap.registerPlugin(ScrollTrigger);
+import './blocks/blogTemplate.css';
 
 const BlogPostPage = () => {
     const { slug } = useParams();
@@ -23,13 +22,16 @@ const BlogPostPage = () => {
         window.scrollTo(0, 0);
     }, [slug]);
 
+    // The reading-progress bar is decoration on an element that carries no content,
+    // so it is set up unconditionally; everything below it moves the article's own
+    // words and goes through the guarded hook.
     useLayoutEffect(() => {
-        if (!post || !pageRef.current) return undefined;
+        if (!post || !progressRef.current) return undefined;
 
-        const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-        const context = gsap.context(() => {
-            gsap.set(progressRef.current, { scaleX: 0 });
-            gsap.to(progressRef.current, {
+        const tween = gsap.fromTo(
+            progressRef.current,
+            { scaleX: 0 },
+            {
                 scaleX: 1,
                 ease: 'none',
                 scrollTrigger: {
@@ -38,21 +40,58 @@ const BlogPostPage = () => {
                     end: 'bottom bottom',
                     scrub: 0.2,
                 },
+            }
+        );
+
+        return () => {
+            tween.scrollTrigger?.kill();
+            tween.kill();
+        };
+    }, [post, slug]);
+
+    useGsapAnimation(
+        () => {
+            const intro = gsap.timeline();
+
+            intro.from('[data-article-intro]', {
+                y: 22,
+                opacity: 0,
+                duration: 0.72,
+                stagger: 0.09,
+                ease: 'power3.out',
             });
 
-            if (!reduceMotion) {
-                gsap.from('[data-article-intro]', {
-                    y: 22,
+            // The spec bubbles are the last thing to land, popping in one by
+            // one under the title rather than arriving as one grey bar.
+            intro.from(
+                '.bt-spec',
+                {
+                    y: 14,
+                    scale: 0.94,
                     opacity: 0,
-                    duration: 0.72,
-                    stagger: 0.09,
-                    ease: 'power3.out',
-                });
-            }
-        }, pageRef);
+                    duration: 0.45,
+                    stagger: 0.05,
+                    ease: 'back.out(1.7)',
+                },
+                '-=0.35'
+            );
 
-        return () => context.revert();
-    }, [post, slug]);
+            // A shallow parallax on the hero mosaic, so the title separates
+            // from its backdrop as the reader starts scrolling.
+            gsap.to('.research-mosaic-layer', {
+                yPercent: 12,
+                ease: 'none',
+                scrollTrigger: {
+                    trigger: '.research-hero-mosaic',
+                    start: 'top top',
+                    end: 'bottom top',
+                    scrub: 0.4,
+                },
+            });
+        },
+        pageRef,
+        [post, slug]
+    );
 
     if (!post) {
         return (
@@ -74,7 +113,12 @@ const BlogPostPage = () => {
         );
     }
 
-    const tocSections = post.sections.map(({ id, title }) => ({ id, title }));
+    // A section may hide its heading in the article (the motivation opener does)
+    // while still needing a label to navigate to.
+    const tocSections = post.sections.map(({ id, title, tocTitle }) => ({
+        id,
+        title: tocTitle ?? title,
+    }));
 
     return (
         <div ref={pageRef} className="min-h-screen research-page">
@@ -113,6 +157,15 @@ const BlogPostPage = () => {
                                 {post.title}
                             </h1>
 
+                            {post.tagline && (
+                                <p
+                                    data-article-intro
+                                    className="bt-hero-tagline mt-3 mx-auto max-w-[34rem] text-center"
+                                >
+                                    {post.tagline}
+                                </p>
+                            )}
+
                             {post.heroLinks?.length > 0 && (
                                 <nav
                                     aria-label="Publication links"
@@ -148,6 +201,10 @@ const BlogPostPage = () => {
                             )}
                         </div>
                     </div>
+
+                    {post.specs?.length > 0 && (
+                        <SpecBubbles specs={post.specs} className="mt-5" />
+                    )}
                 </div>
             </header>
 
