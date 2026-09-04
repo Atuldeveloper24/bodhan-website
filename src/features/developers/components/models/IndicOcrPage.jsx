@@ -18,7 +18,7 @@ const STATS = [
 const IndicOcrPage = () => (
     <div className="min-h-screen research-page">
         <Navbar />
-        <main className="model-page-main">
+        <main className="model-page-main" style={{ '--model-accent': 'var(--text-orange-500)' }}>
             <ModelHero
                 eyebrow="Developers · Model"
                 title={model.name}

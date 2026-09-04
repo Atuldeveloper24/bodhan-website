@@ -1,5 +1,15 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { FacebookIcon, LinkedinIcon, InstagramIcon } from 'lucide-react';
+import Icon from '../../../assets/Icon.png';
+
+const footerLinks = [
+    { label: 'Contact', to: '/contact' },
+    { label: 'Tenders', to: '/tenders' },
+    { label: 'Partners', to: '/partners' },
+    { label: 'Terms and Conditions', to: '/terms' },
+    { label: 'Privacy Policy', to: '/privacy' },
+];
 
 const XIcon = ({ size = 20 }) => (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
@@ -28,8 +38,11 @@ const Footer = () => {
                 {/* Top Section: Logo and Social Icons */}
                 <div className="flex flex-col md:flex-row justify-between items-center mb-2">
                     {/* Left: Logo */}
-                    <div className="text-2xl font-400 text-gray-900 mb-2 md:mb-0">
-                        Bodhan<span className="text-[var(--text-orange-500)]">.AI</span>
+                    <div className="flex items-center gap-2.5 mb-2 md:mb-0">
+                        <img src={Icon} alt="" aria-hidden="true" className="h-10 w-auto object-contain" />
+                        <span className="text-2xl font-400 text-gray-900">
+                            Bodhan<span className="text-[var(--text-orange-500)]">.AI</span>
+                        </span>
                     </div>
 
                     {/* Right: Social Icons */}
@@ -56,9 +69,16 @@ const Footer = () => {
                 {/* Separator Line */}
                 <div className="w-full h-px bg-gray-300 mb-4"></div>
 
-                {/* Bottom: Copyright */}
-                <div className="text-center text-sm text-stone-600">
-                    Copyright © 2026 bodhan.ai
+                {/* Bottom: Copyright + relocated nav links */}
+                <div className="flex flex-col md:flex-row justify-between items-center gap-2 text-sm text-stone-600">
+                    <span>Copyright © 2026 bodhan.ai</span>
+                    <nav className="flex flex-wrap justify-center gap-x-5 gap-y-1">
+                        {footerLinks.map(({ label, to }) => (
+                            <Link key={label} to={to} className="hover:text-[var(--text-orange-500)] transition-colors">
+                                {label}
+                            </Link>
+                        ))}
+                    </nav>
                 </div>
             </div>
         </footer>

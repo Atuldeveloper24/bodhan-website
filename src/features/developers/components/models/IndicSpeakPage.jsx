@@ -18,7 +18,7 @@ const STATS = [
 const IndicSpeakPage = () => (
     <div className="min-h-screen research-page">
         <Navbar />
-        <main className="model-page-main">
+        <main className="model-page-main" style={{ '--model-accent': 'var(--brand-blue)' }}>
             <ModelHero
                 eyebrow="Developers · Model"
                 title={model.name}

@@ -76,7 +76,7 @@ const renderPane = (item, tabId) => {
 const IndicTranslatePage = () => (
     <div className="min-h-screen research-page">
         <Navbar />
-        <main className="model-page-main">
+        <main className="model-page-main" style={{ '--model-accent': 'var(--model-violet)' }}>
             <ModelHero
                 eyebrow="Developers · Model"
                 title={model.name}

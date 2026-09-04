@@ -16,12 +16,12 @@ const STATS = [
 ];
 
 // Names only for now — what separates them is still to be written.
-const VARIANTS = ['Flex', 'Core', 'Realtime'];
+const VARIANTS = ['Flex', 'Core'];
 
 const IndicTranscribePage = () => (
     <div className="min-h-screen research-page">
         <Navbar />
-        <main className="model-page-main">
+        <main className="model-page-main" style={{ '--model-accent': 'var(--model-emerald)' }}>
             <ModelHero
                 eyebrow="Developers · Model"
                 title={model.name}
