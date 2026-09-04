@@ -2,13 +2,16 @@ import { Link } from 'react-router-dom';
 import { motion as Motion, useReducedMotion } from 'motion/react';
 import { ArrowLeft, ArrowUpRight, BookOpen } from 'lucide-react';
 import AnimatedTitle from '../../../../components/AnimatedTitle';
+import ModelTitleIntro from './ModelTitleIntro';
 
 const EASE = [0.25, 0.46, 0.45, 0.94];
+
+const isExternal = (href) => /^https?:\/\//.test(href ?? '');
 
 // The hero carries the model's name, one line on what it does, the links out,
 // and the numbers band — including price — that used to sit at the foot of
 // the page.
-const ModelHero = ({ eyebrow, title, tagline, stats, accent, primaryCta, secondaryCta, blogCta, note }) => {
+const ModelHero = ({ eyebrow, title, tagline, stats, accent, primaryCta, secondaryCta, blogCta, note, intro }) => {
     const reduceMotion = useReducedMotion();
 
     // Above the fold, so it plays on mount: each piece arrives just behind the
@@ -33,7 +36,11 @@ const ModelHero = ({ eyebrow, title, tagline, stats, accent, primaryCta, seconda
                 {eyebrow}
             </Motion.p>
 
-            <AnimatedTitle as="h1" text={title} className="model-title" delay={0.12} />
+            {intro ? (
+                <ModelTitleIntro variant={intro} text={title} className="model-title" />
+            ) : (
+                <AnimatedTitle as="h1" text={title} className="model-title" delay={0.12} />
+            )}
 
             <Motion.p className="model-tagline" {...rise(0.34)}>
                 {tagline}
@@ -51,17 +58,40 @@ const ModelHero = ({ eyebrow, title, tagline, stats, accent, primaryCta, seconda
                         <ArrowUpRight size={14} aria-hidden="true" />
                     </a>
                 )}
-                {blogCta && (
-                    <Link to={blogCta.href} className="model-cta-secondary">
-                        <BookOpen size={14} aria-hidden="true" />
-                        {blogCta.label}
-                    </Link>
-                )}
-                {secondaryCta && (
-                    <a href={secondaryCta.href} className="model-cta-secondary">
-                        {secondaryCta.label}
-                    </a>
-                )}
+                {blogCta &&
+                    (isExternal(blogCta.href) ? (
+                        <a
+                            href={blogCta.href}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="model-cta-secondary"
+                        >
+                            <BookOpen size={14} aria-hidden="true" />
+                            {blogCta.label}
+                            <ArrowUpRight size={13} aria-hidden="true" />
+                        </a>
+                    ) : (
+                        <Link to={blogCta.href} className="model-cta-secondary">
+                            <BookOpen size={14} aria-hidden="true" />
+                            {blogCta.label}
+                        </Link>
+                    ))}
+                {secondaryCta &&
+                    (isExternal(secondaryCta.href) ? (
+                        <a
+                            href={secondaryCta.href}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="model-cta-secondary"
+                        >
+                            {secondaryCta.label}
+                        </a>
+                    ) : (
+                        // in-app route: the site is hash-routed, so a bare href would miss
+                        <Link to={secondaryCta.href} className="model-cta-secondary">
+                            {secondaryCta.label}
+                        </Link>
+                    ))}
             </Motion.div>
 
             {note && (

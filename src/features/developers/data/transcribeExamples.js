@@ -25,11 +25,11 @@ export const AUDIO_EXAMPLES = [
         lang: 'sa',
         modes: {
             native:
-                'राज्याभिषेके चलमानयन्त्या हस्ताचुकाहे न घटो युवत्या सोपानमार्गे च करोति शब्दं ट टं ट टं ट ट टं ट टं ट टं',
+                'राज्याभिषेके चलमानयन्त्या हस्ताचुकाहे न घटो युवत्या',
             mixed:
-                'राज्याभिषेके चलवान् अयंत्या हस्ताचुका हे न घटो युवत्या सोपानमार्गे च करोति शब्दं ट ट ट टं ट ट ट ट ट टं ट टं टं',
+                'राज्याभिषेके चलवान् अयंत्या हस्ताचुका हे न घटो युवत्या',
             romanized:
-                'Raajyaabhisheke chalavaanayantya hasta chukahe na ghato yuvatya sopanamaarge cha karoti shabdam ta ta ta ta ta ta ta ta ta taa taa',
+                'Raajyaabhisheke chalavaanayantya hasta chukahe na ghato yuvatya',
         },
     },
     {
@@ -57,11 +57,11 @@ export const AUDIO_EXAMPLES = [
         lang: 'sat',
         modes: {
             native:
-                'ᱛᱚ ᱡᱚᱦᱟᱨ ᱜᱟᱛᱮ ᱠᱚ ᱛᱤᱦᱤᱧ ᱥᱮᱛᱟᱜ ᱥᱮᱛᱟᱜ ᱯᱟᱨᱥᱮᱞ ᱵᱟᱞᱟ ᱦᱮᱡ ᱮᱱᱟᱭ ᱯᱷᱞᱤᱯᱠᱟᱨᱴ ᱠᱷᱚᱱ ᱚᱰᱟᱨ ᱠᱟᱜ ᱛᱟᱦᱮᱱᱟ ᱥᱩᱴ ᱢᱤᱫᱴᱮᱱ ᱫᱚ ᱦᱚᱞᱟ ᱜᱮ ᱦᱮᱡ ᱠᱟᱱ ᱛᱟᱦᱮᱱᱟ ᱪᱚᱞᱚ ᱵᱟᱱᱟᱨ ᱤᱭᱟᱹ ᱨᱟᱲᱟ ᱠᱟᱛᱮᱧ ᱩᱛᱩ ᱯᱮ ᱠᱟᱱᱟ ᱪᱚᱞᱚ ᱛᱚᱵᱮ ᱱᱤᱭᱟᱹ ᱧᱮᱞ ᱛᱟᱵᱚᱱ ᱯᱮ ᱪᱮᱫ ᱞᱮᱠᱟ ᱧᱮᱞᱚᱜ ᱠᱟᱱᱟ ᱱᱤᱭᱟᱹ ᱱᱤᱭᱟᱹ ᱦᱚᱨᱚᱜ ᱠᱟᱛᱮ ᱱᱟᱦᱟᱜ ᱛᱟᱭᱚᱢ ᱛᱮᱧ ᱩᱛᱩ ᱯᱮᱭᱟ ᱪᱚᱞᱚ ᱛᱚᱵᱮ ᱥᱩᱴ ᱵᱚᱱ ᱧᱮᱞ ᱠᱟᱜ ᱞᱮᱜᱮ ᱟᱨ ᱛᱚᱵᱮ ᱱ',
+                'ᱛᱚ ᱡᱚᱦᱟᱨ ᱜᱟᱛᱮ ᱠᱚ ᱛᱤᱦᱤᱧ ᱥᱮᱛᱟᱜ ᱥᱮᱛᱟᱜ ᱯᱟᱨᱥᱮᱞ ᱵᱟᱞᱟ ᱦᱮᱡ ᱮᱱᱟᱭ ᱯᱷᱞᱤᱯᱠᱟᱨᱴ ᱠᱷᱚᱱ ᱚᱰᱟᱨ ᱠᱟᱜ ᱛᱟᱦᱮᱱᱟ ᱥᱩᱴ',
             mixed:
-                'ᱛᱚ ᱡᱚᱦᱟᱨ ᱜᱟᱛᱮ ᱠᱚ ᱛᱤᱦᱤᱧ ᱥᱮᱛᱟᱜ ᱥᱮᱛᱟᱜ parcel ᱵᱟᱞᱟ ᱦᱮᱡ ᱮᱱᱟ Flipkart ᱠᱷᱚᱱ ᱚᱰᱟᱨ ᱠᱟᱜ ᱛᱟᱦᱮᱱᱟ suit 1 ᱫᱤᱱ ᱫᱚ ᱦᱚᱞᱟ ᱜᱮ ᱦᱮᱡ ᱠᱟᱱ ᱛᱟᱦᱮᱱᱟ ᱪᱚᱞᱚ ᱵᱟᱱᱟᱨ ᱤᱭᱟᱹ ᱨᱟᱲᱟ ᱠᱟᱛᱮᱧ ᱩᱛᱩ ᱯᱮ ᱠᱟᱱᱟ ᱪᱚᱞᱚ ᱛᱚᱵᱮ ᱱᱤᱭᱟᱹ ᱧᱮᱞ ᱛᱟᱵᱚᱱ ᱯᱮ ᱪᱮᱫ ᱞᱮᱠᱟ ᱧᱮᱞᱚᱜ ᱠᱟᱱᱟ ᱱᱤᱭᱟᱹ ᱱᱤᱭᱟᱹ ᱦᱚᱨᱚᱜ ᱠᱟᱛᱮ ᱱᱟᱦᱟᱜ ᱛᱟᱭᱚᱢ ᱛᱮᱧ ᱩᱛᱩ ᱯᱮᱭᱟ ᱪᱚᱞᱚ ᱛᱚᱵᱮ suit ᱵᱚᱱ ᱧᱮᱞ ᱠᱟᱜ ᱞᱮᱜᱮ ᱟᱨ ᱛᱚᱵᱮ ᱱᱤᱭᱟᱹ suit',
+                'ᱛᱚ ᱡᱚᱦᱟᱨ ᱜᱟᱛᱮ ᱠᱚ ᱛᱤᱦᱤᱧ ᱥᱮᱛᱟᱜ ᱥᱮᱛᱟᱜ parcel ᱵᱟᱞᱟ ᱦᱮᱡ ᱮᱱᱟ Flipkart ᱠᱷᱚᱱ ᱚᱰᱟᱨ ᱠᱟᱜ ᱛᱟᱦᱮᱱᱟ suit',
             romanized:
-                'To johar gate ko tehenj taste parcel bala hej ena Flipkart koy order kag tahena suit Midten do hola ge hej kan tahena cholo banar iya rara kateg iny udug pe kana Cholo tobe niya nyel tabon pe ched leka nyelog kana Niya niya horog kateg tahen doy udug pe cholo tobe suit bon nyel kag ge Ar tobe niya suit nyel tabon pe ched leka',
+                'To johar gate ko tehenj taste parcel bala hej ena Flipkart koy order kag tahena suit',
         },
     },
     {
@@ -69,7 +69,7 @@ export const AUDIO_EXAMPLES = [
         label: 'Hindi',
         kind: 'Film song',
         note: 'Sung, with music behind the vocal',
-        audio: '/examples/speech/hindi-song-clip.mp3',
+        audio: '/examples/speech/hindi-song-clip.wav',
         lang: 'hi',
         modes: {
             native:
@@ -85,7 +85,7 @@ export const AUDIO_EXAMPLES = [
         label: 'Hindi',
         kind: 'Child speaker',
         note: 'A younger voice, higher pitch',
-        audio: '/examples/speech/hindi-child-voice.mp3',
+        audio: '/examples/speech/hindi-child-voice.wav',
         lang: 'hi',
         modes: {
             native: 'बात इधर उधर फैलने लगी लोग लड़के की न्याय बुद्धि की चर्चा करने लगे और कहने लगे',
@@ -99,7 +99,7 @@ export const AUDIO_EXAMPLES = [
         label: 'Punjabi',
         kind: 'STEM classroom',
         note: 'Physics terms code-switched into English',
-        audio: '/examples/speech/punjabi-stem.mp3',
+        audio: '/examples/speech/punjabi-stem.wav',
         lang: 'pa',
         modes: {
             native:
@@ -115,7 +115,7 @@ export const AUDIO_EXAMPLES = [
         label: 'English',
         kind: 'Assamese accent',
         note: 'English spoken with an Assamese accent',
-        audio: '/examples/speech/english-assamese-accent.mp3',
+        audio: '/examples/speech/english-assamese-accent.wav',
         lang: 'en',
         modes: {
             native: 'Visitors from different part of the world come to Majuli to witness this art',

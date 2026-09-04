@@ -15,6 +15,9 @@ const STATS = [
     { value: model.price.value, label: model.price.label, isPrice: true },
 ];
 
+// Names only for now — what separates them is still to be written.
+const VARIANTS = ['Flex', 'Core', 'Realtime'];
+
 const IndicTranscribePage = () => (
     <div className="min-h-screen research-page">
         <Navbar />
@@ -22,6 +25,7 @@ const IndicTranscribePage = () => (
             <ModelHero
                 eyebrow="Developers · Model"
                 title={model.name}
+                intro="wave"
                 tagline="Speech in — native script, mixed script, or romanized text out. Built for classrooms, call centres and code-mixed conversation."
                 accent="var(--model-emerald)"
                 stats={STATS}
@@ -30,12 +34,17 @@ const IndicTranscribePage = () => (
                 secondaryCta={{ label: 'Contact', href: '/contact' }}
             />
 
+            <Reveal as="div" className="model-variants" style={{ '--model-accent': 'var(--model-emerald)' }}>
+                <span className="model-variants-label">Variants</span>
+                {VARIANTS.map((name) => (
+                    <span key={name} className="model-variant">
+                        {name}
+                    </span>
+                ))}
+            </Reveal>
+
             <Reveal as="section" className="model-section">
                 <TranscribeExamples />
-                <p className="model-caption">
-                    Real audio, unedited model output in all three transcription modes — native
-                    script, mixed script and romanized.
-                </p>
             </Reveal>
         </main>
         <Footer />

@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ArrowUpRight, ChevronLeft, ChevronRight, ImageOff } from 'lucide-react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { ArrowUpRight, ImageOff, RotateCcw } from 'lucide-react';
+import { useInView, useReducedMotion } from 'motion/react';
 import ReactMarkdown from 'react-markdown';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
@@ -7,14 +8,15 @@ import katex from 'katex';
 import 'katex/dist/katex.min.css';
 import { DOC_EXAMPLES, SCAN_CROP } from '../../data/docParserExamples';
 import { assetUrl } from '../../data/assetUrl';
+import { CONSOLE_URL } from '../../../../config/links';
 
 // The model emits maths as LaTeX, so the demo typesets it rather than showing
 // the source. Bad output stays visible in red instead of throwing.
 const KATEX_OPTIONS = { throwOnError: false, errorColor: '#B91C1C', strict: false };
-const renderMath = (value) =>
-    katex.renderToString(value, { ...KATEX_OPTIONS, displayMode: true });
+const renderMath = (value) => katex.renderToString(value, { ...KATEX_OPTIONS, displayMode: true });
 
-const DEFAULT_POS = 50;
+// How fast the page is "read": one block lands every BLOCK_MS.
+const BLOCK_MS = 420;
 
 // Colours mirror the ones the model's own layout visualisation burns into the
 // scan, so a block's chip on the text side matches its box on the scan side.
@@ -30,8 +32,11 @@ const LABEL_ACCENT = {
     Table: '#8A5A2B',
 };
 
-// Walk the flat `ocr` array back into the layout blocks it came from.
-const toBlocks = ({ ocr, layout }) => {
+// Two shapes reach here: gallery pages carry the model's blocks directly, while
+// the composite examples carry a flat `ocr` list that `layout` groups back up.
+const toBlocks = ({ ocr, layout, blocks }) => {
+    if (blocks) return blocks.map(({ n, label, type, value, box }) => ({ n, label, box, parts: [{ type, value }] }));
+    if (!ocr) return [];
     if (!layout) return ocr.map((part, i) => ({ n: i, label: 'Block', parts: [part] }));
 
     let cursor = 0;
@@ -42,21 +47,50 @@ const toBlocks = ({ ocr, layout }) => {
     });
 };
 
-// The page scan sits on top of the recognised text, clipped by the handle.
-// Both layers fill one page-shaped stage, so the whole page — scan or text —
-// is visible at once without scrolling the demo.
-const CompareSlider = ({ example }) => {
-    const frameRef = useRef(null);
-    const [pos, setPos] = useState(DEFAULT_POS);
-    const [dragging, setDragging] = useState(false);
+const BlockBody = ({ parts }) =>
+    parts.map((part, index) => {
+        if (part.type === 'latex') {
+            return (
+                <div
+                    key={index}
+                    className="ocr-block-math"
+                    dangerouslySetInnerHTML={{ __html: renderMath(part.value) }}
+                />
+            );
+        }
+
+        // Tables come back from the model as HTML.
+        if (part.type === 'html') {
+            return <div key={index} className="ocr-block-table" dangerouslySetInnerHTML={{ __html: part.value }} />;
+        }
+
+        return (
+            <div key={index} className="ocr-block-text">
+                <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[[rehypeKatex, KATEX_OPTIONS]]}>
+                    {part.value}
+                </ReactMarkdown>
+            </div>
+        );
+    });
+
+// The scan on the left, the model's reconstruction building up on the right,
+// one block at a time in the order the model reads them. Where the example
+// carries bounding boxes, the block being written is also outlined on the scan.
+const DocReader = ({ example }) => {
     const [failed, setFailed] = useState(false);
+    const [done, setDone] = useState(0);
+    const [run, setRun] = useState(0);
 
-    const { split } = example;
-    const src = assetUrl(example.image);
+    const stageRef = useRef(null);
+    const inView = useInView(stageRef, { once: true, amount: 0.25 });
+    const reduceMotion = useReducedMotion();
+
     const blocks = useMemo(() => toBlocks(example), [example]);
+    const src = assetUrl(example.image);
 
-    // The stage is the page card alone; the scan is scaled and offset so that
-    // card — not the composite's caption and margins — fills it exactly.
+    // The composites hold scan and output side by side in one image; only the
+    // scan half is shown, cropped to the page card inside it.
+    const { split } = example;
     const crop = example.crop ?? SCAN_CROP;
     const pageAspect = (example.width * split * crop.w) / (example.height * crop.h);
     const scanStyle = {
@@ -65,117 +99,97 @@ const CompareSlider = ({ example }) => {
         top: `${(-crop.y / crop.h) * 100}%`,
     };
 
-    const setFromClientX = useCallback((clientX) => {
-        const frame = frameRef.current;
-        if (!frame) return;
-        const rect = frame.getBoundingClientRect();
-        const ratio = ((clientX - rect.left) / rect.width) * 100;
-        setPos(Math.min(100, Math.max(0, ratio)));
-    }, []);
-
     useEffect(() => {
-        if (!dragging) return undefined;
+        if (reduceMotion) {
+            setDone(blocks.length);
+            return undefined;
+        }
+        if (!inView) return undefined;
 
-        const onMove = (event) => setFromClientX(event.clientX);
-        const onUp = () => setDragging(false);
+        setDone(0);
+        const timer = setInterval(() => {
+            setDone((n) => {
+                if (n >= blocks.length) {
+                    clearInterval(timer);
+                    return n;
+                }
+                return n + 1;
+            });
+        }, BLOCK_MS);
 
-        window.addEventListener('pointermove', onMove);
-        window.addEventListener('pointerup', onUp);
-        return () => {
-            window.removeEventListener('pointermove', onMove);
-            window.removeEventListener('pointerup', onUp);
-        };
-    }, [dragging, setFromClientX]);
+        return () => clearInterval(timer);
+    }, [blocks.length, inView, reduceMotion, run]);
 
-    const onKeyDown = (event) => {
-        const step = event.shiftKey ? 10 : 3;
-        if (event.key === 'ArrowLeft') setPos((p) => Math.max(0, p - step));
-        else if (event.key === 'ArrowRight') setPos((p) => Math.min(100, p + step));
-        else if (event.key === 'Home') setPos(0);
-        else if (event.key === 'End') setPos(100);
-        else return;
-        event.preventDefault();
-    };
+    const reading = done < blocks.length;
+    const current = blocks[done];
 
     return (
-        <div
-            className={`compare-frame${dragging ? ' is-dragging' : ''}`}
-            ref={frameRef}
-            style={{ '--page-aspect': pageAspect, '--ocr-scale': example.textScale ?? 1 }}
-        >
-            <div className="compare-text">
-                {blocks.map((block) => (
-                    <div
-                        key={block.n}
-                        className="ocr-block"
-                        style={{ '--ocr-accent': LABEL_ACCENT[block.label] ?? '#57534E' }}
-                    >
-                        <span className="ocr-block-tag">
-                            <span className="ocr-block-n">{block.n}</span>
-                            {block.label}
-                        </span>
-                        {block.parts.map((part, index) =>
-                            part.type === 'latex' ? (
-                                <div
-                                    key={index}
-                                    className="ocr-block-math"
-                                    dangerouslySetInnerHTML={{ __html: renderMath(part.value) }}
-                                />
-                            ) : (
-                                <div key={index} className="ocr-block-text">
-                                    <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[[rehypeKatex, KATEX_OPTIONS]]}>
-                                        {part.value}
-                                    </ReactMarkdown>
-                                </div>
-                            )
+        <div className="ocr-stage" ref={stageRef}>
+            <figure className="ocr-scan" style={{ '--page-aspect': pageAspect }}>
+                <figcaption className="ocr-side-label">Scan</figcaption>
+
+                {failed ? (
+                    <div className="ocr-missing">
+                        <ImageOff size={20} aria-hidden="true" />
+                        <p>
+                            Missing image
+                            <code>public{src}</code>
+                        </p>
+                    </div>
+                ) : (
+                    <div className="ocr-scan-crop">
+                        <img
+                            src={src}
+                            className="ocr-scan-img"
+                            style={scanStyle}
+                            alt={`${example.title} — page scan`}
+                            onError={() => setFailed(true)}
+                        />
+
+                        {/* the region being read right now */}
+                        {reading && current?.box && (
+                            <span
+                                className="ocr-box"
+                                style={{
+                                    '--ocr-accent': LABEL_ACCENT[current.label] ?? '#57534E',
+                                    top: `${current.box[0] / 10}%`,
+                                    left: `${current.box[1] / 10}%`,
+                                    height: `${(current.box[2] - current.box[0]) / 10}%`,
+                                    width: `${(current.box[3] - current.box[1]) / 10}%`,
+                                }}
+                            />
                         )}
                     </div>
-                ))}
-            </div>
+                )}
+            </figure>
 
-            {failed ? (
-                <div className="compare-scan compare-missing" style={{ clipPath: `inset(0 ${100 - pos}% 0 0)` }}>
-                    <ImageOff size={20} aria-hidden="true" />
-                    <p>
-                        Missing image
-                        <code>public{src}</code>
-                    </p>
+            <div className="ocr-read">
+                <p className="ocr-side-label">
+                    IndicOCR
+                    {reading && <span className="ocr-reading">reading…</span>}
+                    {!reading && (
+                        <button type="button" className="dp-text-btn ocr-replay" onClick={() => setRun((r) => r + 1)}>
+                            <RotateCcw size={12} aria-hidden="true" />
+                            Replay
+                        </button>
+                    )}
+                </p>
+
+                <div className="ocr-blocks" dir={example.rtl ? 'rtl' : undefined}>
+                    {blocks.slice(0, done).map((block) => (
+                        <div
+                            key={block.n}
+                            className="ocr-block"
+                            style={{ '--ocr-accent': LABEL_ACCENT[block.label] ?? '#57534E' }}
+                        >
+                            <span className="ocr-block-tag">
+                                <span className="ocr-block-n">{block.n}</span>
+                                {block.label}
+                            </span>
+                            <BlockBody parts={block.parts} />
+                        </div>
+                    ))}
                 </div>
-            ) : (
-                <div className="compare-scan" style={{ clipPath: `inset(0 ${100 - pos}% 0 0)` }}>
-                    <img
-                        src={src}
-                        className="compare-scan-img"
-                        style={scanStyle}
-                        alt={`${example.title} — page scan with the model's detected layout blocks`}
-                        onError={() => setFailed(true)}
-                    />
-                </div>
-            )}
-
-            <span className="compare-label compare-label-left">Scan</span>
-            <span className="compare-label compare-label-right">IndicOCR</span>
-
-            <div
-                className="compare-handle"
-                style={{ left: `${pos}%` }}
-                role="slider"
-                tabIndex={0}
-                aria-label="Reveal more page scan or more OCR output"
-                aria-valuenow={Math.round(pos)}
-                aria-valuemin={0}
-                aria-valuemax={100}
-                aria-orientation="horizontal"
-                onPointerDown={(event) => {
-                    event.preventDefault();
-                    setDragging(true);
-                }}
-                onKeyDown={onKeyDown}
-            >
-                <span className="compare-handle-grip">
-                    <ChevronLeft size={13} aria-hidden="true" />
-                    <ChevronRight size={13} aria-hidden="true" />
-                </span>
             </div>
         </div>
     );
@@ -192,13 +206,11 @@ const DocParserExamples = () => {
 
                 <div className="pg-card">
                     <div className="pg-main">
-                        <CompareSlider key={example.image} example={example} />
+                        <DocReader key={example.id} example={example} />
                     </div>
 
                     <aside className="pg-rail">
-                        <p className="pg-rail-label">Examples · {DOC_EXAMPLES.length}</p>
-
-                        <div className="pg-rail-list">
+                        <div className="pg-rail-list pg-rail-scroll">
                             {DOC_EXAMPLES.map((e) => (
                                 <button
                                     key={e.id}
@@ -233,8 +245,13 @@ const DocParserExamples = () => {
 
                         <div className="pg-rail-foot">
                             <p>Want to run this model?</p>
-                            <a href="#" className="model-cta-primary model-cta-small">
-                                Hugging Face
+                            <a
+                                href={CONSOLE_URL}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="model-cta-primary model-cta-small"
+                            >
+                                Go to Dashboard
                                 <ArrowUpRight size={13} aria-hidden="true" />
                             </a>
                         </div>

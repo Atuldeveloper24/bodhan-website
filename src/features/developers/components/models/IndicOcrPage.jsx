@@ -22,6 +22,7 @@ const IndicOcrPage = () => (
             <ModelHero
                 eyebrow="Developers · Model"
                 title={model.name}
+                intro="scan"
                 tagline="Layout detection with reading order, then block-level OCR — printed or handwritten, with math as LaTeX and tables as HTML."
                 accent="var(--text-orange-500)"
                 stats={STATS}
@@ -32,10 +33,6 @@ const IndicOcrPage = () => (
 
             <Reveal as="section" className="model-section">
                 <DocParserExamples />
-                <p className="model-caption">
-                    Unedited model predictions on real pages — drag the handle to compare the scan
-                    against the blocks the model found, in the order it reads them.
-                </p>
             </Reveal>
         </main>
         <Footer />

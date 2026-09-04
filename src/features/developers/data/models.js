@@ -1,3 +1,12 @@
+// ⚠️ TEMPORARY BLOG URLS — these are Cloudflare quick-tunnel addresses for the
+// posts as they stand today. They die when the tunnel does; swap each for its
+// permanent home (or an on-site /research/<slug>) once published.
+const BLOGS = {
+    speak: 'https://commented-millions-gave-association.trycloudflare.com/indic-speak.html',
+    ocr: 'https://dow-dual-chem-tutorial.trycloudflare.com/',
+    translate: 'https://amended-comfort-recognized-hearts.trycloudflare.com/',
+};
+
 // ⚠️ PRICING IS PLACEHOLDER — every `price` below is a stand-in so the hero
 // band has something to show. Replace each value with the real published rate
 // before this goes live; the console at console.bodhan.ai is the source of truth.
@@ -35,7 +44,7 @@ export const models = [
             { label: 'Response time', value: '~200 ms' },
         ],
         price: { value: '₹90', label: 'per 1M characters' },
-        blog: { label: 'Read the blog', href: '/research/blog' },
+        blog: { label: 'Read the blog', href: BLOGS.speak },
         href: '/developers/indic-speak',
     },
     {
@@ -53,7 +62,7 @@ export const models = [
             { label: 'Parameters', value: '33M + 0.8B' },
         ],
         price: { value: '₹40', label: 'per 1,000 pages' },
-        blog: { label: 'Read the blog', href: '/research/blog' },
+        blog: { label: 'Read the blog', href: BLOGS.ocr },
         href: '/developers/indic-ocr',
     },
     {
@@ -71,7 +80,7 @@ export const models = [
             { label: 'Context', value: '32K tokens' },
         ],
         price: { value: '₹60', label: 'per 1M characters' },
-        blog: { label: 'Read the blog', href: '/research/blog' },
+        blog: { label: 'Read the blog', href: BLOGS.translate },
         href: '/developers/indic-translate',
     },
 ];

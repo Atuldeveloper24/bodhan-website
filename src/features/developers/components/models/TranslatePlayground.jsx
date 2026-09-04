@@ -3,6 +3,7 @@ import { ArrowUpRight, Loader2 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import EXAMPLES from '../../data/translateExamples.json';
 import { assetUrl } from '../../data/assetUrl';
+import { CONSOLE_URL } from '../../../../config/links';
 
 const MODES = [
     { id: 'document', label: 'Document' },
@@ -228,7 +229,6 @@ const TranslatePlayground = () => {
                     </div>
 
                     <aside className="pg-rail">
-                        <p className="pg-rail-label">Languages · {languages.length}</p>
 
                         <div className="pg-rail-list tp-lang-list">
                             {languages.map((l) => (
@@ -249,8 +249,13 @@ const TranslatePlayground = () => {
 
                         <div className="pg-rail-foot">
                             <p>Want to run this model?</p>
-                            <a href="#" className="model-cta-primary model-cta-small">
-                                Hugging Face
+                            <a
+                                href={CONSOLE_URL}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="model-cta-primary model-cta-small"
+                            >
+                                Go to Dashboard
                                 <ArrowUpRight size={13} aria-hidden="true" />
                             </a>
                         </div>

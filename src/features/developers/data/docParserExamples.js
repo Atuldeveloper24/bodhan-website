@@ -16,6 +16,8 @@
 // measured bounds inside the left portion — x/w as fractions of that portion's
 // width, y/h as fractions of the image height — so the demo shows the page
 // alone, without the caption or the surrounding margin.
+import GALLERY from './docGallery.json';
+
 export const SCAN_CROP = { x: 0.0354, y: 0.04, w: 0.9631, h: 0.934 };
 
 export const DOC_EXAMPLES = [
@@ -243,4 +245,11 @@ export const DOC_EXAMPLES = [
             { type: 'latex', value: '2x - 3 = 0 \\ \\text{तथा} \\ x - 1 = 0 \\\\ 2x = 3 \\\\ x = 1 \\\\ x = 3/2' },
         ],
     },
+
+    // Three more document kinds, straight from the Indic-OCR gallery: a
+    // right-to-left printed page, a form full of tables, and a child's
+    // worksheet. These carry the model's blocks directly (`blocks`) rather than
+    // a flat `ocr` list plus `layout`, and their images are plain scans, so
+    // `split` is 1 and there is no card to crop out.
+    ...GALLERY.examples.map((e) => ({ ...e, crop: { x: 0, y: 0, w: 1, h: 1 } })),
 ];

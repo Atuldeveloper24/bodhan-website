@@ -1,108 +1,19 @@
-import { useEffect, useState } from 'react';
-import { Play, Pause, RotateCcw } from 'lucide-react';
 import Navbar from '../../../home/components/Navbar';
 import Footer from '../../../home/components/Footer';
 import ModelHero from './ModelHero';
+import SpeakExamples from './SpeakExamples';
 import Reveal from '../../../../components/Reveal';
 import { getModelById } from '../../data/models';
 
 const model = getModelById('indic-speak');
 
 const STATS = [
-    { value: '22', label: 'Languages + English' },
-    { value: 'Multiple', label: 'Voices / language' },
+    { value: '45', label: 'Voices' },
+    { value: '22', label: 'Languages / scripts' },
+    { value: '14', label: 'Delivery styles' },
     { value: '~200 ms', label: 'Response time' },
     { value: model.price.value, label: model.price.label, isPrice: true },
 ];
-
-const WORDS = ['आज', 'हम', 'fractions', 'के', 'बारे', 'में', 'सीखेंगे'];
-const VOICES = ['Ananya', 'Rohan'];
-const BARS = Array.from({ length: 28 }, (_, i) => 22 + ((i * 37) % 58));
-
-const prefersReducedMotion = () =>
-    typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-const SpeakDemo = () => {
-    const [playing, setPlaying] = useState(false);
-    const [activeWord, setActiveWord] = useState(-1);
-    const [voice, setVoice] = useState(VOICES[0]);
-
-    useEffect(() => {
-        if (!playing) return undefined;
-        const timer = window.setInterval(() => {
-            setActiveWord((current) => {
-                const next = current + 1;
-                if (next >= WORDS.length - 1) {
-                    window.clearInterval(timer);
-                    setPlaying(false);
-                    return WORDS.length - 1;
-                }
-                return next;
-            });
-        }, 480);
-        return () => window.clearInterval(timer);
-    }, [playing]);
-
-    const play = () => {
-        if (prefersReducedMotion()) {
-            setActiveWord(WORDS.length - 1);
-            return;
-        }
-        if (activeWord >= WORDS.length - 1) setActiveWord(-1);
-        setPlaying(true);
-    };
-
-    const reset = () => {
-        setPlaying(false);
-        setActiveWord(-1);
-    };
-
-    return (
-        <div className="model-panel speak-panel">
-            <div className="speak-top">
-                <div className="speak-voice-tabs" role="tablist" aria-label="Voice">
-                    {VOICES.map((v) => (
-                        <button
-                            key={v}
-                            type="button"
-                            role="tab"
-                            aria-selected={voice === v}
-                            className={voice === v ? 'is-active' : undefined}
-                            onClick={() => setVoice(v)}
-                        >
-                            {v}
-                        </button>
-                    ))}
-                </div>
-            </div>
-
-            <p className="speak-caption" lang="hi">
-                {WORDS.map((word, i) => (
-                    <span key={i} className={`karaoke-word${i <= activeWord ? ' is-said' : ''}${i === activeWord ? ' is-active' : ''}`}>
-                        {word}{' '}
-                    </span>
-                ))}
-            </p>
-
-            <div className={`speak-wave${playing ? ' is-playing' : ''}`} aria-hidden="true">
-                {BARS.map((h, i) => (
-                    <span key={i} style={{ '--h': `${h}%`, animationDelay: `${(i % 8) * 70}ms` }} />
-                ))}
-            </div>
-
-            <div className="dp-toolbar">
-                <button type="button" className="model-cta-primary model-cta-small" onClick={playing ? () => setPlaying(false) : play}>
-                    {playing ? <Pause size={13} aria-hidden="true" /> : <Play size={13} aria-hidden="true" />}
-                    {playing ? 'Pause' : activeWord >= WORDS.length - 1 ? 'Replay' : `Speak as ${voice}`}
-                </button>
-                <button type="button" className="dp-text-btn" onClick={reset}>
-                    <RotateCcw size={12} aria-hidden="true" />
-                    Reset
-                </button>
-            </div>
-        </div>
-    );
-};
 
 const IndicSpeakPage = () => (
     <div className="min-h-screen research-page">
@@ -111,7 +22,8 @@ const IndicSpeakPage = () => (
             <ModelHero
                 eyebrow="Developers · Model"
                 title={model.name}
-                tagline="Text in, a classroom-ready voice out — 22 Indian languages, code-mixed sentences included."
+                intro="speak"
+                tagline="One speech system for the way India actually writes and speaks — multiple scripts, English embedded mid-sentence, numbers and technical notation, 45 voices across 14 delivery styles, and long-form narration."
                 accent="var(--brand-blue)"
                 stats={STATS}
                 primaryCta={{ label: 'Hugging Face', href: '#' }}
@@ -121,8 +33,13 @@ const IndicSpeakPage = () => (
             />
 
             <Reveal as="section" className="model-section">
-                <p className="model-section-label">Try it</p>
-                <SpeakDemo />
+                <h2 className="model-section-title">Hear it work</h2>
+                <p className="model-section-dek">
+                    Code-mixed sentences, a voice cast across languages, and five and a half minutes
+                    of narration. The full range — numbers and formulae, all 45 voices, all 14
+                    delivery styles — is in the blog.
+                </p>
+                <SpeakExamples />
             </Reveal>
         </main>
         <Footer />

@@ -7,6 +7,7 @@ import Icon from '../../../assets/Icon.png';
 import MoELogo from '../../../assets/Ministry_of_Education_India.png';
 import ModelIcon from '../../developers/components/ModelIcon';
 import { models } from '../../developers/data/models';
+import { CONSOLE_URL } from '../../../config/links';
 
 const researchDropdown = [
     {
@@ -36,9 +37,6 @@ const developersResources = [
 ];
 
 const developersDropdown = [...developersApis, { label: 'All models', to: '/developers', description: 'Browse every Bodhan model' }];
-
-const DASHBOARD_URL =
-    'https://console.bodhan.ai/ui/login/?redirect_to=https%3A%2F%2Fconsole.bodhan.ai%2Fui%2F';
 
 const navLinks = [
     { label: 'Vision', to: '/', scrollTo: 'vision-mission' },
@@ -381,7 +379,7 @@ const Navbar = () => {
                             return <span key={link.label}>{renderLink(link, linkClass)}</span>;
                         })}
 
-                        <a href={DASHBOARD_URL} className="nav-dashboard-btn">
+                        <a href={CONSOLE_URL} className="nav-dashboard-btn">
                             Go to Dashboard
                             <ArrowUpRight size={14} aria-hidden="true" />
                         </a>
@@ -478,7 +476,7 @@ const Navbar = () => {
                             );
                         })}
 
-                        <a href={DASHBOARD_URL} className="nav-dashboard-btn nav-dashboard-btn-mobile">
+                        <a href={CONSOLE_URL} className="nav-dashboard-btn nav-dashboard-btn-mobile">
                             Go to Dashboard
                             <ArrowUpRight size={15} aria-hidden="true" />
                         </a>
